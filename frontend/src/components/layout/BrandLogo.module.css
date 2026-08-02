@@ -1,0 +1,37 @@
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.mark {
+  position: relative;
+  width: 30px;
+  height: 34px;
+  flex: none;
+}
+.card1,
+.card2 {
+  position: absolute;
+  width: 20px;
+  height: 28px;
+  border-radius: 4px;
+  top: 3px;
+  box-shadow: var(--sh-sm);
+}
+.card1 {
+  left: 0;
+  background: linear-gradient(180deg, #f7f2e6, #e4d9bd);
+  transform: rotate(-12deg);
+}
+.card2 {
+  right: 0;
+  background: linear-gradient(180deg, var(--c-accent-500), var(--c-accent-600));
+  transform: rotate(12deg);
+}
+.word {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-xl);
+  letter-spacing: var(--tracking-wider);
+  color: var(--c-text-hi);
+}

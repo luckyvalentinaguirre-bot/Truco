@@ -1,0 +1,95 @@
+.btn {
+  --btn-h: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: var(--btn-h);
+  padding: 0 var(--sp-5);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--dur-fast) var(--ease-out),
+    background var(--dur-fast), box-shadow var(--dur-fast), border-color var(--dur-fast);
+  white-space: nowrap;
+}
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.label {
+  display: inline-flex;
+}
+.icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Tamaños */
+.sm {
+  --btn-h: 38px;
+  padding: 0 var(--sp-3);
+  font-size: var(--fs-xs);
+}
+.md {
+  --btn-h: var(--touch-min);
+}
+.lg {
+  --btn-h: 58px;
+  padding: 0 var(--sp-6);
+  font-size: var(--fs-md);
+}
+
+.block {
+  width: 100%;
+}
+
+/* Variantes */
+.primary {
+  background: linear-gradient(180deg, var(--c-accent-500), var(--c-accent-600));
+  color: var(--c-text-on-accent);
+  box-shadow: var(--sh-md), var(--sh-inset), 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+.primary:hover {
+  box-shadow: var(--sh-lg), 0 0 0 1px var(--c-accent-glow),
+    0 6px 20px var(--c-accent-glow);
+}
+
+.secondary {
+  background: var(--c-bg-600);
+  color: var(--c-text-hi);
+  border-color: var(--c-border);
+  box-shadow: var(--sh-sm), var(--sh-inset);
+}
+.secondary:hover {
+  background: var(--c-bg-500);
+  border-color: var(--c-border-strong);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--c-text);
+  border-color: transparent;
+}
+.ghost:hover {
+  background: var(--c-surface-strong);
+  color: var(--c-text-hi);
+}
+
+.danger {
+  background: color-mix(in srgb, var(--c-danger) 18%, var(--c-bg-600));
+  color: var(--c-danger);
+  border-color: color-mix(in srgb, var(--c-danger) 40%, transparent);
+}
+.danger:hover {
+  background: color-mix(in srgb, var(--c-danger) 26%, var(--c-bg-600));
+}

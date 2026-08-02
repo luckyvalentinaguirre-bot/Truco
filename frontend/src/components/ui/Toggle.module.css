@@ -1,0 +1,30 @@
+.toggle {
+  position: relative;
+  width: 52px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--c-border-strong);
+  background: var(--c-bg-900);
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--c-text-mut);
+  box-shadow: var(--sh-sm);
+  transition: transform var(--dur-med) var(--ease-out), background var(--dur-fast);
+}
+.on {
+  background: linear-gradient(180deg, var(--c-accent-500), var(--c-accent-600));
+  border-color: transparent;
+}
+.on .knob {
+  transform: translateX(22px);
+  background: var(--c-text-hi);
+}

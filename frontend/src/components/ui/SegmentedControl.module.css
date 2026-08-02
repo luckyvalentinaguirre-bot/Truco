@@ -1,0 +1,35 @@
+.group {
+  display: inline-flex;
+  padding: 4px;
+  gap: 2px;
+  background: var(--c-bg-800);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-pill);
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
+}
+.group::-webkit-scrollbar {
+  display: none;
+}
+.seg {
+  min-height: 40px;
+  padding: 0 var(--sp-4);
+  border: none;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--c-text-mut);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-fast), background var(--dur-fast);
+}
+.seg:hover {
+  color: var(--c-text);
+}
+.active {
+  background: var(--c-bg-600);
+  color: var(--c-text-hi);
+  box-shadow: var(--sh-sm), var(--sh-inset);
+}

@@ -1,0 +1,125 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+/* ---- Escalera ---- */
+.ladderTitle {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--sp-4);
+}
+.tiers {
+  display: flex;
+  align-items: stretch;
+  gap: var(--sp-2);
+  list-style: none;
+  overflow-x: auto;
+  padding-bottom: var(--sp-2);
+  scrollbar-width: none;
+}
+.tiers::-webkit-scrollbar {
+  display: none;
+}
+.tier {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  white-space: nowrap;
+  flex: none;
+}
+.tierCurrent {
+  border-color: color-mix(in srgb, var(--tier) 55%, transparent);
+  background: color-mix(in srgb, var(--tier) 12%, transparent);
+}
+.tierDot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--r-pill);
+  background: var(--tier);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--tier) 60%, transparent);
+}
+.tierName {
+  font-weight: var(--fw-semibold);
+  color: var(--c-text-hi);
+  font-size: var(--fs-sm);
+}
+.ladderNote {
+  margin-top: var(--sp-4);
+  color: var(--c-text-dim);
+  font-size: var(--fs-xs);
+}
+
+/* ---- Board ---- */
+.boardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.sectionTitle {
+  font-size: var(--fs-xl);
+}
+.tableWrap {
+  overflow-x: auto;
+}
+.loading {
+  padding: var(--sp-6);
+  text-align: center;
+  color: var(--c-text-mut);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+.table thead th {
+  text-align: left;
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--c-text-dim);
+  border-bottom: 1px solid var(--c-border);
+}
+.table tbody td {
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--c-border);
+  font-size: var(--fs-sm);
+  color: var(--c-text);
+}
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+.rowMe {
+  background: color-mix(in srgb, var(--c-accent-500) 8%, transparent);
+}
+.colPos {
+  width: 52px;
+}
+.pos {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  color: var(--c-text-hi);
+}
+.colNum {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.colRank {
+  white-space: nowrap;
+}
+.player {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.pname {
+  color: var(--c-text-hi);
+  font-weight: var(--fw-medium);
+}

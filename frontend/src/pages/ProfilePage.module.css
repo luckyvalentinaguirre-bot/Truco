@@ -1,0 +1,132 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+.loading {
+  color: var(--c-text-mut);
+  text-align: center;
+}
+
+/* ---- Cabecera ---- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+}
+.identity {
+  flex: 1;
+  min-width: 0;
+}
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.name {
+  font-size: var(--fs-2xl);
+}
+.handle {
+  color: var(--c-text-mut);
+  font-size: var(--fs-sm);
+}
+.levelRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+  flex-wrap: wrap;
+}
+.levelBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  color: var(--c-gold-400);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+.xpBar {
+  flex: 1;
+  min-width: 120px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--c-bg-900);
+  overflow: hidden;
+  border: 1px solid var(--c-border);
+}
+.xpFill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--c-accent-500), var(--c-gold-500));
+  transition: width var(--dur-slow) var(--ease-out);
+}
+.xpText {
+  font-size: var(--fs-xs);
+  color: var(--c-text-dim);
+  white-space: nowrap;
+}
+.headerActions {
+  align-self: flex-start;
+}
+
+/* ---- Secciones ---- */
+.sectionTitle {
+  font-size: var(--fs-xl);
+  margin-bottom: var(--sp-4);
+}
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-3);
+}
+.recentHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--sp-4);
+}
+.recentHead .sectionTitle {
+  margin-bottom: 0;
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--c-accent-400);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+.matchList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 760px) {
+  .statGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .header {
+    flex-wrap: wrap;
+  }
+  .headerActions {
+    width: 100%;
+  }
+  .headerActions button {
+    width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    text-align: center;
+  }
+  .nameRow,
+  .levelRow {
+    justify-content: center;
+  }
+}

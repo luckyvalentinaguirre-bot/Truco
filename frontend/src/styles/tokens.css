@@ -1,0 +1,145 @@
+/* =============================================================
+   TRUCO · Design Tokens
+   Fuente única de verdad para color, tipografía, spacing,
+   radios, sombras, z-index y motion.
+   No hardcodear valores en los componentes: usar var(--...).
+   ============================================================= */
+
+:root {
+  /* ---------- Paleta base (mesa de truco, nocturna) ---------- */
+  --c-bg-900: #0b0e13; /* fondo app */
+  --c-bg-800: #0e1116; /* fondo secciones */
+  --c-bg-700: #141922; /* paneles */
+  --c-bg-600: #1b2230; /* paneles elevados */
+  --c-bg-500: #232c3d; /* hover paneles */
+
+  --c-surface: rgba(255, 255, 255, 0.03);
+  --c-surface-strong: rgba(255, 255, 255, 0.06);
+  --c-border: rgba(255, 255, 255, 0.08);
+  --c-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Fieltro de la mesa (acento verde profundo) */
+  --c-felt-900: #0c2a1e;
+  --c-felt-700: #12402d;
+  --c-felt-500: #1c5a3f;
+
+  /* Acento primario (brasa / naranja madera) */
+  --c-accent-500: #e0662a;
+  --c-accent-600: #c1440e;
+  --c-accent-400: #f2884a;
+  --c-accent-glow: rgba(224, 102, 42, 0.35);
+
+  /* Acento secundario (dorado, para rangos / premium) */
+  --c-gold-500: #d9b168;
+  --c-gold-400: #e8c988;
+
+  /* Semánticos */
+  --c-success: #3fb27f;
+  --c-danger: #e0525b;
+  --c-warning: #e5b454;
+  --c-info: #4b93d6;
+
+  /* Texto */
+  --c-text-hi: #f4efe4; /* pergamino claro */
+  --c-text: #cdd3de;
+  --c-text-mut: #8a93a5;
+  --c-text-dim: #5c6576;
+  --c-text-on-accent: #1a0d05;
+
+  /* Palos de la baraja española */
+  --c-suit-oro: #e0a13a;
+  --c-suit-copa: #d6564f;
+  --c-suit-espada: #5b8fd6;
+  --c-suit-basto: #4faa72;
+
+  /* ---------- Tipografía ---------- */
+  --font-display: 'Georgia', 'Times New Roman', serif; /* títulos con carácter */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-mono: 'SFMono-Regular', ui-monospace, 'Cascadia Code', Menlo, monospace;
+
+  --fs-2xs: 0.6875rem; /* 11px */
+  --fs-xs: 0.75rem; /* 12px */
+  --fs-sm: 0.875rem; /* 14px */
+  --fs-md: 1rem; /* 16px */
+  --fs-lg: 1.125rem; /* 18px */
+  --fs-xl: 1.375rem; /* 22px */
+  --fs-2xl: 1.75rem; /* 28px */
+  --fs-3xl: 2.25rem; /* 36px */
+  --fs-4xl: 3rem; /* 48px */
+
+  --lh-tight: 1.15;
+  --lh-normal: 1.5;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --tracking-wide: 0.04em;
+  --tracking-wider: 0.12em;
+
+  /* ---------- Spacing (escala 4px) ---------- */
+  --sp-0: 0;
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 2.5rem;
+  --sp-8: 3rem;
+  --sp-10: 4rem;
+  --sp-12: 6rem;
+
+  /* ---------- Radios ---------- */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+
+  /* ---------- Sombras / profundidad ---------- */
+  --sh-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sh-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --sh-lg: 0 12px 34px rgba(0, 0, 0, 0.55);
+  --sh-xl: 0 24px 60px rgba(0, 0, 0, 0.6);
+  --sh-inset: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --sh-glow: 0 0 0 1px var(--c-accent-glow), 0 8px 24px var(--c-accent-glow);
+
+  /* ---------- Layout ---------- */
+  --sidebar-w: 264px;
+  --topbar-h: 64px;
+  --bottomnav-h: 66px;
+  --content-max: 1240px;
+
+  /* Touch targets (mobile-first): mínimo cómodo 44-48px */
+  --touch-min: 48px;
+
+  /* ---------- Z-index ---------- */
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-drawer: 900;
+  --z-overlay: 1000;
+  --z-modal: 1100;
+  --z-toast: 1200;
+
+  /* ---------- Motion ---------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-med: 240ms;
+  --dur-slow: 420ms;
+
+  /* Safe areas (notch / barra gestual del celular) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Respetar preferencia de menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-med: 0ms;
+    --dur-slow: 0ms;
+  }
+}

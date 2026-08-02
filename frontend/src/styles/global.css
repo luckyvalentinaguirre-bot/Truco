@@ -1,0 +1,114 @@
+/* =============================================================
+   TRUCO · Estilos globales y reset
+   ============================================================= */
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  color: var(--c-text);
+  background: var(--c-bg-900);
+  /* Textura sutil de mesa: viñeta + brillo cálido superior */
+  background-image:
+    radial-gradient(1200px 600px at 50% -10%, rgba(224, 102, 42, 0.08), transparent 60%),
+    radial-gradient(900px 700px at 100% 0%, rgba(28, 90, 63, 0.12), transparent 55%),
+    linear-gradient(180deg, var(--c-bg-800), var(--c-bg-900));
+  background-attachment: fixed;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Evita zoom accidental / selección en controles de juego en mobile */
+button,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--c-text-hi);
+  line-height: var(--lh-tight);
+  font-weight: var(--fw-semibold);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--c-accent-glow);
+  color: var(--c-text-hi);
+}
+
+/* Foco accesible y consistente */
+:focus-visible {
+  outline: 2px solid var(--c-accent-400);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+/* Scrollbar discreto */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-bg-500) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--c-bg-500);
+  border-radius: var(--r-pill);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Utilidad: solo para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+#root {
+  min-height: 100dvh;
+  isolation: isolate;
+}

@@ -1,0 +1,24 @@
+.panel {
+  background: linear-gradient(180deg, var(--c-bg-700), var(--c-bg-800));
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-md), var(--sh-inset);
+}
+.raised {
+  background: linear-gradient(180deg, var(--c-bg-600), var(--c-bg-700));
+  border-color: var(--c-border-strong);
+  box-shadow: var(--sh-lg), var(--sh-inset);
+}
+
+.p_none {
+  padding: 0;
+}
+.p_sm {
+  padding: var(--sp-3);
+}
+.p_md {
+  padding: var(--sp-5);
+}
+.p_lg {
+  padding: var(--sp-6);
+}
