@@ -1,49 +1,73 @@
 .screen {
   position: relative;
   height: 100dvh;
+  max-width: 1160px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
-  max-width: 900px;
-  margin: 0 auto;
+  gap: var(--sp-2);
+  padding: calc(var(--safe-top) + var(--sp-2)) var(--sp-3)
+    calc(var(--safe-bottom) + var(--sp-2));
   overflow-x: hidden;
-  padding: calc(var(--safe-top) + var(--sp-3)) var(--sp-4)
-    calc(var(--safe-bottom) + var(--sp-3));
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(212, 175, 55, 0.05), transparent 60%),
+    linear-gradient(180deg, var(--c-wood-lo), #0b0906);
 }
 
-.top {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
+/* Marco de madera */
+.feltFrame {
+  flex: 1;
+  min-height: 0;
+  border-radius: var(--r-xl);
+  padding: 10px;
+  background: linear-gradient(160deg, var(--c-wood-hi), var(--c-wood) 45%, var(--c-wood-lo));
+  box-shadow: var(--sh-xl), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--c-wood-lo);
 }
-.exit {
+
+/* Paño verde */
+.felt {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(90% 70% at 50% 42%, var(--c-felt-lite), var(--c-felt) 55%, var(--c-felt-deep)),
+    var(--c-felt);
+  border: 2px solid rgba(212, 175, 55, 0.25);
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.turn {
+  display: flex;
+  justify-content: center;
+}
+
+/* Chat (placeholder) */
+.chat {
+  position: absolute;
+  left: var(--sp-3);
+  bottom: var(--sp-3);
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: var(--touch-min);
-  height: var(--touch-min);
-  flex: none;
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-md);
-  background: var(--c-bg-800);
-  color: var(--c-text);
-  cursor: pointer;
-}
-.exit:hover {
-  background: var(--c-bg-700);
-  color: var(--c-text-hi);
-}
-.top > :global(.board),
-.top > div {
-  flex: 1;
+  gap: 6px;
+  height: 40px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--c-gold-soft);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
-.statusRow {
-  display: flex;
-  justify-content: center;
-}
-
-/* Feedback de fin de mano: toast centrado sobre la mesa. */
+/* Feedback de fin de mano */
 .feedbackWrap {
   position: absolute;
   inset: 0;
@@ -55,10 +79,10 @@
 .feedback {
   padding: var(--sp-4) var(--sp-6);
   border-radius: var(--r-lg);
-  background: linear-gradient(180deg, var(--c-bg-600), var(--c-bg-800));
-  border: 1px solid var(--c-border-strong);
+  background: linear-gradient(180deg, var(--c-wood-hi), var(--c-wood-lo));
+  border: 2px solid var(--c-gold);
   box-shadow: var(--sh-xl);
-  color: var(--c-text-hi);
+  color: var(--c-cream);
   font-family: var(--font-display);
   font-weight: var(--fw-bold);
   font-size: var(--fs-2xl);
@@ -71,31 +95,14 @@
   82% { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(0.96); }
 }
-.actions {
-  display: flex;
-  justify-content: center;
-  min-height: var(--touch-min);
-}
 
-/* Celular vertical: aprovechar todo el alto, mano y acciones fijas abajo. */
+/* El chat no debe pisar la mano en pantallas chicas */
 @media (max-width: 560px) {
-  .screen {
-    gap: var(--sp-2);
-    padding-left: var(--sp-3);
-    padding-right: var(--sp-3);
+  .chat {
+    display: none;
   }
-}
-
-/* Celular horizontal: compactar verticalmente y ensanchar la mesa. */
-@media (max-height: 480px) and (orientation: landscape) {
-  .screen {
-    max-width: none;
+  .felt {
+    padding: var(--sp-2);
     gap: var(--sp-1);
-    padding-top: var(--sp-2);
-    padding-bottom: var(--sp-2);
-  }
-  /* La barra de estado se superpone menos: el centro toma el alto. */
-  .statusRow {
-    order: 2;
   }
 }

@@ -1,0 +1,174 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: linear-gradient(180deg, var(--c-wood-hi), var(--c-wood));
+  border: 1px solid var(--c-wood-lo);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-md), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: var(--r-md);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--c-gold-soft);
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.iconBtn:hover {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: var(--c-gold);
+}
+.off {
+  color: var(--c-text-dim);
+}
+
+/* Marcador central */
+.marcador {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-1) var(--sp-4);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: var(--r-md);
+  min-width: 0;
+}
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
+  min-width: 56px;
+}
+.team {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-weight: var(--fw-bold);
+}
+.vos {
+  color: var(--c-btn-truco);
+  filter: brightness(1.5);
+}
+.rival {
+  color: var(--c-noquiero);
+  filter: brightness(1.4);
+}
+.pts {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-2xl);
+  color: var(--c-cream);
+  font-variant-numeric: tabular-nums;
+}
+.malas {
+  font-size: var(--fs-2xs);
+  color: var(--c-text-mut);
+}
+.mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.dash {
+  color: var(--c-gold);
+  font-size: var(--fs-lg);
+}
+.target {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--c-gold-soft);
+  white-space: nowrap;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.abandonar {
+  height: 42px;
+  padding: 0 var(--sp-4);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: var(--r-md);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--c-gold-soft);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.abandonar:hover {
+  border-color: var(--c-noquiero);
+  color: #f0c0c0;
+}
+.confirm {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--c-cream);
+}
+.confirmYes,
+.confirmNo {
+  height: 34px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-sm);
+  border: none;
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+}
+.confirmYes {
+  background: var(--c-noquiero);
+  color: #fff;
+}
+.confirmNo {
+  background: var(--c-bg-600);
+  color: var(--c-text);
+}
+
+/* Mobile: marcador compacto, sin texto "A 40 puntos" duplicado */
+@media (max-width: 560px) {
+  .bar {
+    gap: var(--sp-2);
+    padding: var(--sp-1) var(--sp-2);
+  }
+  .iconBtn {
+    width: 38px;
+    height: 38px;
+  }
+  .abandonar {
+    height: 38px;
+    padding: 0 var(--sp-2);
+    font-size: var(--fs-2xs);
+  }
+  .marcador {
+    gap: var(--sp-2);
+    padding: 2px var(--sp-2);
+  }
+  .pts {
+    font-size: var(--fs-xl);
+  }
+  .target {
+    display: none;
+  }
+  .malas {
+    display: none;
+  }
+}

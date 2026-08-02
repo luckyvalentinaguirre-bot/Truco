@@ -23,6 +23,24 @@
   --c-felt-700: #12402d;
   --c-felt-500: #1c5a3f;
 
+  /* ---- Mesa de Truco (paleta de referencia) ---- */
+  --c-felt: #0e3b2e; /* verde paño */
+  --c-felt-deep: #0a2a20;
+  --c-felt-lite: #14503c;
+  --c-wood: #3a2a1a; /* borde de madera */
+  --c-wood-hi: #5a4126;
+  --c-wood-lo: #241a10;
+  --c-gold: #d4af37; /* dorado detalles */
+  --c-gold-soft: #e8cf7a;
+  --c-cream: #f7f3e9; /* marfil de carta */
+  --c-card-back: #b03020; /* reverso rojo */
+  --c-card-back-deep: #7d2016;
+  --c-flor: #2e5aac; /* azul flor */
+  --c-btn-truco: #1e6b3a; /* verde botones */
+  --c-envido: #c9a227; /* amarillo envido */
+  --c-quiero: #1e6b3a;
+  --c-noquiero: #a12626; /* rojo no quiero */
+
   /* Acento primario (brasa / naranja madera) */
   --c-accent-500: #e0662a;
   --c-accent-600: #c1440e;

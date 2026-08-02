@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   actorNow,
   getPending,
@@ -17,18 +17,15 @@ import {
   TRUCO_LABEL,
   ENVIDO_LABEL,
 } from '@/features/match/matchView';
-import { Scoreboard } from '@/features/match/components/Scoreboard';
-import { OpponentBar } from '@/features/match/components/OpponentBar';
+import { TopBar } from '@/features/match/components/TopBar';
 import { TableCenter } from '@/features/match/components/TableCenter';
 import { PlayerHand } from '@/features/match/components/PlayerHand';
 import { ActionBar } from '@/features/match/components/ActionBar';
-import { CallOverlay } from '@/features/match/components/CallOverlay';
 import { StatusBar } from '@/features/match/components/StatusBar';
 import { GameOverModal } from '@/features/match/components/EndModals';
 import styles from './MatchPage.module.css';
 
 export function MatchPage() {
-  const navigate = useNavigate();
   const location = useLocation();
   const difficulty: Difficulty =
     (location.state as { difficulty?: Difficulty } | null)?.difficulty ??
@@ -38,7 +35,6 @@ export function MatchPage() {
     useLocalMatch(difficulty);
   const [selected, setSelected] = useState<number | null>(null);
 
-  // Al cambiar de baza o de mano, limpiar la selección de carta.
   useEffect(() => {
     setSelected(null);
   }, [state.hand.tricks.length, state.handNumber]);
@@ -56,67 +52,60 @@ export function MatchPage() {
     pending.callerTeam !== humanTeam &&
     actorNow(state) === humanSeat;
 
-  const callLabel = pending
-    ? pending.kind === 'truco'
+  const respondingTo = humanMustRespond
+    ? pending!.kind === 'truco'
       ? TRUCO_LABEL[state.hand.truco.level as TrucoCall] ?? 'Truco'
       : ENVIDO_LABEL[state.hand.envido.calls[state.hand.envido.calls.length - 1]] ??
         'Envido'
-    : '';
+    : null;
 
   const playCard = (card: Card) => {
     dispatch({ type: 'PLAY_CARD', seat: humanSeat, card });
     setSelected(null);
   };
 
-  const showGameOver = state.phase === 'finished';
-
   return (
     <div className={styles.screen}>
-      <header className={styles.top}>
-        <button className={styles.exit} onClick={() => navigate('/')} aria-label="Salir">
-          <Icon name="close" size={22} />
-        </button>
-        <Scoreboard state={state} humanSeat={humanSeat} />
-      </header>
+      <TopBar state={state} humanSeat={humanSeat} />
 
-      <OpponentBar state={state} aiSeat={aiSeat} thinking={thinking} />
+      <div className={styles.feltFrame}>
+        <div className={styles.felt}>
+          <TableCenter state={state} humanSeat={humanSeat} aiSeat={aiSeat} thinking={thinking} />
 
-      <TableCenter state={state} humanSeat={humanSeat} aiSeat={aiSeat} />
+          <div className={styles.turn}>
+            <StatusBar status={status} banner={banner} />
+          </div>
 
-      <div className={styles.statusRow}>
-        <StatusBar status={status} banner={banner} />
-      </div>
+          <ActionBar
+            seat={humanSeat}
+            options={options}
+            hasFlor={hasFlor}
+            respondingTo={respondingTo}
+            onAction={dispatch}
+          />
 
-      <PlayerHand
-        hand={state.players[humanSeat].hand}
-        options={options}
-        piezaKeys={piezaKeys}
-        selectedIndex={selected}
-        onSelect={setSelected}
-        onPlay={playCard}
-      />
+          <PlayerHand
+            hand={state.players[humanSeat].hand}
+            options={options}
+            piezaKeys={piezaKeys}
+            selectedIndex={selected}
+            onSelect={setSelected}
+            onPlay={playCard}
+          />
 
-      <div className={styles.actions}>
-        <ActionBar seat={humanSeat} options={options} hasFlor={hasFlor} onAction={dispatch} />
-      </div>
+          <button className={styles.chat} disabled aria-label="Chat (próximamente)">
+            <Icon name="chat" size={18} /> Chat
+          </button>
 
-      {/* Feedback de fin de mano (1-2 s, sin interacción). */}
-      {handFeedback && (
-        <div className={styles.feedbackWrap} aria-live="polite">
-          <span className={styles.feedback}>{handFeedback}</span>
+          {handFeedback && (
+            <div className={styles.feedbackWrap} aria-live="polite">
+              <span className={styles.feedback}>{handFeedback}</span>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      {humanMustRespond && (
-        <CallOverlay
-          seat={humanSeat}
-          callLabel={callLabel}
-          options={options}
-          onAction={dispatch}
-        />
-      )}
-
-      {showGameOver && (
+      {state.phase === 'finished' && (
         <GameOverModal state={state} humanSeat={humanSeat} onRestart={restart} />
       )}
     </div>

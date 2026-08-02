@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import type { Action, Seat } from '@/game';
-import { Button } from '@/components/ui';
 import {
   TRUCO_LABEL,
   ENVIDO_LABEL,
@@ -14,90 +13,102 @@ interface ActionBarProps {
   seat: Seat;
   options: HumanOptions;
   hasFlor: boolean;
+  /** Etiqueta del canto pendiente (para el título del panel). */
+  respondingTo: string | null;
   onAction: (action: Action) => void;
 }
 
 /**
- * Barra de acciones contextual. SÓLO muestra acciones legales
- * (calculadas por el motor). No hay botones deshabilitados sueltos.
+ * Panel "ACCIONES" con botones contextuales y colores de la referencia.
+ * Sólo aparecen acciones legales (calculadas por el motor).
  */
-export function ActionBar({ seat, options, hasFlor, onAction }: ActionBarProps) {
+export function ActionBar({
+  seat,
+  options,
+  hasFlor,
+  respondingTo,
+  onAction,
+}: ActionBarProps) {
   const [confirmFold, setConfirmFold] = useState(false);
 
-  const nothing =
-    options.trucoCalls.length === 0 &&
-    options.envidoCalls.length === 0 &&
-    !options.canFlor &&
-    !options.canFold;
-
-  if (nothing) {
-    return <div className={styles.bar} />;
-  }
+  const hasAny =
+    options.trucoCalls.length > 0 ||
+    options.envidoCalls.length > 0 ||
+    options.canFlor ||
+    options.canFold ||
+    options.canAccept ||
+    options.canDecline;
 
   return (
-    <div className={styles.bar}>
+    <div className={styles.panel}>
+      <span className={styles.title}>{respondingTo ? `¿Querés el ${respondingTo}?` : 'Acciones'}</span>
+
+      {!hasAny && <span className={styles.waiting}>Esperá tu turno…</span>}
+
       {confirmFold ? (
         <div className={styles.confirm}>
-          <span className={styles.confirmText}>¿Seguro que te vas al mazo?</span>
-          <Button
-            size="sm"
-            variant="danger"
+          <span>¿Seguro que te vas al mazo?</span>
+          <button
+            className={[styles.btn, styles.noquiero].join(' ')}
             onClick={() => {
               onAction({ type: 'FOLD', seat });
               setConfirmFold(false);
             }}
           >
             Sí, me voy
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => setConfirmFold(false)}>
+          </button>
+          <button className={[styles.btn, styles.neutral].join(' ')} onClick={() => setConfirmFold(false)}>
             Cancelar
-          </Button>
+          </button>
         </div>
       ) : (
-        <div className={styles.groups}>
-          {options.envidoCalls.length > 0 && (
-            <div className={styles.group}>
-              {options.envidoCalls.map((call) => (
-                <Button
-                  key={call}
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => onAction(envidoAction(seat, call))}
-                >
-                  {ENVIDO_LABEL[call]}
-                </Button>
-              ))}
-            </div>
+        <div className={styles.grid}>
+          {/* Respuestas a un canto */}
+          {options.canAccept && (
+            <button className={[styles.btn, styles.quiero].join(' ')} onClick={() => onAction({ type: 'ACCEPT', seat })}>
+              Quiero
+            </button>
+          )}
+          {options.canDecline && (
+            <button className={[styles.btn, styles.noquiero].join(' ')} onClick={() => onAction({ type: 'DECLINE', seat })}>
+              No quiero
+            </button>
           )}
 
+          {/* Cantos de envido */}
+          {options.envidoCalls.map((call) => (
+            <button
+              key={call}
+              className={[styles.btn, styles.envido].join(' ')}
+              onClick={() => onAction(envidoAction(seat, call))}
+            >
+              {ENVIDO_LABEL[call]}
+            </button>
+          ))}
+
+          {/* Flor */}
           {options.canFlor && hasFlor && (
-            <div className={styles.group}>
-              <Button size="sm" onClick={() => onAction({ type: 'CALL_FLOR', seat })}>
-                🌸 Flor
-              </Button>
-            </div>
+            <button className={[styles.btn, styles.flor].join(' ')} onClick={() => onAction({ type: 'CALL_FLOR', seat })}>
+              Flor
+            </button>
           )}
 
-          {options.trucoCalls.length > 0 && (
-            <div className={styles.group}>
-              {options.trucoCalls.map((call) => (
-                <Button
-                  key={call}
-                  size="sm"
-                  onClick={() => onAction(trucoAction(seat, call))}
-                >
-                  {TRUCO_LABEL[call]}
-                </Button>
-              ))}
-            </div>
-          )}
+          {/* Cantos de truco */}
+          {options.trucoCalls.map((call) => (
+            <button
+              key={call}
+              className={[styles.btn, styles.truco].join(' ')}
+              onClick={() => onAction(trucoAction(seat, call))}
+            >
+              {TRUCO_LABEL[call]}
+            </button>
+          ))}
 
+          {/* Irse al mazo */}
           {options.canFold && (
-            <div className={styles.group}>
-              <Button size="sm" variant="ghost" onClick={() => setConfirmFold(true)}>
-                Me voy al mazo
-              </Button>
-            </div>
+            <button className={[styles.btn, styles.neutral].join(' ')} onClick={() => setConfirmFold(true)}>
+              Irse al mazo
+            </button>
           )}
         </div>
       )}

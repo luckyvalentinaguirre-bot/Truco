@@ -1,35 +1,87 @@
-.bar {
+.panel {
   display: flex;
-  justify-content: center;
-  min-height: var(--touch-min);
-}
-.groups {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  justify-content: center;
-}
-.group {
-  display: flex;
-  gap: var(--sp-2);
-  padding: 4px;
-  border-radius: var(--r-pill);
-  background: var(--c-bg-800);
-  border: 1px solid var(--c-border);
-}
-.confirm {
-  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: var(--sp-2);
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: var(--sp-2) var(--sp-3);
-  border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--c-danger) 12%, var(--c-bg-700));
-  border: 1px solid color-mix(in srgb, var(--c-danger) 35%, transparent);
+  padding: var(--sp-2) var(--sp-4) var(--sp-3);
+  border-radius: var(--r-lg);
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  box-shadow: var(--sh-md), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
-.confirmText {
+.title {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--c-gold-soft);
+}
+.waiting {
   font-size: var(--fs-sm);
-  color: var(--c-text-hi);
-  font-weight: var(--fw-medium);
+  color: var(--c-text-mut);
+  padding: var(--sp-2) 0;
+}
+.grid,
+.confirm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  justify-content: center;
+}
+.confirm {
+  align-items: center;
+  font-size: var(--fs-sm);
+  color: var(--c-cream);
+}
+
+.btn {
+  min-height: var(--touch-min);
+  min-width: 96px;
+  padding: 0 var(--sp-4);
+  border: none;
+  border-radius: var(--r-md);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--sh-sm), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform var(--dur-fast), filter var(--dur-fast);
+}
+.btn:hover {
+  filter: brightness(1.1);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+
+.truco {
+  background: linear-gradient(180deg, #2a8049, var(--c-btn-truco));
+}
+.envido {
+  background: linear-gradient(180deg, #dab63a, var(--c-envido));
+  color: #241a05;
+}
+.flor {
+  background: linear-gradient(180deg, #3a6ec4, var(--c-flor));
+}
+.quiero {
+  background: linear-gradient(180deg, #2a8049, var(--c-quiero));
+}
+.noquiero {
+  background: linear-gradient(180deg, #c23434, var(--c-noquiero));
+}
+.neutral {
+  background: linear-gradient(180deg, var(--c-wood-hi), var(--c-wood));
+  color: var(--c-gold-soft);
+  box-shadow: var(--sh-sm), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 480px) {
+  .btn {
+    min-width: 84px;
+    padding: 0 var(--sp-3);
+    font-size: var(--fs-xs);
+  }
 }

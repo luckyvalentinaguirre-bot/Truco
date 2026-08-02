@@ -1,137 +1,266 @@
-.center {
-  position: relative;
+/* ===== Fila superior: rival · cartas · mano ===== */
+.rivalRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+.rivalInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: var(--r-md);
+  min-width: 0;
+}
+.rivalName {
+  color: var(--c-cream);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+}
+.rivalTeam {
+  font-size: var(--fs-2xs);
+  color: var(--c-text-mut);
+}
+.think {
+  color: var(--c-gold-soft);
+  font-style: normal;
+}
+.rivalCards {
   flex: 1;
-  min-height: 0;
+  display: flex;
+  gap: var(--sp-2);
+  justify-content: center;
+}
+.manoBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-3);
-  padding: var(--sp-4);
-  border-radius: var(--r-xl);
-  background:
-    radial-gradient(80% 70% at 50% 45%, var(--c-felt-500), var(--c-felt-900)),
-    var(--c-felt-900);
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  box-shadow: var(--sh-inset), 0 20px 50px rgba(0, 0, 0, 0.5),
-    inset 0 0 80px rgba(0, 0, 0, 0.45);
-  overflow: hidden;
+  width: 60px;
+  height: 60px;
+  flex: none;
+  border-radius: var(--r-pill);
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--c-gold);
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.25);
+}
+.manoLabel {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--c-gold-soft);
+  line-height: 1;
+}
+.manoWho {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  color: var(--c-cream);
+  font-size: var(--fs-md);
+  line-height: 1.1;
 }
 
-.muestraBox {
+/* ===== Zona de juego ===== */
+.playArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boxLabel {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--c-gold-soft);
+}
+
+/* Última baza (izquierda) */
+.ultimaBaza {
   position: absolute;
-  top: var(--sp-3);
-  right: var(--sp-3);
+  left: var(--sp-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  border-radius: var(--r-md);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+.ultimaSlots {
+  display: flex;
+  gap: var(--sp-1);
+}
+.ultimaSlot {
+  width: 40px;
+  height: 64px;
+  border-radius: var(--r-sm);
+  border: 1px dashed rgba(212, 175, 55, 0.3);
+  background: rgba(0, 0, 0, 0.2);
+}
+.ultimaEmpty {
+  font-size: var(--fs-2xs);
+  color: var(--c-text-dim);
+}
+
+/* Centro: logo + baza */
+.center {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.logo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(212, 175, 55, 0.16);
+  pointer-events: none;
+}
+.sun {
+  width: 120px;
+  height: 120px;
+  position: absolute;
+  opacity: 0.5;
+}
+.logoTitle {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-3xl);
+  letter-spacing: var(--tracking-wide);
+  color: rgba(212, 175, 55, 0.22);
+}
+.logoSub {
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tracking-wider);
+  color: rgba(212, 175, 55, 0.22);
+}
+.baza {
+  position: relative;
+  display: flex;
+  gap: var(--sp-4);
+  z-index: 1;
+}
+.aiSlot,
+.humanSlot {
+  min-height: 141px;
+  min-width: 88px;
+  display: grid;
+  place-items: center;
+}
+.bazaGhost {
+  width: 88px;
+  aspect-ratio: 5 / 8;
+  border-radius: var(--r-md);
+  border: 1px dashed rgba(212, 175, 55, 0.22);
+  background: rgba(0, 0, 0, 0.14);
+}
+.dropped {
+  animation: drop var(--dur-med) var(--ease-out);
+}
+@keyframes drop {
+  from { opacity: 0; transform: translateY(-14px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+.pips {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+.pip {
+  width: 11px;
+  height: 11px;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+.pipEmpty { background: rgba(0, 0, 0, 0.3); }
+.pipWin { background: var(--c-success); border-color: transparent; }
+.pipLoss { background: var(--c-danger); border-color: transparent; }
+.pipParda { background: var(--c-text-dim); border-color: transparent; }
+
+/* Muestra + mazo (derecha) */
+.rightStack {
+  position: absolute;
+  right: var(--sp-2);
+  top: var(--sp-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  align-items: center;
+}
+.muestraBox,
+.mazoBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
   padding: var(--sp-2);
   border-radius: var(--r-md);
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid var(--c-border);
-}
-.muestraLabel {
-  font-size: var(--fs-2xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wider);
-  color: var(--c-gold-400);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 175, 55, 0.25);
 }
 .muestraSuit {
   font-size: var(--fs-2xs);
-  color: var(--c-text);
+  color: var(--c-cream);
 }
 .piezaTag {
-  color: var(--c-gold-400);
+  color: var(--c-gold-soft);
   font-style: normal;
 }
-
-.pips {
-  position: absolute;
-  top: var(--sp-3);
-  left: var(--sp-3);
-  display: flex;
-  gap: 6px;
-}
-.pip {
-  width: 12px;
-  height: 12px;
-  border-radius: var(--r-pill);
-  border: 1px solid var(--c-border-strong);
-}
-.pipEmpty {
-  background: rgba(0, 0, 0, 0.3);
-}
-.pipWin {
-  background: var(--c-success);
-  border-color: transparent;
-}
-.pipLoss {
-  background: var(--c-danger);
-  border-color: transparent;
-}
-.pipParda {
-  background: var(--c-text-dim);
-  border-color: transparent;
+.mazoCount {
+  font-size: var(--fs-2xs);
+  color: var(--c-gold-soft);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
 }
 
-.playZone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-2);
-}
-.vs {
-  font-family: var(--font-display);
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--tracking-wider);
-  color: rgba(255, 255, 255, 0.12);
-}
-.aiSlot,
-.humanSlot {
-  min-height: 141px;
-  display: grid;
-  place-items: center;
-}
-.ghost {
-  width: 88px;
-  aspect-ratio: 5 / 8;
-  border-radius: var(--r-md);
-  border: 1px dashed rgba(255, 255, 255, 0.14);
-  background: rgba(0, 0, 0, 0.14);
-}
-.played {
-  animation: drop var(--dur-med) var(--ease-out);
-}
-@keyframes drop {
-  from {
-    opacity: 0;
-    transform: translateY(-14px) scale(0.94);
+/* ===== Responsive ===== */
+@media (max-width: 720px) {
+  .rivalCards :global(*) {
+    margin: 0;
   }
-  to {
-    opacity: 1;
-    transform: none;
+  .ultimaBaza {
+    display: none; /* prioridad: cartas del jugador y baza central */
   }
-}
-
-@media (max-height: 700px), (max-width: 560px) {
   .aiSlot,
   .humanSlot {
     min-height: 96px;
+    min-width: 58px;
   }
-  .ghost {
+  .bazaGhost {
     width: 58px;
+  }
+  .logoTitle {
+    font-size: var(--fs-2xl);
+  }
+  .sun {
+    width: 90px;
+    height: 90px;
   }
 }
 
-/* Celular horizontal: muestra al costado y cartas jugadas en fila */
-@media (max-height: 480px) and (orientation: landscape) {
-  .playZone {
-    flex-direction: row;
-    gap: var(--sp-5);
+@media (max-width: 480px) {
+  .rightStack {
+    right: 2px;
+    gap: var(--sp-2);
   }
-  .vs {
-    display: none;
+  .manoBox {
+    width: 52px;
+    height: 52px;
+  }
+  .baza {
+    gap: var(--sp-2);
   }
 }

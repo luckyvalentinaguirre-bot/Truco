@@ -218,37 +218,60 @@ function CornerIndex({ card, x, y }: { card: Card; x: number; y: number }) {
   );
 }
 
+const GOLD = '#d4af37';
+const RED_BACK = '#b03020';
+const RED_BACK_DEEP = '#7d2016';
+
 function CardBack() {
   return (
     <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} className={styles.svg} aria-hidden="true">
       <defs>
-        <pattern id="lattice" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <path d="M0 0 H22 M0 11 H22" stroke="rgba(217,177,104,0.28)" strokeWidth="1.4" />
+        <pattern id="backLattice" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="20" height="20" fill="none" />
+          <path d="M0 10 H20 M10 0 V20" stroke="rgba(212,175,55,0.22)" strokeWidth="1.2" />
+          <circle cx="10" cy="10" r="1.4" fill="rgba(212,175,55,0.3)" />
         </pattern>
+        <radialGradient id="backGlow" cx="50%" cy="42%" r="70%">
+          <stop offset="0%" stopColor={RED_BACK} />
+          <stop offset="100%" stopColor={RED_BACK_DEEP} />
+        </radialGradient>
       </defs>
-      <rect x={2} y={2} width={VIEW_W - 4} height={VIEW_H - 4} rx={16} fill="#123a2b" />
-      <rect x={2} y={2} width={VIEW_W - 4} height={VIEW_H - 4} rx={16} fill="url(#lattice)" />
-      <rect x={14} y={14} width={VIEW_W - 28} height={VIEW_H - 28} rx={10} fill="none" stroke="#d9b168" strokeWidth={2} />
-      <rect x={20} y={20} width={VIEW_W - 40} height={VIEW_H - 40} rx={8} fill="none" stroke="rgba(217,177,104,0.5)" strokeWidth={1} />
-      {/* Medallón central */}
+      <rect x={2} y={2} width={VIEW_W - 4} height={VIEW_H - 4} rx={14} fill="url(#backGlow)" />
+      <rect x={2} y={2} width={VIEW_W - 4} height={VIEW_H - 4} rx={14} fill="url(#backLattice)" />
+      <rect x={12} y={12} width={VIEW_W - 24} height={VIEW_H - 24} rx={9} fill="none" stroke={GOLD} strokeWidth={2.4} />
+      <rect x={18} y={18} width={VIEW_W - 36} height={VIEW_H - 36} rx={7} fill="none" stroke="rgba(212,175,55,0.55)" strokeWidth={1} />
+      {/* Medallón central dorado */}
       <g transform={`translate(${VIEW_W / 2} ${VIEW_H / 2})`}>
-        <circle r={44} fill="none" stroke="#d9b168" strokeWidth={2} />
-        <circle r={30} fill="#0e2f22" stroke="#d9b168" strokeWidth={1.4} />
-        {Array.from({ length: 12 }).map((_, i) => {
-          const a = (i / 12) * Math.PI * 2;
+        <circle r={46} fill={RED_BACK_DEEP} stroke={GOLD} strokeWidth={2.4} />
+        <circle r={34} fill="none" stroke="rgba(212,175,55,0.6)" strokeWidth={1.2} />
+        {Array.from({ length: 16 }).map((_, i) => {
+          const a = (i / 16) * Math.PI * 2;
           return (
             <line
               key={i}
-              x1={Math.cos(a) * 32}
-              y1={Math.sin(a) * 32}
-              x2={Math.cos(a) * 42}
-              y2={Math.sin(a) * 42}
-              stroke="#d9b168"
-              strokeWidth={1.4}
+              x1={Math.cos(a) * 34}
+              y1={Math.sin(a) * 34}
+              x2={Math.cos(a) * 46}
+              y2={Math.sin(a) * 46}
+              stroke={GOLD}
+              strokeWidth={1.2}
             />
           );
         })}
-        <circle r={9} fill="#d9b168" />
+        {/* Rosetón */}
+        {Array.from({ length: 8 }).map((_, i) => {
+          const a = (i / 8) * Math.PI * 2;
+          return (
+            <path
+              key={i}
+              d="M0 -22 Q6 -8 0 0 Q-6 -8 0 -22 Z"
+              fill={GOLD}
+              opacity={0.85}
+              transform={`rotate(${(a * 180) / Math.PI})`}
+            />
+          );
+        })}
+        <circle r={7} fill={GOLD} />
       </g>
     </svg>
   );
@@ -299,14 +322,12 @@ export function PlayingCard({
         <rect x={12} y={12} width={VIEW_W - 24} height={VIEW_H - 24} rx={9} fill="none" stroke={ink.main} strokeWidth={1.6} opacity={0.75} />
         <rect x={17} y={17} width={VIEW_W - 34} height={VIEW_H - 34} rx={7} fill="none" stroke={ink.soft} strokeWidth={1} opacity={0.7} />
 
-        {/* Índice — al estilo español, sólo arriba (evita confundir 6 y 9).
-            Se duplica arriba-derecha para leerlo con las cartas en abanico. */}
+        {/* Índices en esquinas (arriba-izq y abajo-der rotado), como la baraja
+            española tradicional de la referencia. */}
         <CornerIndex card={card} x={34} y={44} />
-        <CornerIndex card={card} x={VIEW_W - 34} y={44} />
-        {/* Filete inferior decorativo con el palo, sin número. */}
-        <svg x={VIEW_W / 2 - 13} y={VIEW_H - 40} width={26} height={26} viewBox="0 0 40 40" opacity={0.9}>
-          <SuitSymbol suit={card.suit} />
-        </svg>
+        <g transform={`rotate(180 ${VIEW_W / 2} ${VIEW_H / 2})`}>
+          <CornerIndex card={card} x={34} y={44} />
+        </g>
 
         {/* Composición central */}
         {isFigure ? <FigureFace card={card} /> : <NumberFace card={card} />}

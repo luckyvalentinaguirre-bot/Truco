@@ -16,6 +16,9 @@ export type IconName =
   | 'cards'
   | 'plus'
   | 'search'
+  | 'sound'
+  | 'mute'
+  | 'chat'
   | 'online';
 
 interface IconProps extends SVGProps<SVGSVGElement> {
@@ -78,6 +81,23 @@ const paths: Record<IconName, JSX.Element> = {
     <>
       <circle cx="11" cy="11" r="6.5" />
       <path d="m16 16 4.5 4.5" />
+    </>
+  ),
+  sound: (
+    <>
+      <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+      <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8 8 0 0 1 0 12" />
+    </>
+  ),
+  mute: (
+    <>
+      <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+      <path d="M17 9.5l4 5M21 9.5l-4 5" />
+    </>
+  ),
+  chat: (
+    <>
+      <path d="M4 5h16v11H9l-4 4v-4H4V5Z" />
     </>
   ),
   online: <circle cx="12" cy="12" r="6" />,

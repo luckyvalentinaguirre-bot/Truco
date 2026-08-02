@@ -72,9 +72,18 @@ sustituir `useLocalMatch` por un cliente WebSocket sin tocar la mesa.
 
 - **Cartas españolas** (`components/game/PlayingCard.tsx`): un único `<svg>` con
   `viewBox` fijo (240×384) que escala con el contenedor y **no se recorta nunca**.
-  Palos dibujados a mano (oros, copas, espadas, bastos), pips para 1-7, figuras
-  Sota/Caballo/Rey y reverso con medallón. El halo de **pieza** lo determina el
-  motor (`cardCategory`), no React.
+  Palos dibujados a mano (oros=monedas, copas, espadas azules, bastos verdes),
+  pips para 1-7, figuras Sota/Caballo/Rey, índices en dos esquinas y **reverso
+  rojo/dorado** con medallón. El halo de **pieza** lo determina el motor
+  (`cardCategory`), no React.
+- **Mesa según referencia** (paleta en `styles/tokens.css`: paño `#0e3b2e`,
+  madera `#3a2a1a`, dorado `#d4af37`, marfil `#f7f3e9`). Marco de madera + paño
+  verde con: barra superior (menú · marcador VOS–RIVAL · sonido/config/abandonar),
+  info del rival y cartas boca abajo, indicador **Mano**, caja **Última baza**,
+  logo central "TRUCO URUGUAYO" con sol, **Muestra**, **mazo** con contador, panel
+  **Acciones** con botones de color (Truco verde, Envido amarillo, Flor azul,
+  Quiero verde, No quiero rojo) y chat (placeholder). Composición específica para
+  desktop y mobile; cartas del jugador siempre 100% visibles.
 - **Sin pantalla entre manos**: al terminar una mano, `useLocalMatch` muestra un
   feedback de ~1,7 s ("Ganaste la mano +2") y **reparte la siguiente
   automáticamente** (`startNextHand`). La pantalla final aparece **sólo** al
