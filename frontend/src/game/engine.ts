@@ -313,6 +313,11 @@ function doCallEnvido(
   if (hand.truco.acceptedLevel !== 'none') {
     throw new Error('No se puede cantar Envido con el Truco ya aceptado');
   }
+  if (hand.truco.pending) {
+    // "Envido primero" (cantar envido sobre un truco pendiente) todavía no se
+    // modela: se mantiene una sola cadena de canto pendiente por vez.
+    throw new Error('Respondé primero el Truco pendiente');
+  }
   if (anyFlorPresent(state)) {
     throw new Error('Hay Flor en juego: no se juega Envido');
   }

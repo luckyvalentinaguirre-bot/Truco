@@ -24,6 +24,17 @@
   color: var(--c-text-mut);
   max-width: 44ch;
 }
+.difficulty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.difficultyLabel {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--c-text-mut);
+}
 .heroActions {
   display: flex;
   gap: var(--sp-3);

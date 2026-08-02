@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageHeader, Panel, Button, Badge, Icon } from '@/components/ui';
+import { PageHeader, Panel, Button, Badge, Icon, SegmentedControl } from '@/components/ui';
 import { PlayingCard } from '@/components/game/PlayingCard';
 import type { Card, GameMode } from '@/game';
 import { OFFICIAL_40 } from '@/game';
+import { loadSettings, saveSettings, type Difficulty } from '@/services/settings';
 import styles from './PlayPage.module.css';
 
 interface ModeCardData {
@@ -31,8 +32,16 @@ const PREVIEW_HAND: Card[] = [
 
 export function PlayPage() {
   const [selected, setSelected] = useState<number | null>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>(
+    () => loadSettings().difficulty,
+  );
   const navigate = useNavigate();
-  const startMatch = () => navigate('/mesa');
+  const startMatch = () => navigate('/mesa', { state: { difficulty } });
+
+  const changeDifficulty = (d: Difficulty) => {
+    setDifficulty(d);
+    saveSettings({ difficulty: d });
+  };
 
   return (
     <div className={styles.page}>
@@ -53,6 +62,20 @@ export function PlayPage() {
             Buscá una partida al instante o desafiá a un amigo. Piezas, matas,
             envido, flor y señas — todo el Truco de verdad.
           </p>
+          <div className={styles.difficulty}>
+            <span className={styles.difficultyLabel}>Dificultad de la IA</span>
+            <SegmentedControl<Difficulty>
+              ariaLabel="Dificultad"
+              value={difficulty}
+              onChange={changeDifficulty}
+              options={[
+                { value: 'facil', label: 'Fácil' },
+                { value: 'normal', label: 'Normal' },
+                { value: 'dificil', label: 'Difícil' },
+              ]}
+            />
+          </div>
+
           <div className={styles.heroActions}>
             <Button
               size="lg"

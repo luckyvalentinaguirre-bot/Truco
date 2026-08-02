@@ -90,15 +90,15 @@
 }
 .aiSlot,
 .humanSlot {
-  min-height: 138px;
+  min-height: 141px;
   display: grid;
   place-items: center;
 }
 .ghost {
-  width: 92px;
-  height: 138px;
+  width: 88px;
+  aspect-ratio: 5 / 8;
   border-radius: var(--r-md);
-  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
   background: rgba(0, 0, 0, 0.14);
 }
 .played {
@@ -121,8 +121,7 @@
     min-height: 96px;
   }
   .ghost {
-    width: 62px;
-    height: 92px;
+    width: 58px;
   }
 }
 

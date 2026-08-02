@@ -86,7 +86,9 @@ Implementado, tipado fuerte y cubierto por tests:
 - Reparto determinista por semilla; setup de 1v1/2v2/3v3/3 jugadores.
 
 **Pendiente** (próximas etapas): duelo de tantos de Flor enfrentada
-(Con Flor Envido / Contra Flor al Resto), reglas finas de 3 jugadores
+(Con Flor Envido / Contra Flor al Resto), "envido primero" (cantar envido
+sobre un truco pendiente — hoy se mantiene una sola cadena de canto pendiente
+por vez para evitar estados ambiguos), reglas finas de 3 jugadores
 (4ª carta + descarte) y pico a pico en 3v3, y el servidor autoritativo con
 WebSockets. La arquitectura ya lo contempla.
 

@@ -6,6 +6,7 @@
   gap: var(--sp-3);
   max-width: 900px;
   margin: 0 auto;
+  overflow-x: hidden;
   padding: calc(var(--safe-top) + var(--sp-3)) var(--sp-4)
     calc(var(--safe-bottom) + var(--sp-3));
 }
@@ -40,6 +41,35 @@
 .statusRow {
   display: flex;
   justify-content: center;
+}
+
+/* Feedback de fin de mano: toast centrado sobre la mesa. */
+.feedbackWrap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: var(--z-overlay);
+}
+.feedback {
+  padding: var(--sp-4) var(--sp-6);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--c-bg-600), var(--c-bg-800));
+  border: 1px solid var(--c-border-strong);
+  box-shadow: var(--sh-xl);
+  color: var(--c-text-hi);
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-2xl);
+  text-align: center;
+  animation: feedbackPop 1.7s var(--ease-out) both;
+}
+@keyframes feedbackPop {
+  0% { opacity: 0; transform: scale(0.8); }
+  12% { opacity: 1; transform: scale(1); }
+  82% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.96); }
 }
 .actions {
   display: flex;

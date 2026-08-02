@@ -112,3 +112,17 @@ select {
   min-height: 100dvh;
   isolation: isolate;
 }
+
+/* Preferencia del usuario: animaciones desactivadas. */
+:root[data-animations='off'] {
+  --dur-fast: 0ms;
+  --dur-med: 0ms;
+  --dur-slow: 0ms;
+}
+:root[data-animations='off'] *,
+:root[data-animations='off'] *::before,
+:root[data-animations='off'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.001ms !important;
+}

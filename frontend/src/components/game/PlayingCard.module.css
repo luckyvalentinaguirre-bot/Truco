@@ -1,96 +1,63 @@
+/* La carta es un SVG con viewBox fijo: escala sin recortarse jamás.
+   El tamaño lo fija el ancho; el alto sale del aspect-ratio 5:8. */
 .card {
-  --w: 92px;
-  --h: 138px;
-  position: relative;
+  --w: 88px;
+  display: block;
   width: var(--w);
-  height: var(--h);
-  border-radius: var(--r-md);
+  aspect-ratio: 5 / 8;
   flex: none;
-  box-shadow: var(--sh-md);
-  user-select: none;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 14px;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+  transition: transform var(--dur-med) var(--ease-out),
+    filter var(--dur-med) var(--ease-out);
 }
-.sm {
-  --w: 60px;
-  --h: 90px;
-}
-.md {
-  --w: 92px;
-  --h: 138px;
-}
-.lg {
-  --w: 120px;
-  --h: 180px;
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-.face {
-  background: linear-gradient(180deg, #f7f2e6, #e9dfc7);
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  color: var(--suit, var(--c-text));
-  padding: 0;
+.sm {
+  --w: 58px;
 }
+.md {
+  --w: 88px;
+}
+.lg {
+  --w: 116px;
+}
+
 .interactive {
   cursor: pointer;
-  transition: transform var(--dur-med) var(--ease-out), box-shadow var(--dur-med);
 }
 .interactive:hover,
 .interactive:focus-visible {
-  transform: translateY(-10px);
-  box-shadow: var(--sh-lg);
+  transform: translateY(-8px);
+  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.5));
+  outline: none;
 }
+
+/* Seleccionada: sube y resalta con brasa. */
 .selected {
   transform: translateY(-16px);
-  box-shadow: var(--sh-lg), 0 0 0 3px var(--c-accent-500);
+  filter: drop-shadow(0 0 4px var(--c-accent-400))
+    drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55));
 }
 
-.corner {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1;
+/* Halo de pieza (la lógica viene del motor). Sutil y elegante. */
+.pieza {
+  filter: drop-shadow(0 0 6px rgba(217, 177, 104, 0.7))
+    drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
 }
-.tl {
-  top: 8px;
-  left: 8px;
-}
-.br {
-  bottom: 8px;
-  right: 8px;
-  transform: rotate(180deg);
-}
-.rank {
-  font-family: var(--font-display);
-  font-weight: var(--fw-bold);
-  font-size: calc(var(--w) * 0.24);
-}
-.glyph {
-  font-size: calc(var(--w) * 0.16);
-}
-.center {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: calc(var(--w) * 0.5);
-  opacity: 0.9;
+.pieza.selected {
+  filter: drop-shadow(0 0 10px rgba(217, 177, 104, 0.85))
+    drop-shadow(0 14px 22px rgba(0, 0, 0, 0.55));
 }
 
-.back {
-  background: linear-gradient(135deg, var(--c-felt-700), var(--c-felt-900));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: grid;
-  place-items: center;
-}
-.backMark {
-  width: 62%;
-  height: 78%;
-  border-radius: var(--r-sm);
-  border: 2px solid color-mix(in srgb, var(--c-gold-500) 55%, transparent);
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 6px,
-    color-mix(in srgb, var(--c-gold-500) 18%, transparent) 6px,
-    color-mix(in srgb, var(--c-gold-500) 18%, transparent) 12px
-  );
+.backWrap {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
 }

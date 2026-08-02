@@ -9,6 +9,7 @@ import {
   legalActions,
   calcEnvido,
   calcFlor,
+  cardCategory,
   type Action,
   type EnvidoCall,
   type MatchState,
@@ -90,6 +91,18 @@ export function humanOptions(state: MatchState, seat: Seat): HumanOptions {
     canDecline,
     canFold,
   };
+}
+
+/** Claves de las cartas que son PIEZA (según el motor) en una mano. */
+export function piezaCardKeys(
+  state: MatchState,
+  seat: Seat,
+): Set<string> {
+  const muestra = state.hand.muestra;
+  const keys = state.players[seat].hand
+    .filter((c) => cardCategory(c, muestra) === 'pieza')
+    .map((c) => cardKey(c.rank, c.suit));
+  return new Set(keys);
 }
 
 /** ¿El humano puede jugar esta carta ahora? */

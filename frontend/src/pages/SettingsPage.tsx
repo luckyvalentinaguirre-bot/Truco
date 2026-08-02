@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageHeader, Panel, Button, Badge } from '@/components/ui';
 import { Toggle } from '@/components/ui/Toggle';
 import { RULESETS, OFFICIAL_40 } from '@/game';
+import {
+  loadSettings,
+  saveSettings,
+  applyAnimationPreference,
+  type Difficulty,
+} from '@/services/settings';
 import styles from './SettingsPage.module.css';
 
 interface RowProps {
@@ -23,27 +29,29 @@ function SettingRow({ title, desc, children }: RowProps) {
 }
 
 export function SettingsPage() {
-  const [senas, setSenas] = useState(true);
-  const [sound, setSound] = useState(true);
-  const [animations, setAnimations] = useState(true);
-  const [notifications, setNotifications] = useState(false);
+  const [settings, setSettings] = useState(() => loadSettings());
   const [ruleset, setRuleset] = useState(OFFICIAL_40.id);
+
+  useEffect(() => {
+    applyAnimationPreference(settings.animations);
+  }, [settings.animations]);
+
+  const update = (patch: Partial<ReturnType<typeof loadSettings>>) => {
+    setSettings(saveSettings(patch));
+  };
 
   return (
     <div className={styles.page}>
       <PageHeader
         eyebrow="Preferencias"
         title="Configuración"
-        subtitle="Ajustá tu experiencia. Estas opciones se guardarán en tu cuenta cuando conectemos el backend."
+        subtitle="Se guardan en este dispositivo. Cuando conectemos el backend, viajarán con tu cuenta."
       />
 
       <section className={styles.group}>
         <h3 className={styles.groupTitle}>Juego</h3>
         <Panel padding="none" className={styles.card}>
-          <SettingRow
-            title="Reglamento"
-            desc="Variante de puntuación de las partidas."
-          >
+          <SettingRow title="Reglamento" desc="Variante de puntuación de las partidas.">
             <select
               className={styles.select}
               value={ruleset}
@@ -56,32 +64,35 @@ export function SettingsPage() {
               ))}
             </select>
           </SettingRow>
-          <SettingRow
-            title="Señas"
-            desc="Habilitar señas al compañero en modos por equipos."
-          >
-            <Toggle checked={senas} onChange={setSenas} label="Señas" />
+          <SettingRow title="Dificultad de la IA" desc="Nivel del rival en las partidas vs IA.">
+            <select
+              className={styles.select}
+              value={settings.difficulty}
+              onChange={(e) => update({ difficulty: e.target.value as Difficulty })}
+            >
+              <option value="facil">Fácil</option>
+              <option value="normal">Normal</option>
+              <option value="dificil">Difícil</option>
+            </select>
           </SettingRow>
           <SettingRow title="Animaciones" desc="Transiciones y efectos de la mesa.">
-            <Toggle checked={animations} onChange={setAnimations} label="Animaciones" />
+            <Toggle
+              checked={settings.animations}
+              onChange={(v) => update({ animations: v })}
+              label="Animaciones"
+            />
           </SettingRow>
         </Panel>
       </section>
 
       <section className={styles.group}>
-        <h3 className={styles.groupTitle}>Audio y notificaciones</h3>
+        <h3 className={styles.groupTitle}>Audio</h3>
         <Panel padding="none" className={styles.card}>
           <SettingRow title="Sonido" desc="Efectos de cartas y cantos.">
-            <Toggle checked={sound} onChange={setSound} label="Sonido" />
-          </SettingRow>
-          <SettingRow
-            title="Notificaciones"
-            desc="Avisos de invitaciones y turnos."
-          >
             <Toggle
-              checked={notifications}
-              onChange={setNotifications}
-              label="Notificaciones"
+              checked={settings.sound}
+              onChange={(v) => update({ sound: v })}
+              label="Sonido"
             />
           </SettingRow>
         </Panel>

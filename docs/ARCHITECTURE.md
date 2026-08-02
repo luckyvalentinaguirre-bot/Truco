@@ -68,6 +68,25 @@ nuevo MatchState → React re-renderiza → animación
 React muestra el juego; el motor decide el juego. La misma separación permitirá
 sustituir `useLocalMatch` por un cliente WebSocket sin tocar la mesa.
 
+### Detalles del vertical slice
+
+- **Cartas españolas** (`components/game/PlayingCard.tsx`): un único `<svg>` con
+  `viewBox` fijo (240×384) que escala con el contenedor y **no se recorta nunca**.
+  Palos dibujados a mano (oros, copas, espadas, bastos), pips para 1-7, figuras
+  Sota/Caballo/Rey y reverso con medallón. El halo de **pieza** lo determina el
+  motor (`cardCategory`), no React.
+- **Sin pantalla entre manos**: al terminar una mano, `useLocalMatch` muestra un
+  feedback de ~1,7 s ("Ganaste la mano +2") y **reparte la siguiente
+  automáticamente** (`startNextHand`). La pantalla final aparece **sólo** al
+  llegar a 40.
+- **IA con dificultad** (`game/ai.ts`): perfiles fácil/normal/difícil (umbrales +
+  probabilidad de error). Siempre elige dentro de `legalActions`.
+- **Preferencias** (`services/settings.ts`): sonido, animaciones y dificultad,
+  persistidas en `localStorage`. Las animaciones off se aplican vía
+  `:root[data-animations='off']`.
+- **Sonido** (`services/sound.ts`): efectos sintetizados con Web Audio (sin
+  archivos externos), silenciables. Degradación segura si no hay Web Audio.
+
 ## Sistema de diseño
 
 Tokens en `src/styles/tokens.css` (color, tipografía, spacing, radios,

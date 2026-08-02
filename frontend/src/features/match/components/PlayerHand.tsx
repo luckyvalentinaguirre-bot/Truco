@@ -7,6 +7,8 @@ import styles from './PlayerHand.module.css';
 interface PlayerHandProps {
   hand: Card[];
   options: HumanOptions;
+  /** Claves de cartas que son pieza (determinado por el motor). */
+  piezaKeys: Set<string>;
   selectedIndex: number | null;
   onSelect: (index: number) => void;
   onPlay: (card: Card) => void;
@@ -20,6 +22,7 @@ interface PlayerHandProps {
 export function PlayerHand({
   hand,
   options,
+  piezaKeys,
   selectedIndex,
   onSelect,
   onPlay,
@@ -43,6 +46,7 @@ export function PlayerHand({
                 card={card}
                 size="lg"
                 selected={selected}
+                pieza={piezaKeys.has(`${card.rank}-${card.suit}`)}
                 onClick={
                   playable
                     ? () => (selected ? onPlay(card) : onSelect(i))
