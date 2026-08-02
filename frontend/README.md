@@ -11,6 +11,8 @@ npm run build      # typecheck (tsc -b) + build de producción (vite)
 npm run preview    # sirve el build de producción
 npm run lint       # ESLint
 npm run typecheck  # solo chequeo de tipos
+npm test           # tests del motor (Vitest, sin renderizar componentes)
+npm run test:watch # tests en modo watch
 ```
 
 ## Mapa de carpetas (`src/`)

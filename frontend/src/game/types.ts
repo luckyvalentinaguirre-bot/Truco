@@ -29,6 +29,15 @@ export type CardCategory = 'pieza' | 'mata' | 'comun';
 /** Modalidades de partida contempladas por la arquitectura. */
 export type GameMode = '1v1' | '2v2' | '3v3' | '3players';
 
+/** Identificador de equipo. Siempre hay dos bandos. */
+export type TeamId = 'A' | 'B';
+
+/** Índice de asiento en la mesa (0..n-1, en orden de juego). */
+export type Seat = number;
+
+/** Resultado de una baza: gana un equipo, o es parda. */
+export type TrickOutcome = TeamId | 'parda';
+
 /** Cantos de la línea de Truco. */
 export type TrucoCall = 'truco' | 'retruco' | 'vale4';
 
