@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PlayPage } from '@/pages/PlayPage';
+import { MatchPage } from '@/pages/MatchPage';
 import { FriendsPage } from '@/pages/FriendsPage';
 import { RankingPage } from '@/pages/RankingPage';
 import { ProfilePage } from '@/pages/ProfilePage';
@@ -13,6 +14,8 @@ import { NotFoundPage } from '@/pages/NotFoundPage';
  * partida (/mesa/:id), autenticación y protección más adelante.
  */
 export const router = createBrowserRouter([
+  // Mesa a pantalla completa (fuera del shell de navegación).
+  { path: '/mesa', element: <MatchPage /> },
   {
     path: '/',
     element: <AppLayout />,

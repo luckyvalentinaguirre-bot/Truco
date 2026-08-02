@@ -1,0 +1,71 @@
+.screen {
+  position: relative;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  max-width: 900px;
+  margin: 0 auto;
+  padding: calc(var(--safe-top) + var(--sp-3)) var(--sp-4)
+    calc(var(--safe-bottom) + var(--sp-3));
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.exit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  flex: none;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-bg-800);
+  color: var(--c-text);
+  cursor: pointer;
+}
+.exit:hover {
+  background: var(--c-bg-700);
+  color: var(--c-text-hi);
+}
+.top > :global(.board),
+.top > div {
+  flex: 1;
+}
+
+.statusRow {
+  display: flex;
+  justify-content: center;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  min-height: var(--touch-min);
+}
+
+/* Celular vertical: aprovechar todo el alto, mano y acciones fijas abajo. */
+@media (max-width: 560px) {
+  .screen {
+    gap: var(--sp-2);
+    padding-left: var(--sp-3);
+    padding-right: var(--sp-3);
+  }
+}
+
+/* Celular horizontal: compactar verticalmente y ensanchar la mesa. */
+@media (max-height: 480px) and (orientation: landscape) {
+  .screen {
+    max-width: none;
+    gap: var(--sp-1);
+    padding-top: var(--sp-2);
+    padding-bottom: var(--sp-2);
+  }
+  /* La barra de estado se superpone menos: el centro toma el alto. */
+  .statusRow {
+    order: 2;
+  }
+}

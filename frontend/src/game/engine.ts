@@ -50,10 +50,21 @@ function activeSeats(state: MatchState): Seat[] {
 }
 
 /** ¿Hay algún canto esperando respuesta? */
-function pendingResponse(hand: HandState): { callerTeam: TeamId } | null {
-  if (hand.truco.pending) return { callerTeam: hand.truco.callerTeam! };
-  if (hand.envido.pending) return { callerTeam: hand.envido.callerTeam! };
+export type PendingKind = 'truco' | 'envido';
+export interface PendingInfo {
+  kind: PendingKind;
+  callerTeam: TeamId;
+}
+
+function pendingResponse(hand: HandState): PendingInfo | null {
+  if (hand.truco.pending) return { kind: 'truco', callerTeam: hand.truco.callerTeam! };
+  if (hand.envido.pending) return { kind: 'envido', callerTeam: hand.envido.callerTeam! };
   return null;
+}
+
+/** Info del canto pendiente (para overlays de la UI). */
+export function getPending(state: MatchState): PendingInfo | null {
+  return pendingResponse(state.hand);
 }
 
 /** Siguiente asiento activo que debe jugar tras `seat`. */
@@ -75,6 +86,48 @@ export function isLegal(state: MatchState, action: Action): boolean {
   } catch {
     return false;
   }
+}
+
+/** Asiento del rival que debe responder al canto pendiente (o null). */
+export function responderSeat(state: MatchState): Seat | null {
+  const pending = pendingResponse(state.hand);
+  if (!pending) return null;
+  const seat = state.players.find(
+    (p) => !p.folded && p.team !== pending.callerTeam,
+  )?.seat;
+  return seat ?? null;
+}
+
+/** ¿Quién debe actuar ahora? El que responde un canto, o el del turno. */
+export function actorNow(state: MatchState): Seat | null {
+  if (state.phase === 'finished' || state.hand.finished) return null;
+  return responderSeat(state) ?? state.hand.turnSeat;
+}
+
+/**
+ * Enumera TODAS las acciones legales para un asiento, filtrándolas con el
+ * propio reductor (el motor es la autoridad). La usan la IA y la UI para
+ * no ofrecer jamás una acción imposible.
+ */
+export function legalActions(state: MatchState, seat: Seat): Action[] {
+  const player = state.players[seat];
+  if (!player) return [];
+
+  const candidates: Action[] = [
+    ...player.hand.map((card) => ({ type: 'PLAY_CARD', seat, card }) as Action),
+    { type: 'CALL_TRUCO', seat, call: 'truco' },
+    { type: 'CALL_TRUCO', seat, call: 'retruco' },
+    { type: 'CALL_TRUCO', seat, call: 'vale4' },
+    { type: 'CALL_ENVIDO', seat, call: 'envido' },
+    { type: 'CALL_ENVIDO', seat, call: 'real_envido' },
+    { type: 'CALL_ENVIDO', seat, call: 'falta_envido' },
+    { type: 'CALL_FLOR', seat },
+    { type: 'ACCEPT', seat },
+    { type: 'DECLINE', seat },
+    { type: 'FOLD', seat },
+  ];
+
+  return candidates.filter((a) => isLegal(state, a));
 }
 
 // -------------------------------------------------------------

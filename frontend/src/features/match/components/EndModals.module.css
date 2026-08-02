@@ -1,0 +1,101 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--sp-4);
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(4px);
+  animation: fade var(--dur-med) var(--ease-out);
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  width: min(94vw, 440px);
+  padding: var(--sp-7) var(--sp-6);
+  border-radius: var(--r-xl);
+  background: linear-gradient(180deg, var(--c-bg-600), var(--c-bg-800));
+  border: 1px solid var(--c-border-strong);
+  box-shadow: var(--sh-xl);
+  text-align: center;
+  animation: rise var(--dur-med) var(--ease-out);
+}
+.eyebrow {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--c-text-mut);
+}
+.title {
+  font-size: var(--fs-2xl);
+}
+.big {
+  font-size: var(--fs-4xl);
+  font-family: var(--font-display);
+}
+.win {
+  color: var(--c-success);
+}
+.loss {
+  color: var(--c-danger);
+}
+.awards {
+  list-style: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin: var(--sp-2) 0;
+}
+.awardRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  font-size: var(--fs-sm);
+  color: var(--c-text);
+}
+.awardPts {
+  font-weight: var(--fw-semibold);
+  color: var(--c-text-hi);
+}
+.score,
+.finalScore {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  color: var(--c-text-hi);
+}
+.score {
+  display: flex;
+  gap: var(--sp-3);
+  font-size: var(--fs-lg);
+  margin: var(--sp-2) 0 var(--sp-3);
+}
+.finalScore {
+  font-size: var(--fs-3xl);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--sp-3);
+}
+.scoreSep {
+  color: var(--c-text-dim);
+}
+.overActions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}

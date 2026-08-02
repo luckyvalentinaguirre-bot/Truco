@@ -1,0 +1,54 @@
+.wrap {
+  display: flex;
+  justify-content: center;
+}
+.fan {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-end;
+  padding-top: 28px; /* espacio para que la carta suba al seleccionarse */
+}
+.slot {
+  position: relative;
+  transition: transform var(--dur-med) var(--ease-out);
+}
+.blocked {
+  opacity: 0.55;
+  filter: saturate(0.7);
+}
+.playable {
+  opacity: 1;
+}
+.selectedSlot {
+  z-index: 2;
+}
+.playBtn {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  padding: 6px var(--sp-4);
+  border: none;
+  border-radius: var(--r-pill);
+  background: linear-gradient(180deg, var(--c-accent-500), var(--c-accent-600));
+  color: var(--c-text-on-accent);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-wide);
+  cursor: pointer;
+  box-shadow: var(--sh-md);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .fan {
+    gap: var(--sp-2);
+  }
+}
+
+/* Celular en horizontal: cartas algo más chicas para no tapar la mesa */
+@media (max-height: 480px) and (orientation: landscape) {
+  .fan {
+    padding-top: 18px;
+  }
+}

@@ -24,6 +24,7 @@ export * from './actions';
 export * from './events';
 export * from './setup';
 export * from './engine';
+export * from './ai';
 
 // Señas disponibles según la mano (mecánica de juego).
 export * from './senasEngine';

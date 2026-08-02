@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageHeader, Panel, Button, Badge, Icon } from '@/components/ui';
 import { PlayingCard } from '@/components/game/PlayingCard';
 import type { Card, GameMode } from '@/game';
@@ -30,6 +31,8 @@ const PREVIEW_HAND: Card[] = [
 
 export function PlayPage() {
   const [selected, setSelected] = useState<number | null>(null);
+  const navigate = useNavigate();
+  const startMatch = () => navigate('/mesa');
 
   return (
     <div className={styles.page}>
@@ -51,8 +54,12 @@ export function PlayPage() {
             envido, flor y señas — todo el Truco de verdad.
           </p>
           <div className={styles.heroActions}>
-            <Button size="lg" leading={<Icon name="play" size={20} />}>
-              Buscar partida
+            <Button
+              size="lg"
+              leading={<Icon name="play" size={20} />}
+              onClick={startMatch}
+            >
+              Jugar vs IA
             </Button>
             <Button size="lg" variant="secondary" leading={<Icon name="friends" size={20} />}>
               Jugar con amigos
@@ -102,10 +109,11 @@ export function PlayPage() {
               <Button
                 variant={m.featured ? 'primary' : 'secondary'}
                 block
-                disabled={m.mode === 'custom'}
+                disabled={m.mode !== '1v1'}
                 trailing={<Icon name="chevron" size={18} />}
+                onClick={m.mode === '1v1' ? startMatch : undefined}
               >
-                {m.mode === 'custom' ? 'Muy pronto' : 'Jugar'}
+                {m.mode === '1v1' ? 'Jugar' : 'Muy pronto'}
               </Button>
             </Panel>
           ))}

@@ -1,0 +1,138 @@
+.center {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-radius: var(--r-xl);
+  background:
+    radial-gradient(80% 70% at 50% 45%, var(--c-felt-500), var(--c-felt-900)),
+    var(--c-felt-900);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: var(--sh-inset), 0 20px 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 80px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.muestraBox {
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--sp-2);
+  border-radius: var(--r-md);
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--c-border);
+}
+.muestraLabel {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--c-gold-400);
+}
+.muestraSuit {
+  font-size: var(--fs-2xs);
+  color: var(--c-text);
+}
+.piezaTag {
+  color: var(--c-gold-400);
+  font-style: normal;
+}
+
+.pips {
+  position: absolute;
+  top: var(--sp-3);
+  left: var(--sp-3);
+  display: flex;
+  gap: 6px;
+}
+.pip {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--c-border-strong);
+}
+.pipEmpty {
+  background: rgba(0, 0, 0, 0.3);
+}
+.pipWin {
+  background: var(--c-success);
+  border-color: transparent;
+}
+.pipLoss {
+  background: var(--c-danger);
+  border-color: transparent;
+}
+.pipParda {
+  background: var(--c-text-dim);
+  border-color: transparent;
+}
+
+.playZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.vs {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-wider);
+  color: rgba(255, 255, 255, 0.12);
+}
+.aiSlot,
+.humanSlot {
+  min-height: 138px;
+  display: grid;
+  place-items: center;
+}
+.ghost {
+  width: 92px;
+  height: 138px;
+  border-radius: var(--r-md);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.14);
+}
+.played {
+  animation: drop var(--dur-med) var(--ease-out);
+}
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-height: 700px), (max-width: 560px) {
+  .aiSlot,
+  .humanSlot {
+    min-height: 96px;
+  }
+  .ghost {
+    width: 62px;
+    height: 92px;
+  }
+}
+
+/* Celular horizontal: muestra al costado y cartas jugadas en fila */
+@media (max-height: 480px) and (orientation: landscape) {
+  .playZone {
+    flex-direction: row;
+    gap: var(--sp-5);
+  }
+  .vs {
+    display: none;
+  }
+}

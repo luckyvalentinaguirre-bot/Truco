@@ -1,0 +1,36 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--c-bg-800);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+}
+.meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.name {
+  color: var(--c-text-hi);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+}
+.team {
+  font-size: var(--fs-xs);
+  color: var(--c-text-mut);
+}
+.think {
+  color: var(--c-accent-400);
+  font-style: normal;
+}
+.cards {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding-right: var(--sp-2);
+}
+.cardBack {
+  display: inline-flex;
+}

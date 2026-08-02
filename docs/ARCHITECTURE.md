@@ -45,6 +45,29 @@ La UI **nunca** habla directo con la fuente de datos ni decide reglas: pasa
 por `services/api` (swap transparente a HTTP) y por `game/` (swap a servidor
 autoritativo). Por eso agregar backend/multiplayer **no** obliga a reescribir.
 
+## Mesa jugable (Etapa 3)
+
+Partida local **1 humano vs IA** en la ruta a pantalla completa `/mesa`.
+
+```
+Usuario pulsa carta → dispatch(PLAY_CARD) → applyAction (motor) →
+nuevo MatchState → React re-renderiza → animación
+```
+
+- `features/match/useLocalMatch.ts` — **Game Controller / Adapter**: guarda el
+  `MatchState`, aplica acciones con `applyAction` y **conduce a la IA** con una
+  pausa (setTimeout) para que sus jugadas se vean. La IA (`game/ai.ts`) elige
+  siempre dentro de `legalActions` del motor — nunca puede hacer una jugada
+  ilegal.
+- `features/match/matchView.ts` — adaptador de **vista puro** (estado
+  contextual, acciones legales agrupadas, banners). La UI sólo lee esto.
+- `features/match/components/` — mesa, mano interactiva, marcador, overlays de
+  canto, resúmenes de mano y fin de partida. Composición **específica** para
+  desktop, celular vertical y horizontal (no un simple `flex-wrap`).
+
+React muestra el juego; el motor decide el juego. La misma separación permitirá
+sustituir `useLocalMatch` por un cliente WebSocket sin tocar la mesa.
+
 ## Sistema de diseño
 
 Tokens en `src/styles/tokens.css` (color, tipografía, spacing, radios,

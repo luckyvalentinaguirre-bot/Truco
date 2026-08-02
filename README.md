@@ -21,9 +21,18 @@ mesa que se reorganiza en vertical, safe-areas para notch).
   jerarquía completa, piezas, excepción del Rey, envido, flor y señas.
 - Documentación del reglamento y de la arquitectura.
 
+**Etapa 2 — Motor de reglas** ✅ · **Etapa 3 — Mesa jugable (vs IA)** ✅
+
+- Motor de Truco determinista y testeable (jerarquía, piezas, envido, flor,
+  cadenas de truco/envido, pardas, scoring, fin de partida) con reductor
+  `applyAction`.
+- **Partida jugable** 1 humano vs IA en `/mesa`: mesa responsive (desktop /
+  celular vertical y horizontal), cartas interactivas, cantos contextuales,
+  resúmenes y pantalla de victoria. La IA usa el mismo motor.
+
 Todavía **no** implementados (por diseño): login real, PostgreSQL,
-WebSockets, matchmaking, partidas online, motor completo de la mano, tienda.
-La arquitectura ya está preparada para incorporarlos sin rehacer nada.
+WebSockets, matchmaking, partidas online, tienda. La arquitectura ya está
+preparada para incorporarlos sin rehacer nada.
 
 ## Stack
 
