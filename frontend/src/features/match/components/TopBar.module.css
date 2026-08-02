@@ -48,8 +48,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 2px;
   line-height: 1.05;
-  min-width: 56px;
+  min-width: 84px;
+}
+.zone {
+  font-size: var(--fs-2xs);
+  color: var(--c-text-mut);
+  font-variant-numeric: tabular-nums;
 }
 .team {
   font-size: var(--fs-2xs);
@@ -162,13 +168,10 @@
     gap: var(--sp-2);
     padding: 2px var(--sp-2);
   }
-  .pts {
-    font-size: var(--fs-xl);
+  .side {
+    min-width: 68px;
   }
-  .target {
-    display: none;
-  }
-  .malas {
+  .zone {
     display: none;
   }
 }

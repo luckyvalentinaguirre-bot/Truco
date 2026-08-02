@@ -1,0 +1,17 @@
+.row {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+.cuadro {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+@media (max-width: 560px) {
+  .cuadro {
+    width: 13px;
+    height: 13px;
+  }
+}

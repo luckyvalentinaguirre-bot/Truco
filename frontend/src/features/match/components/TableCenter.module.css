@@ -82,7 +82,7 @@
 /* Última baza (izquierda) */
 .ultimaBaza {
   position: absolute;
-  left: var(--sp-2);
+  left: clamp(6px, 3%, 48px);
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -193,8 +193,8 @@
 /* Muestra + mazo (derecha) */
 .rightStack {
   position: absolute;
-  right: var(--sp-2);
-  top: var(--sp-1);
+  right: clamp(6px, 3%, 48px);
+  top: clamp(4px, 6%, 40px);
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);

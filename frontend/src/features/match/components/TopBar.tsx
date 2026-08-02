@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { MatchState, Seat, TeamId } from '@/game';
 import { Icon } from '@/components/ui';
 import { loadSettings, saveSettings } from '@/services/settings';
+import { Fosforos } from './Fosforos';
 import styles from './TopBar.module.css';
 
 interface TopBarProps {
@@ -20,6 +21,9 @@ export function TopBar({ state, humanSeat }: TopBarProps) {
   const rivalTeam: TeamId = humanTeam === 'A' ? 'B' : 'A';
   const malas = state.ruleset.malas;
 
+  const half = (pts: number) => (pts >= malas ? pts - malas : pts);
+  const zone = (pts: number) => (pts >= malas ? 'Buenas' : 'Malas');
+
   const toggleSound = () => {
     const next = !sound;
     setSound(next);
@@ -35,20 +39,20 @@ export function TopBar({ state, humanSeat }: TopBarProps) {
       <div className={styles.marcador}>
         <div className={styles.side}>
           <span className={[styles.team, styles.vos].join(' ')}>Vos</span>
-          <span className={styles.pts}>{state.score[humanTeam]}</span>
-          <span className={styles.malas}>
-            {state.score[humanTeam] >= malas ? 'Buenas' : 'Malas'}: {state.score[humanTeam] % malas}
+          <Fosforos points={half(state.score[humanTeam])} />
+          <span className={styles.zone}>
+            {zone(state.score[humanTeam])} · {state.score[humanTeam]}
           </span>
         </div>
         <div className={styles.mid}>
           <span className={styles.dash}>—</span>
-          <span className={styles.target}>A {state.ruleset.targetPoints} puntos</span>
+          <span className={styles.target}>A {state.ruleset.targetPoints}</span>
         </div>
         <div className={styles.side}>
           <span className={[styles.team, styles.rival].join(' ')}>Rival</span>
-          <span className={styles.pts}>{state.score[rivalTeam]}</span>
-          <span className={styles.malas}>
-            {state.score[rivalTeam] >= malas ? 'Buenas' : 'Malas'}: {state.score[rivalTeam] % malas}
+          <Fosforos points={half(state.score[rivalTeam])} color="var(--c-cream)" />
+          <span className={styles.zone}>
+            {zone(state.score[rivalTeam])} · {state.score[rivalTeam]}
           </span>
         </div>
       </div>
