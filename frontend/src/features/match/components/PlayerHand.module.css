@@ -8,6 +8,14 @@
   align-items: flex-end;
   padding-top: 28px; /* espacio para que la carta suba al seleccionarse */
 }
+
+/* En pantallas bajas se recorta el espacio de elevación para ganar alto. */
+@media (max-height: 800px) {
+  .fan { padding-top: 16px; }
+}
+@media (max-height: 680px) {
+  .fan { padding-top: 10px; gap: var(--sp-2); }
+}
 .slot {
   position: relative;
   transition: transform var(--dur-med) var(--ease-out);

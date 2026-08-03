@@ -38,7 +38,9 @@
   gap: var(--sp-2);
   /* Inset para que las cartas/paneles queden sobre el paño y no sobre el riel
      de madera (el riel ocupa ~13% del alto y ~7% del ancho de la imagen). */
-  padding: clamp(8px, 5.5%, 52px) clamp(14px, 7%, 96px);
+  /* Vertical basado en la altura (vh) para no comerse el alto en laptops;
+     horizontal en % para dejar el contenido dentro del óvalo. */
+  padding: clamp(6px, 3.2vh, 38px) clamp(14px, 6%, 88px);
   overflow: hidden;
 }
 
@@ -137,4 +139,10 @@
   .felt { gap: 2px; }
   .playerTag { padding: 0; }
   .turn { margin: 0; }
+}
+
+/* Laptops de poca altura: bandas más juntas para que entre todo. */
+@media (max-height: 800px) {
+  .felt { gap: 2px; }
+  .playerTag { padding: 0; }
 }

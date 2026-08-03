@@ -72,7 +72,9 @@
   flex: 1;
   /* No colapsar: garantiza separación vertical entre carta del rival (arriba)
      y carta del jugador (abajo). */
-  min-height: clamp(150px, 30vh, 340px);
+  /* Chico para poder encogerse en pantallas bajas (laptops) y no cortar la
+     mano; crece con flex si hay lugar. */
+  min-height: clamp(76px, 16vh, 320px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -545,4 +547,9 @@
 /* Móvil: zona de juego más compacta para que entren mano + acciones. */
 @media (max-width: 560px) {
   .playArea { min-height: clamp(104px, 17vh, 190px); }
+}
+
+/* Poca altura: zona del rival más compacta. */
+@media (max-height: 800px) {
+  .oppZone { gap: 4px; padding-top: 0; }
 }

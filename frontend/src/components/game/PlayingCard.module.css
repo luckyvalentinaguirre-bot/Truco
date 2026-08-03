@@ -118,6 +118,24 @@
   .sm { --w: 46px; }
 }
 
+/* Pantallas de POCA ALTURA (laptops 768/720/600): achicar las cartas por alto
+   para que la mano y las acciones siempre entren en el viewport. */
+@media (max-height: 800px) {
+  .lg { --w: 96px; }
+  .md { --w: 78px; }
+  .sm { --w: 50px; }
+}
+@media (max-height: 680px) {
+  .lg { --w: 84px; }
+  .md { --w: 68px; }
+  .sm { --w: 46px; }
+}
+@media (max-height: 600px) {
+  .lg { --w: 74px; }
+  .md { --w: 60px; }
+  .sm { --w: 42px; }
+}
+
 .interactive {
   cursor: pointer;
 }
