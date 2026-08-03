@@ -425,26 +425,26 @@
 }
 .pileStack {
   position: relative;
-  width: 92px;
-  height: 118px;
+  width: 100px;
+  height: 150px;
 }
-/* Mazo (reverso): detrás, asomando arriba-izquierda. */
-.pileMazo {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  transform: rotate(-8deg);
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
-}
-/* Muestra: adelante y entera. */
+/* Muestra: abajo-izquierda, entera a la vista. */
 .pileMuestra {
   position: absolute;
-  top: 18px;
-  left: 22px;
-  z-index: 2;
-  transform: rotate(5deg);
+  left: 0;
+  top: 56px;
+  z-index: 1;
+  transform: rotate(-5deg);
   filter: drop-shadow(0 4px 9px rgba(0, 0, 0, 0.6));
+}
+/* Mazo (reverso): arriba-derecha, tapando sólo la puntita de la muestra. */
+.pileMazo {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 2;
+  transform: rotate(7deg);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
 /* =====================================================================

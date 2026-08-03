@@ -8,13 +8,11 @@ import {
   type TrucoCall,
 } from '@/game';
 import { Icon } from '@/components/ui';
-import { Avatar } from '@/components/ui/Avatar';
 import { loadSettings, type Difficulty, type Settings } from '@/services/settings';
 import { getMesaAsset } from '@/features/match/mesaAssets';
 import { useLocalMatch } from '@/features/match/useLocalMatch';
 import {
   humanOptions,
-  statusText,
   humanHasFlor,
   piezaCardKeys,
   TRUCO_LABEL,
@@ -55,7 +53,6 @@ export function MatchPage() {
   }, [state.hand.tricks.length, state.handNumber]);
 
   const options = humanOptions(state, humanSeat);
-  const status = statusText(state, humanSeat);
   const hasFlor = humanHasFlor(state, humanSeat);
   const piezaKeys = piezaCardKeys(state, humanSeat);
   const actorSeat = actorNow(state);
@@ -92,16 +89,7 @@ export function MatchPage() {
           <TableCenter state={state} humanSeat={humanSeat} aiSeat={aiSeat} thinking={thinking} />
 
           <div className={styles.turn}>
-            <StatusBar status={status} banner={banner} />
-          </div>
-
-          {/* Identidad del jugador, pegada a su mano (abajo) */}
-          <div className={styles.playerTag}>
-            <Avatar name="Vos" size={26} />
-            <span className={styles.playerName}>Vos</span>
-            {state.hand.manoSeat === humanSeat && (
-              <span className={styles.manoChip}>● de mano</span>
-            )}
+            <StatusBar banner={banner} />
           </div>
 
           <PlayerHand

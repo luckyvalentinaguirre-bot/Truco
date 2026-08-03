@@ -74,22 +74,13 @@ function DeckPile({ state }: { state: MatchState }) {
   );
 }
 
-/** Columna derecha (mano + pila) — usada por 2v2/3v3. */
-function RightStack({ state, manoIsHuman }: { state: MatchState; manoIsHuman: boolean }) {
+/** Columna derecha (pila mazo+muestra) — usada por 2v2/3v3. */
+function RightStack({ state }: { state: MatchState }) {
   return (
     <div className={styles.rightStack}>
-      <div className={[styles.manoBox, styles.manoSide].join(' ')}>
-        <span className={styles.manoLabel}>Mano</span>
-        <span className={styles.manoWho}>{manoIsHuman ? 'Vos' : 'Rival'}</span>
-      </div>
       <DeckPile state={state} />
     </div>
   );
-}
-
-/** Chip pequeño "de mano" para ubicar cerca del jugador que corresponde. */
-function ManoChip() {
-  return <span className={styles.manoChip}>● de mano</span>;
 }
 
 function Pips({ state, humanTeam }: { state: MatchState; humanTeam: string }) {
@@ -119,7 +110,6 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
   const humanTeam = state.players[humanSeat].team;
   const resolved = state.hand.tricks.filter((t) => t.outcome !== null);
   const lastResolved = resolved[resolved.length - 1];
-  const manoIsHuman = state.hand.manoSeat === humanSeat;
   const aiRemaining = state.players[aiSeat].hand.length;
 
   return (
@@ -129,9 +119,7 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
         <div className={styles.oppInfo}>
           <Avatar name="Rival IA" size={38} online />
           <div className={styles.oppText}>
-            <span className={styles.oppName}>
-              Rival IA {!manoIsHuman && <ManoChip />}
-            </span>
+            <span className={styles.oppName}>Rival IA</span>
             <span className={styles.oppTeam}>
               Equipo {state.players[aiSeat].team}
               {thinking && <em className={styles.think}> · pensando…</em>}
@@ -208,14 +196,12 @@ function OpponentSeat({
   remaining,
   spot,
   thinking,
-  isMano,
 }: {
   name: string;
   team: string;
   remaining: number;
   spot: Spot;
   thinking: boolean;
-  isMano: boolean;
 }) {
   const vertical = spot === 'left' || spot === 'right';
   return (
@@ -223,10 +209,7 @@ function OpponentSeat({
       <div className={styles.seatInfo}>
         <Avatar name={name} size={30} online />
         <div className={styles.seatText}>
-          <span className={styles.seatName}>
-            {name}
-            {isMano && <span className={styles.seatMano}> · mano</span>}
-          </span>
+          <span className={styles.seatName}>{name}</span>
           <span className={styles.seatTeam}>
             Equipo {team}
             {thinking && <em className={styles.think}> · pensando…</em>}
@@ -245,7 +228,6 @@ function OpponentSeat({
 function TableMulti({ state, humanSeat, thinking }: TableCenterProps) {
   const trick = displayedTrick(state);
   const humanTeam = state.players[humanSeat].team;
-  const manoIsHuman = state.hand.manoSeat === humanSeat;
   const views = seatViews(state.players, humanSeat);
   const bySeat = new Map(views.map((v) => [v.seat, v]));
 
@@ -266,7 +248,6 @@ function TableMulti({ state, humanSeat, thinking }: TableCenterProps) {
                 remaining={p.hand.length}
                 spot={v.spot}
                 thinking={thinking && isActor}
-                isMano={state.hand.manoSeat === v.seat}
               />
             );
           })}
@@ -299,7 +280,7 @@ function TableMulti({ state, humanSeat, thinking }: TableCenterProps) {
           <Pips state={state} humanTeam={humanTeam} />
         </div>
 
-        <RightStack state={state} manoIsHuman={manoIsHuman} />
+        <RightStack state={state} />
       </div>
     </>
   );
