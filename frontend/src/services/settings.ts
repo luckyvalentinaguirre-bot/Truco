@@ -4,12 +4,15 @@
  * ============================================================= */
 export type Difficulty = 'facil' | 'normal' | 'dificil';
 export type MesaTheme = 'verde' | 'bordo' | 'azul';
+/** Puntos para ganar la partida: 30 (corta) o 40 (larga, oficial). */
+export type Puntos = 30 | 40;
 
 export interface Settings {
   sound: boolean;
   animations: boolean;
   difficulty: Difficulty;
   mesaTheme: MesaTheme;
+  puntos: Puntos;
 }
 
 const KEY = 'truco.settings.v1';
@@ -19,6 +22,7 @@ const DEFAULTS: Settings = {
   animations: true,
   difficulty: 'normal',
   mesaTheme: 'verde',
+  puntos: 30,
 };
 
 export function loadSettings(): Settings {

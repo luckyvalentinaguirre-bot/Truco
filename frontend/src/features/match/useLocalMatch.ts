@@ -20,6 +20,7 @@ import {
   type GameEvent,
   type GameMode,
   type MatchState,
+  type Ruleset,
   type Seat,
   type TeamId,
 } from '@/game';
@@ -77,9 +78,10 @@ function soundFor(event: GameEvent, humanTeam: TeamId): SoundName | null {
 export function useLocalMatch(
   difficulty: Difficulty = 'normal',
   mode: GameMode = '1v1',
+  ruleset?: Ruleset,
 ) {
   const [state, setState] = useState<MatchState>(() =>
-    createMatch({ mode, seed: randomSeed() }),
+    createMatch({ mode, seed: randomSeed(), ruleset }),
   );
   const [bubbles, setBubbles] = useState<ActiveBubble[]>([]);
   // Narración diferida del Envido: burbujas de tantos/"son buenas" en orden de mano.
@@ -140,8 +142,8 @@ export function useLocalMatch(
     setReveal([]);
     handEvents.current = [];
     playSound('deal');
-    setState(createMatch({ mode, seed: randomSeed() }));
-  }, [mode]);
+    setState(createMatch({ mode, seed: randomSeed(), ruleset }));
+  }, [mode, ruleset]);
 
   // -------- Driver de la IA (maneja TODOS los asientos no-humanos) --------
   useEffect(() => {

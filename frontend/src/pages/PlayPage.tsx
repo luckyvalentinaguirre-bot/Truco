@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageHeader, Panel, Button, Badge, Icon, SegmentedControl } from '@/components/ui';
 import { PlayingCard } from '@/components/game/PlayingCard';
 import type { Card, GameMode } from '@/game';
-import { OFFICIAL_40 } from '@/game';
-import { loadSettings, saveSettings, type Difficulty } from '@/services/settings';
+import { loadSettings, saveSettings, type Difficulty, type Puntos } from '@/services/settings';
 import styles from './PlayPage.module.css';
 
 interface ModeCardData {
@@ -35,13 +34,19 @@ export function PlayPage() {
   const [difficulty, setDifficulty] = useState<Difficulty>(
     () => loadSettings().difficulty,
   );
+  const [puntos, setPuntos] = useState<Puntos>(() => loadSettings().puntos);
   const navigate = useNavigate();
   const startMatch = (mode: GameMode = '1v1') =>
-    navigate('/mesa', { state: { difficulty, mode } });
+    navigate('/mesa', { state: { difficulty, mode, puntos } });
 
   const changeDifficulty = (d: Difficulty) => {
     setDifficulty(d);
     saveSettings({ difficulty: d });
+  };
+
+  const changePuntos = (p: Puntos) => {
+    setPuntos(p);
+    saveSettings({ puntos: p });
   };
 
   return (
@@ -49,7 +54,11 @@ export function PlayPage() {
       <PageHeader
         eyebrow="Truco Uruguayo"
         title="Jugá una partida"
-        subtitle={`Reglamento oficial · ${OFFICIAL_40.label} (20 malas + 20 buenas).`}
+        subtitle={
+          puntos === 40
+            ? 'Reglamento uruguayo · 40 puntos (20 malas + 20 buenas).'
+            : 'Reglamento uruguayo · 30 puntos (15 malas + 15 buenas).'
+        }
       />
 
       {/* Hero + preview de mesa */}
@@ -73,6 +82,18 @@ export function PlayPage() {
                 { value: 'facil', label: 'Fácil' },
                 { value: 'normal', label: 'Normal' },
                 { value: 'dificil', label: 'Difícil' },
+              ]}
+            />
+          </div>
+          <div className={styles.difficulty}>
+            <span className={styles.difficultyLabel}>Puntos para ganar</span>
+            <SegmentedControl<'30' | '40'>
+              ariaLabel="Puntos"
+              value={String(puntos) as '30' | '40'}
+              onChange={(v) => changePuntos(Number(v) as Puntos)}
+              options={[
+                { value: '30', label: '30 · Corta' },
+                { value: '40', label: '40 · Larga' },
               ]}
             />
           </div>
