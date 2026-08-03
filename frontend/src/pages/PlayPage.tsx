@@ -85,8 +85,13 @@ export function PlayPage() {
             >
               Jugar vs IA
             </Button>
-            <Button size="lg" variant="secondary" leading={<Icon name="friends" size={20} />}>
-              Jugar con amigos
+            <Button
+              size="lg"
+              variant="secondary"
+              leading={<Icon name="friends" size={20} />}
+              onClick={() => navigate('/lan')}
+            >
+              Jugar por LAN
             </Button>
           </div>
         </div>

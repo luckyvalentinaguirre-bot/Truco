@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PlayPage } from '@/pages/PlayPage';
 import { MatchPage } from '@/pages/MatchPage';
+import { LanPage } from '@/pages/LanPage';
 import { FriendsPage } from '@/pages/FriendsPage';
 import { RankingPage } from '@/pages/RankingPage';
 import { ProfilePage } from '@/pages/ProfilePage';
@@ -21,6 +22,7 @@ const devRoutes = import.meta.env.DEV
 export const router = createBrowserRouter([
   // Mesa a pantalla completa (fuera del shell de navegación).
   { path: '/mesa', element: <MatchPage /> },
+  { path: '/lan', element: <LanPage /> },
   ...devRoutes,
   {
     path: '/',
