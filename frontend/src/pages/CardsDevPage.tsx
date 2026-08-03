@@ -9,6 +9,7 @@ import type { CSSProperties } from 'react';
 import type { Suit } from '@/game';
 import { PlayingCard } from '@/components/game/PlayingCard';
 import { getCardAsset, getCardBackAsset } from '@/components/game/cardAssets';
+import { MESA_THEMES, getMesaAsset } from '@/features/match/mesaAssets';
 
 const RANKS = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12] as const;
 const SUITS: { id: Suit; label: string }[] = [
@@ -52,6 +53,24 @@ export function CardsDevPage() {
             <PlayingCard faceDown size="md" />
             <div>{getCardBackAsset().replace('/cartas_truco/', '')}</div>
           </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 style={{ fontFamily: 'Georgia, serif', color: '#e6c65a' }}>MESAS</h2>
+        <div style={rowCards}>
+          {MESA_THEMES.map((m) => (
+            <div key={m.id} style={cell}>
+              <img
+                src={getMesaAsset(m.id)}
+                alt={`Mesa ${m.label}`}
+                style={{ width: 260, borderRadius: 10, display: 'block' }}
+              />
+              <div>
+                {m.label} · {getMesaAsset(m.id).replace('/mesas/', '')}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>

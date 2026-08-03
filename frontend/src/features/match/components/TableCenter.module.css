@@ -34,7 +34,8 @@
   gap: var(--sp-2);
   justify-content: center;
 }
-.manoSide {
+/* Especificidad .manoBox.manoX para ganarle a .manoBox (declarada luego). */
+.manoBox.manoSide {
   display: none;
 }
 .manoBox {
@@ -235,10 +236,10 @@
   }
   /* En móvil el indicador de mano va en la columna derecha, no en la fila
      superior (ahí no hay ancho suficiente). */
-  .manoTop {
+  .manoBox.manoTop {
     display: none;
   }
-  .manoSide {
+  .manoBox.manoSide {
     display: flex;
     width: 52px;
     height: 52px;

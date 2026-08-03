@@ -3,11 +3,13 @@
  * Sin backend. Fuente única para sonido, animaciones y dificultad.
  * ============================================================= */
 export type Difficulty = 'facil' | 'normal' | 'dificil';
+export type MesaTheme = 'verde' | 'bordo' | 'azul';
 
 export interface Settings {
   sound: boolean;
   animations: boolean;
   difficulty: Difficulty;
+  mesaTheme: MesaTheme;
 }
 
 const KEY = 'truco.settings.v1';
@@ -16,6 +18,7 @@ const DEFAULTS: Settings = {
   sound: true,
   animations: true,
   difficulty: 'normal',
+  mesaTheme: 'verde',
 };
 
 export function loadSettings(): Settings {

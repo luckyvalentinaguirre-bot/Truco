@@ -7,7 +7,9 @@ import {
   saveSettings,
   applyAnimationPreference,
   type Difficulty,
+  type MesaTheme,
 } from '@/services/settings';
+import { MESA_THEMES } from '@/features/match/mesaAssets';
 import styles from './SettingsPage.module.css';
 
 interface RowProps {
@@ -73,6 +75,19 @@ export function SettingsPage() {
               <option value="facil">Fácil</option>
               <option value="normal">Normal</option>
               <option value="dificil">Difícil</option>
+            </select>
+          </SettingRow>
+          <SettingRow title="Color de mesa" desc="Paño del tablero durante la partida.">
+            <select
+              className={styles.select}
+              value={settings.mesaTheme}
+              onChange={(e) => update({ mesaTheme: e.target.value as MesaTheme })}
+            >
+              {MESA_THEMES.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.label}
+                </option>
+              ))}
             </select>
           </SettingRow>
           <SettingRow title="Animaciones" desc="Transiciones y efectos de la mesa.">

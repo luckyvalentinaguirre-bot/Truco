@@ -7,7 +7,8 @@ import {
   type TrucoCall,
 } from '@/game';
 import { Icon } from '@/components/ui';
-import { loadSettings, type Difficulty } from '@/services/settings';
+import { loadSettings, type Difficulty, type Settings } from '@/services/settings';
+import { getMesaAsset } from '@/features/match/mesaAssets';
 import { useLocalMatch } from '@/features/match/useLocalMatch';
 import {
   humanOptions,
@@ -34,6 +35,17 @@ export function MatchPage() {
   const { state, humanSeat, aiSeat, banner, handFeedback, dispatch, restart } =
     useLocalMatch(difficulty);
   const [selected, setSelected] = useState<number | null>(null);
+
+  // Tema de mesa (imagen de fondo real). Se actualiza en vivo al cambiarlo.
+  const [mesaTheme, setMesaTheme] = useState(() => loadSettings().mesaTheme);
+  useEffect(() => {
+    const onSettings = (e: Event) => {
+      const s = (e as CustomEvent<Settings>).detail;
+      if (s?.mesaTheme) setMesaTheme(s.mesaTheme);
+    };
+    window.addEventListener('truco:settings', onSettings as EventListener);
+    return () => window.removeEventListener('truco:settings', onSettings as EventListener);
+  }, []);
 
   useEffect(() => {
     setSelected(null);
@@ -68,7 +80,10 @@ export function MatchPage() {
     <div className={styles.screen}>
       <TopBar state={state} humanSeat={humanSeat} />
 
-      <div className={styles.feltFrame}>
+      <div
+        className={styles.feltFrame}
+        style={{ backgroundImage: `url("${getMesaAsset(mesaTheme)}")` }}
+      >
         <div className={styles.felt}>
           <TableCenter state={state} humanSeat={humanSeat} aiSeat={aiSeat} thinking={thinking} />
 
