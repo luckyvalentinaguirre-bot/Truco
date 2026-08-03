@@ -23,8 +23,6 @@ import { TopBar } from '@/features/match/components/TopBar';
 import { TableCenter } from '@/features/match/components/TableCenter';
 import { PlayerHand } from '@/features/match/components/PlayerHand';
 import { ActionBar } from '@/features/match/components/ActionBar';
-import { StatusBar } from '@/features/match/components/StatusBar';
-import { Announcement } from '@/features/match/components/Announcement';
 import { GameOverModal } from '@/features/match/components/EndModals';
 import styles from './MatchPage.module.css';
 
@@ -34,7 +32,7 @@ export function MatchPage() {
   const difficulty: Difficulty = navState?.difficulty ?? loadSettings().difficulty;
   const mode: GameMode = navState?.mode ?? '1v1';
 
-  const { state, humanSeat, aiSeat, banner, announcement, bubbles, dispatch, restart } =
+  const { state, humanSeat, aiSeat, bubbles, reveal, dispatch, restart } =
     useLocalMatch(difficulty, mode);
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -95,11 +93,8 @@ export function MatchPage() {
             aiSeat={aiSeat}
             thinking={thinking}
             bubbles={bubbles}
+            reveal={reveal}
           />
-
-          <div className={styles.turn}>
-            <StatusBar banner={banner} />
-          </div>
 
           <PlayerHand
             hand={state.players[humanSeat].hand}
@@ -121,8 +116,6 @@ export function MatchPage() {
           <button className={styles.chat} disabled aria-label="Chat (próximamente)">
             <Icon name="chat" size={18} /> Chat
           </button>
-
-          <Announcement data={announcement} />
         </div>
       </div>
 

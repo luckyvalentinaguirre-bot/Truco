@@ -24,20 +24,20 @@ import {
 } from '@/game';
 import type { Difficulty } from '@/services/settings';
 import { playSound, type SoundName } from '@/services/sound';
-import {
-  bannerFromEvents,
-  announcementFromEvents,
-  bubblesFromEvents,
-  envidoNarration,
-  type MatchAnnouncement,
-  type CantoBubble,
-} from './matchView';
+import { bubblesFromEvents, envidoNarration, type CantoBubble } from './matchView';
 
 const HUMAN_SEAT: Seat = 0;
 const AI_STEP_MS = 750;
 const HAND_FEEDBACK_MS = 1700;
 const BUBBLE_MS = 5000;
 const NARRATION_STEP_MS = 850;
+const HAND_REVEAL_MS = 3200;
+
+/** Cartas de un rival mostradas boca arriba al terminar la mano (envido/flor). */
+export interface RevealHand {
+  seat: Seat;
+  cards: import('@/game').Card[];
+}
 
 /** Burbuja de canto activa cerca de un asiento (id único para expirar). */
 export interface ActiveBubble {
@@ -80,23 +80,17 @@ export function useLocalMatch(
   const [state, setState] = useState<MatchState>(() =>
     createMatch({ mode, seed: randomSeed() }),
   );
-  const [banner, setBanner] = useState<string | null>(null);
-  const [announcement, setAnnouncement] = useState<MatchAnnouncement | null>(null);
-  const [handFeedback, setHandFeedback] = useState<string | null>(null);
   const [bubbles, setBubbles] = useState<ActiveBubble[]>([]);
-  // Narración diferida del Envido: burbujas de tantos/"son buenas" en orden de
-  // mano y, al final, el resumen de puntos.
-  const [pendingEnvido, setPendingEnvido] = useState<{
-    narration: CantoBubble[];
-    result: MatchAnnouncement | null;
-  } | null>(null);
+  // Narración diferida del Envido: burbujas de tantos/"son buenas" en orden de mano.
+  const [pendingEnvido, setPendingEnvido] = useState<CantoBubble[] | null>(null);
+  // Cartas de los rivales reveladas al terminar una mano con envido/flor.
+  const [reveal, setReveal] = useState<RevealHand[]>([]);
   const handEvents = useRef<GameEvent[]>([]);
 
   const humanSeat = HUMAN_SEAT;
   // Primer asiento rival (compatibilidad con lecturas 1v1). En 2v2/3v3 todos
   // los asientos != humano los maneja la IA (ver drivers de abajo).
   const aiSeat = state.players.find((p) => p.seat !== humanSeat)!.seat;
-  const humanTeam = state.players[humanSeat].team;
 
   const applyAndTrack = useCallback(
     (action: Action) => {
@@ -116,8 +110,6 @@ export function useLocalMatch(
           const s = soundFor(e, prev.players[HUMAN_SEAT].team);
           if (s) playSound(s);
         }
-        const b = bannerFromEvents(events, next, HUMAN_SEAT);
-        if (b) setBanner(b);
         // Los cantos ("Truco", "Envido", "Quiero", …) van como burbujas
         // pequeñas junto al asiento que los dijo.
         const newBubbles = bubblesFromEvents(events);
@@ -128,18 +120,10 @@ export function useLocalMatch(
             ...newBubbles.map((b2) => ({ ...b2, id: ++bubbleSeq, born: now })),
           ]);
         }
-        // Resultado del Envido: se narra en orden de mano (tantos / "son
-        // buenas") y recién al final se muestra el resumen de puntos.
-        const envidoResolved = events.some((e) => e.type === 'ENVIDO_RESOLVED');
-        const ann = announcementFromEvents(events, next, HUMAN_SEAT);
-        if (envidoResolved) {
-          setPendingEnvido({
-            narration: envidoNarration(next, next.hand.manoSeat),
-            result: ann && ann.kind === 'result' ? ann : null,
-          });
-        } else if (ann && ann.kind === 'result') {
-          // Otros resultados (Flor) se muestran directo en el centro.
-          setAnnouncement(ann);
+        // Resultado del Envido: se narra con burbujas en orden de mano
+        // (tantos / "son buenas"). Sin cartel central: sólo globos + marcador.
+        if (events.some((e) => e.type === 'ENVIDO_RESOLVED')) {
+          setPendingEnvido(envidoNarration(next, next.hand.manoSeat));
         }
         return next;
       });
@@ -150,10 +134,9 @@ export function useLocalMatch(
   const dispatch = useCallback((action: Action) => applyAndTrack(action), [applyAndTrack]);
 
   const restart = useCallback(() => {
-    setBanner(null);
-    setHandFeedback(null);
     setBubbles([]);
     setPendingEnvido(null);
+    setReveal([]);
     handEvents.current = [];
     playSound('deal');
     setState(createMatch({ mode, seed: randomSeed() }));
@@ -196,52 +179,36 @@ export function useLocalMatch(
     return () => clearTimeout(t);
   }, [state, humanSeat, applyAndTrack]);
 
-  // -------- Fin de mano: feedback corto + reparto automático --------
+  // -------- Fin de mano: si hubo envido/flor se revelan las cartas rivales
+  //          automáticamente un instante antes de repartir la próxima. --------
   useEffect(() => {
     if (state.phase !== 'playing' || !state.hand.finished) return;
 
-    const winner = state.hand.winner;
-    const pointsToWinner = handEvents.current
-      .filter((e): e is Extract<GameEvent, { type: 'POINTS_AWARDED' }> =>
-        e.type === 'POINTS_AWARDED' && e.team === winner,
-      )
-      .reduce((sum, e) => sum + e.points, 0);
-    setHandFeedback(
-      winner === humanTeam
-        ? `Ganaste la mano +${pointsToWinner}`
-        : `Perdiste la mano +${pointsToWinner}`,
+    const hadTantos = handEvents.current.some(
+      (e) => e.type === 'ENVIDO_RESOLVED' || e.type === 'FLOR_RESOLVED',
     );
-
+    if (hadTantos) {
+      setReveal(
+        state.players
+          .filter((p) => p.seat !== humanSeat)
+          .map((p) => ({ seat: p.seat, cards: [...p.played, ...p.hand] })),
+      );
+    }
+    const delay = hadTantos ? HAND_REVEAL_MS : HAND_FEEDBACK_MS;
     const t = setTimeout(() => {
-      setHandFeedback(null);
-      setBanner(null);
+      setReveal([]);
       handEvents.current = [];
       playSound('deal');
       setState((prev) => (prev.hand.finished ? startNextHand(prev) : prev));
-    }, HAND_FEEDBACK_MS);
+    }, delay);
     return () => clearTimeout(t);
-  }, [state, humanTeam]);
+  }, [state, humanSeat]);
 
-  // -------- Auto-ocultar el banner de baza --------
-  useEffect(() => {
-    if (!banner) return;
-    const t = setTimeout(() => setBanner(null), 1400);
-    return () => clearTimeout(t);
-  }, [banner]);
-
-  // -------- Auto-ocultar el anuncio (resultado) --------
-  useEffect(() => {
-    if (!announcement) return;
-    const t = setTimeout(() => setAnnouncement(null), 2600);
-    return () => clearTimeout(t);
-  }, [announcement]);
-
-  // -------- Narración del Envido: burbujas escalonadas + resumen final --------
+  // -------- Narración del Envido: burbujas escalonadas (tantos / son buenas) --------
   useEffect(() => {
     if (!pendingEnvido) return;
-    const { narration, result } = pendingEnvido;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    narration.forEach((b, i) => {
+    pendingEnvido.forEach((b, i) => {
       timers.push(
         setTimeout(() => {
           setBubbles((prev) => [
@@ -251,14 +218,6 @@ export function useLocalMatch(
         }, i * NARRATION_STEP_MS),
       );
     });
-    if (result) {
-      timers.push(
-        setTimeout(
-          () => setAnnouncement(result),
-          narration.length * NARRATION_STEP_MS + 150,
-        ),
-      );
-    }
     return () => timers.forEach(clearTimeout);
   }, [pendingEnvido]);
 
@@ -278,10 +237,8 @@ export function useLocalMatch(
     state,
     humanSeat,
     aiSeat,
-    banner,
-    announcement,
     bubbles,
-    handFeedback,
+    reveal,
     dispatch,
     restart,
   };

@@ -1,8 +1,9 @@
 import type { MatchState, Seat } from '@/game';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlayingCard } from '@/components/game/PlayingCard';
+import type { Card } from '@/game';
 import { seatViews, type Spot } from '../seating';
-import type { ActiveBubble } from '../useLocalMatch';
+import type { ActiveBubble, RevealHand } from '../useLocalMatch';
 import styles from './TableCenter.module.css';
 
 interface TableCenterProps {
@@ -11,6 +12,20 @@ interface TableCenterProps {
   aiSeat: Seat;
   thinking: boolean;
   bubbles?: ActiveBubble[];
+  reveal?: RevealHand[];
+}
+
+/** Mano de un rival revelada boca arriba (al terminar una mano con envido/flor). */
+function RevealedCards({ cards }: { cards: Card[] }) {
+  return (
+    <div className={styles.oppHand} aria-label="Cartas del rival">
+      {cards.map((card, i) => (
+        <span key={i} className={styles.dealCard}>
+          <PlayingCard card={card} size="sm" flip />
+        </span>
+      ))}
+    </div>
+  );
 }
 
 /** Capa de burbujas de canto: cada una junto al asiento que la dijo. */
@@ -110,12 +125,13 @@ function RightStack({ state }: { state: MatchState }) {
 // -------------------------------------------------------------
 // 1v1 (diseño original, intacto)
 // -------------------------------------------------------------
-function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
+function Table1v1({ state, humanSeat, aiSeat, thinking, reveal }: TableCenterProps) {
   const trick = displayedTrick(state);
   const humanPlay = trick?.plays.find((p) => p.seat === humanSeat)?.card ?? null;
   const aiPlay = trick?.plays.find((p) => p.seat === aiSeat)?.card ?? null;
   const manoIsHuman = state.hand.manoSeat === humanSeat;
   const aiRemaining = state.players[aiSeat].hand.length;
+  const revealCards = reveal?.find((r) => r.seat === aiSeat)?.cards;
 
   return (
     <>
@@ -131,13 +147,17 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
             </span>
           </div>
         </div>
-        <div className={styles.oppHand} aria-label={`${aiRemaining} cartas del rival`}>
-          {Array.from({ length: aiRemaining }).map((_, i) => (
-            <span key={`${state.handNumber}-${i}`} className={styles.dealCard} style={{ animationDelay: `${i * 110}ms` }}>
-              <PlayingCard faceDown size="sm" />
-            </span>
-          ))}
-        </div>
+        {revealCards ? (
+          <RevealedCards cards={revealCards} />
+        ) : (
+          <div className={styles.oppHand} aria-label={`${aiRemaining} cartas del rival`}>
+            {Array.from({ length: aiRemaining }).map((_, i) => (
+              <span key={`${state.handNumber}-${i}`} className={styles.dealCard} style={{ animationDelay: `${i * 110}ms` }}>
+                <PlayingCard faceDown size="sm" />
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Cartas jugadas: capa sobre el paño usando el alto del óvalo, para
@@ -191,12 +211,14 @@ function OpponentSeat({
   remaining,
   spot,
   thinking,
+  revealCards,
 }: {
   name: string;
   team: string;
   remaining: number;
   spot: Spot;
   thinking: boolean;
+  revealCards?: Card[];
 }) {
   const vertical = spot === 'left' || spot === 'right';
   return (
@@ -212,15 +234,19 @@ function OpponentSeat({
         </div>
       </div>
       <div className={[styles.seatCards, vertical ? styles.seatCardsV : ''].join(' ')}>
-        {Array.from({ length: remaining }).map((_, i) => (
-          <PlayingCard key={i} faceDown size="sm" />
-        ))}
+        {revealCards
+          ? revealCards.map((card, i) => (
+              <PlayingCard key={i} card={card} size="sm" flip />
+            ))
+          : Array.from({ length: remaining }).map((_, i) => (
+              <PlayingCard key={i} faceDown size="sm" />
+            ))}
       </div>
     </div>
   );
 }
 
-function TableMulti({ state, humanSeat, thinking }: TableCenterProps) {
+function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
   const trick = displayedTrick(state);
   const views = seatViews(state.players, humanSeat);
   const bySeat = new Map(views.map((v) => [v.seat, v]));
@@ -242,6 +268,7 @@ function TableMulti({ state, humanSeat, thinking }: TableCenterProps) {
                 remaining={p.hand.length}
                 spot={v.spot}
                 thinking={thinking && isActor}
+                revealCards={reveal?.find((r) => r.seat === v.seat)?.cards}
               />
             );
           })}
