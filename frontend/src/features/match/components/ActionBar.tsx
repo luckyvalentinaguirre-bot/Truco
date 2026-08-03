@@ -30,6 +30,13 @@ export function ActionBar({
   onAction,
 }: ActionBarProps) {
   const [confirmFold, setConfirmFold] = useState(false);
+  const [envidoOpen, setEnvidoOpen] = useState(false);
+
+  // El submenú de Envido sólo tiene sentido si hay más de una opción; con una
+  // sola se muestra directa (un toque). Se cierra si dejan de existir opciones.
+  const envidoCalls = options.envidoCalls;
+  const showEnvidoMenu = envidoOpen && envidoCalls.length > 0;
+  const groupEnvido = envidoCalls.length >= 2;
 
   const hasAny =
     options.trucoCalls.length > 0 ||
@@ -61,6 +68,28 @@ export function ActionBar({
             Cancelar
           </button>
         </div>
+      ) : showEnvidoMenu ? (
+        /* Submenú compacto de Envido: sólo los cantos permitidos ahora. */
+        <div className={styles.grid}>
+          {envidoCalls.map((call) => (
+            <button
+              key={call}
+              className={[styles.btn, styles.envido].join(' ')}
+              onClick={() => {
+                onAction(envidoAction(seat, call));
+                setEnvidoOpen(false);
+              }}
+            >
+              {ENVIDO_LABEL[call]}
+            </button>
+          ))}
+          <button
+            className={[styles.btn, styles.neutral].join(' ')}
+            onClick={() => setEnvidoOpen(false)}
+          >
+            Volver
+          </button>
+        </div>
       ) : (
         <div className={styles.grid}>
           {/* Respuestas a un canto */}
@@ -75,16 +104,27 @@ export function ActionBar({
             </button>
           )}
 
-          {/* Cantos de envido */}
-          {options.envidoCalls.map((call) => (
+          {/* Cantos de envido: un único botón que despliega las opciones
+              válidas (Envido / Real Envido / Falta Envido). Con una sola
+              opción se canta directo. */}
+          {groupEnvido ? (
             <button
-              key={call}
               className={[styles.btn, styles.envido].join(' ')}
-              onClick={() => onAction(envidoAction(seat, call))}
+              onClick={() => setEnvidoOpen(true)}
             >
-              {ENVIDO_LABEL[call]}
+              Envido ▾
             </button>
-          ))}
+          ) : (
+            envidoCalls.map((call) => (
+              <button
+                key={call}
+                className={[styles.btn, styles.envido].join(' ')}
+                onClick={() => onAction(envidoAction(seat, call))}
+              >
+                {ENVIDO_LABEL[call]}
+              </button>
+            ))
+          )}
 
           {/* Flor */}
           {options.canFlor && hasFlor && (

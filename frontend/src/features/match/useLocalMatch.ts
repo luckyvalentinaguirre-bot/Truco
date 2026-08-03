@@ -24,11 +24,27 @@ import {
 } from '@/game';
 import type { Difficulty } from '@/services/settings';
 import { playSound, type SoundName } from '@/services/sound';
-import { bannerFromEvents, announcementFromEvents, type MatchAnnouncement } from './matchView';
+import {
+  bannerFromEvents,
+  announcementFromEvents,
+  bubblesFromEvents,
+  type MatchAnnouncement,
+} from './matchView';
 
 const HUMAN_SEAT: Seat = 0;
 const AI_STEP_MS = 750;
 const HAND_FEEDBACK_MS = 1700;
+const BUBBLE_MS = 5000;
+
+/** Burbuja de canto activa cerca de un asiento (id único para expirar). */
+export interface ActiveBubble {
+  id: number;
+  seat: Seat;
+  text: string;
+  /** Momento (ms) en que se creó, para expirarla ~5s después. */
+  born: number;
+}
+let bubbleSeq = 0;
 
 function randomSeed(): number {
   return Math.floor(Math.random() * 0xffffffff);
@@ -64,6 +80,7 @@ export function useLocalMatch(
   const [banner, setBanner] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState<MatchAnnouncement | null>(null);
   const [handFeedback, setHandFeedback] = useState<string | null>(null);
+  const [bubbles, setBubbles] = useState<ActiveBubble[]>([]);
   const handEvents = useRef<GameEvent[]>([]);
 
   const humanSeat = HUMAN_SEAT;
@@ -92,8 +109,19 @@ export function useLocalMatch(
         }
         const b = bannerFromEvents(events, next, HUMAN_SEAT);
         if (b) setBanner(b);
+        // El anuncio central muestra SÓLO resultados ("Son buenas", Flor).
+        // Los cantos ("Truco", "Envido", "Quiero", …) van como burbujas
+        // pequeñas junto al asiento que los dijo.
         const ann = announcementFromEvents(events, next, HUMAN_SEAT);
-        if (ann) setAnnouncement(ann);
+        if (ann && ann.kind === 'result') setAnnouncement(ann);
+        const newBubbles = bubblesFromEvents(events);
+        if (newBubbles.length > 0) {
+          const now = Date.now();
+          setBubbles((prev) => [
+            ...prev,
+            ...newBubbles.map((b2) => ({ ...b2, id: ++bubbleSeq, born: now })),
+          ]);
+        }
         return next;
       });
     },
@@ -105,6 +133,7 @@ export function useLocalMatch(
   const restart = useCallback(() => {
     setBanner(null);
     setHandFeedback(null);
+    setBubbles([]);
     handEvents.current = [];
     playSound('deal');
     setState(createMatch({ mode, seed: randomSeed() }));
@@ -177,13 +206,24 @@ export function useLocalMatch(
     return () => clearTimeout(t);
   }, [banner]);
 
-  // -------- Auto-ocultar el anuncio (canto / resultado) --------
+  // -------- Auto-ocultar el anuncio (resultado) --------
   useEffect(() => {
     if (!announcement) return;
-    const ms = announcement.kind === 'result' ? 2600 : 1700;
-    const t = setTimeout(() => setAnnouncement(null), ms);
+    const t = setTimeout(() => setAnnouncement(null), 2600);
     return () => clearTimeout(t);
   }, [announcement]);
+
+  // -------- Expirar las burbujas de canto (~5s cada una) --------
+  useEffect(() => {
+    if (bubbles.length === 0) return;
+    const soonest = Math.min(...bubbles.map((b) => b.born));
+    const wait = Math.max(0, soonest + BUBBLE_MS - Date.now());
+    const t = setTimeout(() => {
+      const cutoff = Date.now() - BUBBLE_MS;
+      setBubbles((prev) => prev.filter((b) => b.born > cutoff));
+    }, wait);
+    return () => clearTimeout(t);
+  }, [bubbles]);
 
   return {
     state,
@@ -191,6 +231,7 @@ export function useLocalMatch(
     aiSeat,
     banner,
     announcement,
+    bubbles,
     handFeedback,
     dispatch,
     restart,

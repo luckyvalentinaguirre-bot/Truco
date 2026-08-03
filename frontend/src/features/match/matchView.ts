@@ -201,16 +201,6 @@ export interface MatchAnnouncement {
   tone: 'call' | 'win' | 'lose' | 'neutral';
 }
 
-function bestByTeam(state: MatchState, team: TeamId): number {
-  let best = -1;
-  for (const p of state.players) {
-    if (p.folded || p.team !== team) continue;
-    const v = calcEnvido(p.hand, state.hand.muestra).value;
-    if (v > best) best = v;
-  }
-  return best;
-}
-
 /**
  * Deriva un anuncio de un lote de eventos. Prioriza resultados (envido/flor
  * resueltos) sobre cantos. Puro: sólo lee el estado; no cambia reglas.
@@ -221,7 +211,6 @@ export function announcementFromEvents(
   humanSeat: Seat,
 ): MatchAnnouncement | null {
   const humanTeam = state.players[humanSeat].team;
-  const rivalTeam: TeamId = humanTeam === 'A' ? 'B' : 'A';
   const whoOf = (seat: Seat) =>
     state.players[seat].team === humanTeam ? 'Vos' : 'Rival';
 
@@ -229,17 +218,14 @@ export function announcementFromEvents(
   for (let i = events.length - 1; i >= 0; i--) {
     const e = events[i];
     if (e.type === 'ENVIDO_RESOLVED') {
-      const you = bestByTeam(state, humanTeam);
-      const rival = bestByTeam(state, rivalTeam);
+      // Resultado limpio y tradicional: "Son buenas" (el que pierde reconoce
+      // que los tantos del otro son buenos). NO se muestran los tantos de
+      // cada jugador; el motor ya resolvió con esa info internamente.
       const win = e.winner === humanTeam;
       return {
         kind: 'result',
-        title: 'Envido',
-        rows: [
-          { label: 'Vos', value: you, you: true },
-          { label: 'Rival', value: rival, you: false },
-        ],
-        verdict: win ? `¡Es buena!  +${e.points}` : `Es del rival  +${e.points}`,
+        title: 'Son buenas',
+        verdict: win ? `Ganás el envido · +${e.points}` : `Gana el rival · +${e.points}`,
         tone: win ? 'win' : 'lose',
       };
     }
@@ -268,6 +254,41 @@ export function announcementFromEvents(
     }
   }
   return null;
+}
+
+/** Burbuja de canto: texto corto a mostrar cerca de un asiento. */
+export interface CantoBubble {
+  seat: Seat;
+  text: string;
+}
+
+/**
+ * Burbujas de canto derivadas de un lote de eventos: cada canto/respuesta
+ * ("Truco", "Envido", "Quiero", "No quiero", "Flor", …) genera una burbuja
+ * junto al asiento que la dijo. Puro; la UI la muestra ~5s y la descarta.
+ */
+export function bubblesFromEvents(events: GameEvent[]): CantoBubble[] {
+  const out: CantoBubble[] = [];
+  for (const e of events) {
+    switch (e.type) {
+      case 'TRUCO_CALLED':
+        out.push({ seat: e.seat, text: TRUCO_LABEL[e.call] });
+        break;
+      case 'ENVIDO_CALLED':
+        out.push({ seat: e.seat, text: ENVIDO_LABEL[e.call] });
+        break;
+      case 'FLOR_DECLARED':
+        out.push({ seat: e.seat, text: 'Flor' });
+        break;
+      case 'CALL_ACCEPTED':
+        out.push({ seat: e.seat, text: 'Quiero' });
+        break;
+      case 'CALL_DECLINED':
+        out.push({ seat: e.seat, text: 'No quiero' });
+        break;
+    }
+  }
+  return out;
 }
 
 /** Descriptor de una acción concreta para asociarla a un botón. */

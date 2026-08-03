@@ -77,6 +77,39 @@ export function nextSeat(seat: Seat, count: number): Seat {
   return (seat + 1) % count;
 }
 
+/* =============================================================
+ * PRIORIDAD DE MANO
+ * -------------------------------------------------------------
+ * La "mano" no es una posición fija: es un orden de prioridad
+ * circular entre TODOS los jugadores, empezando por `manoSeat` y
+ * girando en el sentido del reparto (índice de asiento creciente,
+ * módulo N). El primero es el más mano; el último, el menos.
+ *
+ * Ej. N=4, manoSeat=1 ⇒ orden [1, 2, 3, 0]:
+ *   1 > 2 > 3 > 0.
+ *
+ * La prioridad NO depende del equipo: compañeros y rivales se
+ * ordenan igual, sólo por su lugar alrededor de la mesa.
+ * ============================================================= */
+
+/** Asientos ordenados por prioridad de mano (más mano primero). */
+export function manoOrder(manoSeat: Seat, count: number): Seat[] {
+  return Array.from({ length: count }, (_, i) => (manoSeat + i) % count);
+}
+
+/**
+ * Rango de mano de un asiento: 0 = el más mano, `count-1` = el menos.
+ * A menor rango, mayor prioridad.
+ */
+export function manoRank(seat: Seat, manoSeat: Seat, count: number): number {
+  return (seat - manoSeat + count) % count;
+}
+
+/** ¿`a` es más mano que `b` (tiene prioridad sobre `b`)? */
+export function hasManoOver(a: Seat, b: Seat, manoSeat: Seat, count: number): boolean {
+  return manoRank(a, manoSeat, count) < manoRank(b, manoSeat, count);
+}
+
 /**
  * Reparte una nueva mano: baraja, reparte 3 cartas a cada jugador y
  * descubre la muestra. Rota el reparto y el mano.

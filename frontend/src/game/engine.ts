@@ -32,7 +32,7 @@ import { declareFlor } from './florBetting';
 import { calcEnvido } from './envido';
 import { calcFlor, FLOR_BASE_POINTS } from './flor';
 import { addPoints, gameWinner } from './scoring';
-import { dealHand, nextSeat } from './setup';
+import { dealHand, nextSeat, manoRank } from './setup';
 
 function otherTeam(t: TeamId): TeamId {
   return t === 'A' ? 'B' : 'A';
@@ -339,18 +339,54 @@ function anyFlorPresent(state: MatchState): boolean {
   );
 }
 
-/** Showdown de Envido: gana el tanto más alto; empate ⇒ mano. */
-function resolveEnvidoShowdown(state: MatchState): {
-  winner: TeamId;
-} {
-  const best: Record<TeamId, number> = { A: -1, B: -1 };
-  for (const p of state.players) {
-    if (p.folded) continue;
-    const v = calcEnvido(p.hand, state.hand.muestra).value;
-    if (v > best[p.team]) best[p.team] = v;
+/** Un participante del showdown de Envido: su tanto y su asiento. */
+export interface EnvidoEntry {
+  seat: Seat;
+  team: TeamId;
+  value: number;
+}
+
+/**
+ * Decide el ganador del Envido a partir de los tantos de cada jugador:
+ * gana el tanto más alto. En caso de EMPATE no se decide al azar: gana el
+ * jugador con prioridad de mano (el más mano en el orden circular que arranca
+ * en `manoSeat`) y el equipo ganador es el de ese jugador.
+ *
+ * La prioridad es individual e independiente del equipo, así que resuelve
+ * igual los empates entre rivales y entre compañeros. Función pura y testeable.
+ */
+export function envidoWinnerFrom(
+  entries: EnvidoEntry[],
+  manoSeat: Seat,
+  count: number,
+): TeamId {
+  let bestValue = -1;
+  let bestRank = Number.POSITIVE_INFINITY;
+  let winner: TeamId | null = null;
+  for (const e of entries) {
+    const rank = manoRank(e.seat, manoSeat, count);
+    // Gana mayor tanto; a igual tanto, el de menor rango (más mano).
+    if (e.value > bestValue || (e.value === bestValue && rank < bestRank)) {
+      bestValue = e.value;
+      bestRank = rank;
+      winner = e.team;
+    }
   }
-  if (best.A === best.B) return { winner: state.hand.manoTeam };
-  return { winner: best.A > best.B ? 'A' : 'B' };
+  return winner ?? 'A';
+}
+
+/** Showdown de Envido usando el estado real (tantos calculados del motor). */
+function resolveEnvidoShowdown(state: MatchState): { winner: TeamId } {
+  const entries: EnvidoEntry[] = state.players
+    .filter((p) => !p.folded)
+    .map((p) => ({
+      seat: p.seat,
+      team: p.team,
+      value: calcEnvido(p.hand, state.hand.muestra).value,
+    }));
+  return {
+    winner: envidoWinnerFrom(entries, state.hand.manoSeat, state.players.length),
+  };
 }
 
 // -------------------------------------------------------------

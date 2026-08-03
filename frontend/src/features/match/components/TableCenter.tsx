@@ -3,6 +3,7 @@ import { cardCategory, suitLabel } from '@/game';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlayingCard } from '@/components/game/PlayingCard';
 import { seatViews, type Spot } from '../seating';
+import type { ActiveBubble } from '../useLocalMatch';
 import styles from './TableCenter.module.css';
 
 interface TableCenterProps {
@@ -10,6 +11,38 @@ interface TableCenterProps {
   humanSeat: Seat;
   aiSeat: Seat;
   thinking: boolean;
+  bubbles?: ActiveBubble[];
+}
+
+/** Capa de burbujas de canto: cada una junto al asiento que la dijo. */
+function SeatBubbles({
+  state,
+  humanSeat,
+  bubbles,
+}: {
+  state: MatchState;
+  humanSeat: Seat;
+  bubbles: ActiveBubble[];
+}) {
+  if (bubbles.length === 0) return null;
+  const spotOf = new Map(
+    seatViews(state.players, humanSeat).map((v) => [v.seat, v.spot]),
+  );
+  return (
+    <div className={styles.bubbleLayer} aria-live="polite">
+      {bubbles.map((b) => {
+        const spot = spotOf.get(b.seat) ?? 'bottom';
+        return (
+          <span
+            key={b.id}
+            className={[styles.bubble, styles[`bubble_${spot}`]].join(' ')}
+          >
+            {b.text}
+          </span>
+        );
+      })}
+    </div>
+  );
 }
 
 /** Baza en curso, o la última con cartas si la actual está vacía. */
@@ -277,9 +310,15 @@ function TableMulti({ state, humanSeat, thinking }: TableCenterProps) {
 }
 
 export function TableCenter(props: TableCenterProps) {
-  return props.state.players.length > 2 ? (
-    <TableMulti {...props} />
-  ) : (
-    <Table1v1 {...props} />
+  const bubbles = props.bubbles ?? [];
+  return (
+    <>
+      {props.state.players.length > 2 ? (
+        <TableMulti {...props} />
+      ) : (
+        <Table1v1 {...props} />
+      )}
+      <SeatBubbles state={props.state} humanSeat={props.humanSeat} bubbles={bubbles} />
+    </>
   );
 }

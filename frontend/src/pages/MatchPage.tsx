@@ -33,7 +33,7 @@ export function MatchPage() {
   const difficulty: Difficulty = navState?.difficulty ?? loadSettings().difficulty;
   const mode: GameMode = navState?.mode ?? '1v1';
 
-  const { state, humanSeat, aiSeat, banner, announcement, dispatch, restart } =
+  const { state, humanSeat, aiSeat, banner, announcement, bubbles, dispatch, restart } =
     useLocalMatch(difficulty, mode);
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -86,7 +86,13 @@ export function MatchPage() {
         style={{ backgroundImage: `url("${getMesaAsset(mesaTheme)}")` }}
       >
         <div className={styles.felt}>
-          <TableCenter state={state} humanSeat={humanSeat} aiSeat={aiSeat} thinking={thinking} />
+          <TableCenter
+            state={state}
+            humanSeat={humanSeat}
+            aiSeat={aiSeat}
+            thinking={thinking}
+            bubbles={bubbles}
+          />
 
           <div className={styles.turn}>
             <StatusBar banner={banner} />
