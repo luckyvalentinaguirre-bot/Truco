@@ -60,17 +60,22 @@ function RightStack({ state, manoIsHuman }: { state: MatchState; manoIsHuman: bo
         <span className={styles.manoLabel}>Mano</span>
         <span className={styles.manoWho}>{manoIsHuman ? 'Vos' : 'Rival'}</span>
       </div>
-      <div className={styles.muestraBox}>
-        <span className={styles.boxLabel}>Muestra</span>
-        <PlayingCard card={muestra} size="sm" />
+      {/* Pila real: mazo (reverso) tapando ~50% de la muestra por debajo. */}
+      <div className={styles.pile}>
+        <span className={styles.boxLabel}>Mazo · Muestra</span>
+        <div className={styles.pileStack} aria-label="Mazo y muestra">
+          <span className={styles.pileMuestra}>
+            <PlayingCard card={muestra} size="sm" />
+          </span>
+          <span className={styles.pileMazo}>
+            <PlayingCard faceDown size="sm" />
+          </span>
+        </div>
         <span className={styles.muestraSuit}>
           {suitLabel(muestra.suit)}
           {muestraCat === 'pieza' && <em className={styles.piezaTag}> · pieza</em>}
+          <span className={styles.mazoCount}> · {deckRemaining} en el mazo</span>
         </span>
-      </div>
-      <div className={styles.mazoBox}>
-        <PlayingCard faceDown size="sm" />
-        <span className={styles.mazoCount}>{deckRemaining} cartas</span>
       </div>
     </div>
   );
