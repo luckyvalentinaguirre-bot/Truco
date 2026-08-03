@@ -29,7 +29,7 @@ import {
   envidoPointsAtStake,
 } from './envidoBetting';
 import {
-  declareFlor,
+  declareFlorSeat,
   openFlorDuel,
   canCallContraflor,
   callContraflor,
@@ -454,14 +454,15 @@ function doCallFlor(
   const hand = state.hand;
   const player = state.players[seat];
   if (!state.ruleset.withFlor) throw new Error('Reglamento sin Flor');
-  if (hand.flor.resolved) throw new Error('La Flor ya fue resuelta');
   if (player.folded) throw new Error('El jugador se fue al mazo');
+  // CADA jugador evalúa su propia mano: sólo puede cantar si él tiene Flor.
   if (!calcFlor(player.hand, hand.muestra).hasFlor) {
     throw new Error('El jugador no tiene Flor');
   }
 
-  // ---- Subir a Contraflor al resto (respuesta a una flor rival) ----
+  // ---- Subir a Contraflor (respuesta a una flor rival) ----
   if (call !== 'flor') {
+    if (hand.flor.resolved) throw new Error('La Flor ya fue resuelta');
     if (!canCallContraflor(hand.flor, player.team, call)) {
       throw new Error('No se puede cantar Contraflor ahora');
     }
@@ -472,34 +473,49 @@ function doCallFlor(
     };
   }
 
-  // ---- Declaración inicial de Flor ----
-  if (hand.flor.pendingCall) throw new Error('Ya hay una Flor en juego');
+  // ---- Anuncio de Flor de un jugador ----
   if (player.played.length > 0) {
     throw new Error('Ya jugaste: no podés cantar Flor');
   }
   if (!hand.envidoWindowOpen) throw new Error('La ventana de Flor está cerrada');
-  if (hand.flor.declaredBy.includes(player.team)) {
-    throw new Error('Tu equipo ya declaró la Flor');
+  if (hand.flor.declaredSeats.includes(seat)) {
+    throw new Error('Ya cantaste tu Flor');
   }
 
-  const declared = declareFlor(hand.flor, player.team);
+  const team = player.team;
+  const teamAlreadyIn = hand.flor.declaredBy.includes(team);
+  const flor1 = declareFlorSeat(hand.flor, seat, team);
+  const announce = (): Applied<MatchState> => ({
+    state: { ...state, hand: { ...hand, flor: flor1 } },
+    events: [{ type: 'FLOR_DECLARED', seat, team }],
+  });
 
-  // Si el equipo rival también tiene flor, se abre el duelo (queda esperando
-  // su respuesta: aceptar o subir a Contraflor al resto). Si no, se resuelve
-  // al instante como flor simple (+3).
-  if (rivalFlorHolders(state, player.team).length > 0) {
-    const flor = openFlorDuel(declared, player.team);
+  // Anuncio SECUNDARIO (sólo burbuja, no cambia la apuesta): el equipo ya tiene
+  // su flor en juego (un COMPAÑERO ya cantó), o ya se resolvió, o el rival abrió
+  // el duelo. Que un compañero haya cantado NO bloquea a este jugador.
+  if (
+    teamAlreadyIn ||
+    hand.flor.resolved ||
+    (hand.flor.pendingCall && hand.flor.callerTeam !== team)
+  ) {
+    return announce();
+  }
+
+  // PRIMERA flor de este equipo. Si el rival también tiene flor, se abre el
+  // duelo; si no, se resuelve al instante como flor simple (+3).
+  if (rivalFlorHolders(state, team).length > 0) {
+    const flor = openFlorDuel(flor1, team);
     return {
       state: { ...state, hand: { ...hand, flor } },
-      events: [{ type: 'FLOR_DECLARED', seat, team: player.team }],
+      events: [{ type: 'FLOR_DECLARED', seat, team }],
     };
   }
 
   const { winner, points } = resolveFlorShowdown(state);
-  const flor = { ...declared, resolved: true, callerTeam: player.team };
+  const flor = { ...flor1, resolved: true, callerTeam: team };
   const score = addPoints(state.score, winner, points, state.ruleset);
   const events: GameEvent[] = [
-    { type: 'FLOR_DECLARED', seat, team: player.team },
+    { type: 'FLOR_DECLARED', seat, team },
     { type: 'FLOR_RESOLVED', winner, points },
     { type: 'POINTS_AWARDED', team: winner, points, reason: 'flor' },
   ];

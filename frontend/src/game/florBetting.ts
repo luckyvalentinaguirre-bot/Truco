@@ -6,7 +6,7 @@
  * La resolución completa enfrentada se ampliará; la base (Flor = 3)
  * y la representación del estado ya están cubiertas.
  * ============================================================= */
-import type { FlorCall, TeamId } from './types';
+import type { FlorCall, Seat, TeamId } from './types';
 import { FLOR_BASE_POINTS } from './flor';
 
 /** Respuesta a "echar los perros": si el rival tiene Flor o no. */
@@ -15,6 +15,8 @@ export type PerrosResponse = 'en_ley' | 'a_punto';
 export interface FlorState {
   /** Equipos que cantaron Flor (tienen flor declarada). */
   declaredBy: TeamId[];
+  /** Asientos que YA anunciaron su Flor (cada jugador la canta por separado). */
+  declaredSeats: Seat[];
   /** Canto de flor en curso (si escaló a contraflor). */
   call: FlorCall;
   pendingCall: FlorCall | null;
@@ -27,6 +29,7 @@ export interface FlorState {
 export function initFlorState(): FlorState {
   return {
     declaredBy: [],
+    declaredSeats: [],
     call: 'flor',
     pendingCall: null,
     callerTeam: null,
@@ -39,6 +42,21 @@ export function initFlorState(): FlorState {
 export function declareFlor(state: FlorState, team: TeamId): FlorState {
   if (state.declaredBy.includes(team)) return state;
   return { ...state, declaredBy: [...state.declaredBy, team] };
+}
+
+/**
+ * Registra el anuncio de Flor de UN jugador (asiento). Cada jugador con Flor la
+ * anuncia por separado; que un compañero ya la haya cantado NO bloquea a los
+ * demás. También deja registrado el equipo.
+ */
+export function declareFlorSeat(state: FlorState, seat: Seat, team: TeamId): FlorState {
+  const declaredSeats = state.declaredSeats.includes(seat)
+    ? state.declaredSeats
+    : [...state.declaredSeats, seat];
+  const declaredBy = state.declaredBy.includes(team)
+    ? state.declaredBy
+    : [...state.declaredBy, team];
+  return { ...state, declaredSeats, declaredBy };
 }
 
 /** Puntos de la Flor simple (rival sin flor): base 3. */

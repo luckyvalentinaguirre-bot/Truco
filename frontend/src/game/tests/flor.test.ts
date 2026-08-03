@@ -215,6 +215,68 @@ describe('Puntaje de la Flor (motor)', () => {
     ).toThrow();
   });
 
+  it('un compañero NO bloquea la Flor propia: ambos pueden anunciarla (2v2)', () => {
+    // 2v2: asientos 0 y 2 = equipo A ; 1 y 3 = equipo B. 0 y 2 con flor.
+    const base = createMatch({ mode: '2v2', seed: 1 });
+    const s: MatchState = {
+      ...base,
+      players: base.players.map((p, i) => ({
+        ...p,
+        hand:
+          i === 0
+            ? [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')] // flor
+            : i === 2
+              ? [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')] // flor (mismo equipo A)
+              : [c(1, 'espada'), c(6, 'oro'), c(4, 'basto')], // sin flor
+        played: [],
+        folded: false,
+      })),
+      hand: { ...base.hand, muestra: c(1, 'oro'), envidoWindowOpen: true },
+    };
+    // El asiento 0 canta Flor.
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    expect(s1.hand.flor.declaredSeats).toContain(0);
+    // El compañero (asiento 2) TAMBIÉN puede cantar su Flor.
+    const r2 = applyAction(s1, { type: 'CALL_FLOR', seat: 2 });
+    expect(r2.state.hand.flor.declaredSeats).toEqual([0, 2]);
+    expect(r2.events.some((e) => e.type === 'FLOR_DECLARED' && e.seat === 2)).toBe(true);
+  });
+
+  it('un jugador SIN flor no puede cantarla, aunque su compañero tenga', () => {
+    const base = createMatch({ mode: '2v2', seed: 1 });
+    const s: MatchState = {
+      ...base,
+      players: base.players.map((p, i) => ({
+        ...p,
+        hand:
+          i === 0
+            ? [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')] // flor
+            : [c(1, 'espada'), c(6, 'oro'), c(4, 'basto')], // sin flor
+        played: [],
+        folded: false,
+      })),
+      hand: { ...base.hand, muestra: c(1, 'oro'), envidoWindowOpen: true },
+    };
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    // El asiento 2 (equipo A, sin flor) NO puede cantar.
+    expect(() => applyAction(s1, { type: 'CALL_FLOR', seat: 2 })).toThrow();
+  });
+
+  it('un jugador que ya jugó su primera carta no puede cantar Flor', () => {
+    const base = forced(
+      [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')],
+      [c(1, 'espada'), c(6, 'copa'), c(4, 'basto')],
+      c(1, 'oro'),
+    );
+    const s = {
+      ...base,
+      players: base.players.map((p, i) =>
+        i === 0 ? { ...p, hand: p.hand.slice(1), played: [p.hand[0]] } : p,
+      ),
+    };
+    expect(() => applyAction(s, { type: 'CALL_FLOR', seat: 0 })).toThrow();
+  });
+
   it('no se puede cantar Flor sin tenerla', () => {
     const s = forced(
       [c(1, 'espada'), c(6, 'copa'), c(4, 'basto')],

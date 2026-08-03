@@ -163,16 +163,14 @@ export function useLocalMatch(
     if (state.phase !== 'playing' || state.hand.finished) return;
     if (!state.ruleset.withFlor || state.hand.flor.resolved) return;
     if (!state.hand.envidoWindowOpen) return;
-    // Si ya hay un duelo de flores abierto, lo maneja el driver normal (la IA
-    // responde por turno); no volver a declarar.
-    if (state.hand.flor.pendingCall) return;
-    // Cualquier asiento de IA con flor sin declarar la reclama.
+    // CADA asiento de IA con flor la anuncia por separado (aunque un compañero
+    // ya la haya cantado). El duelo/respuesta lo maneja el driver normal.
     const ai = state.players.find(
       (p) =>
         p.seat !== humanSeat &&
         !p.folded &&
         p.played.length === 0 &&
-        !state.hand.flor.declaredBy.includes(p.team) &&
+        !state.hand.flor.declaredSeats.includes(p.seat) &&
         calcFlor(p.hand, state.hand.muestra).hasFlor,
     );
     if (!ai) return;
