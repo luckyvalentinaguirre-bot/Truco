@@ -1,21 +1,28 @@
 import { describe, it, expect } from 'vitest';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   getCardAsset,
   getCardBackAsset,
   allCards,
 } from '../../components/game/cardAssets';
 
+/** Ruta pública (/cartas_truco/...) → archivo en disco dentro de public/. */
+function onDisk(publicPath: string): string {
+  return join(process.cwd(), 'public', publicPath.replace(/^\//, ''));
+}
+
 describe('getCardAsset · vinculación exacta palo+valor → PNG', () => {
   it('mapea los ejemplos exigidos', () => {
     expect(getCardAsset({ suit: 'oro', rank: 3 })).toBe('/cartas_truco/OROS/oros-3.png');
-    expect(getCardAsset({ suit: 'copa', rank: 7 })).toBe('/cartas_truco/COPAS/copas-7.png');
+    expect(getCardAsset({ suit: 'copa', rank: 7 })).toBe('/cartas_truco/COPA/copas-7.png');
     expect(getCardAsset({ suit: 'espada', rank: 1 })).toBe('/cartas_truco/ESPADAS/espadas-1.png');
     expect(getCardAsset({ suit: 'basto', rank: 12 })).toBe('/cartas_truco/BASTOS/bastos-12.png');
   });
 
   it('carpetas en MAYÚSCULAS y archivos en minúsculas para todo palo', () => {
     expect(getCardAsset({ suit: 'oro', rank: 10 })).toBe('/cartas_truco/OROS/oros-10.png');
-    expect(getCardAsset({ suit: 'copa', rank: 11 })).toBe('/cartas_truco/COPAS/copas-11.png');
+    expect(getCardAsset({ suit: 'copa', rank: 11 })).toBe('/cartas_truco/COPA/copas-11.png');
     expect(getCardAsset({ suit: 'espada', rank: 12 })).toBe('/cartas_truco/ESPADAS/espadas-12.png');
     expect(getCardAsset({ suit: 'basto', rank: 1 })).toBe('/cartas_truco/BASTOS/bastos-1.png');
   });
@@ -30,6 +37,16 @@ describe('getCardAsset · vinculación exacta palo+valor → PNG', () => {
     const paths = cards.map(getCardAsset);
     expect(new Set(paths).size).toBe(40);
     expect(paths.some((p) => /-(8|9)\.png$/.test(p))).toBe(false);
+  });
+
+  it('los 40 PNG reales + card_back existen en disco (sin 404)', () => {
+    const faltantes: string[] = [];
+    for (const card of allCards()) {
+      const p = getCardAsset(card);
+      if (!existsSync(onDisk(p))) faltantes.push(p);
+    }
+    if (!existsSync(onDisk(getCardBackAsset()))) faltantes.push(getCardBackAsset());
+    expect(faltantes, `Assets faltantes:\n${faltantes.join('\n')}`).toEqual([]);
   });
 
   it('rechaza palo o valor inválidos (no inventa asset)', () => {

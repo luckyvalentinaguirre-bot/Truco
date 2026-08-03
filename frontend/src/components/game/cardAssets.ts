@@ -21,10 +21,15 @@ import type { Card, Rank, Suit } from '@/game';
 export const CARDS_BASE = '/cartas_truco';
 export const CARD_BACK_SRC = `${CARDS_BASE}/card_back.png`;
 
-/** Palo del engine (singular) → carpeta (MAYÚSCULAS) y prefijo de archivo. */
+/**
+ * Palo del engine (singular) → carpeta real y prefijo de archivo.
+ * OJO: la carpeta de copas en los assets reales es `COPA` (singular),
+ * mientras que el resto es plural. Se respeta la estructura tal cual existe
+ * en `public/cartas_truco/` (verificado en disco), no la asumida.
+ */
 const SUIT_DIR: Record<Suit, { folder: string; file: string }> = {
   oro: { folder: 'OROS', file: 'oros' },
-  copa: { folder: 'COPAS', file: 'copas' },
+  copa: { folder: 'COPA', file: 'copas' },
   espada: { folder: 'ESPADAS', file: 'espadas' },
   basto: { folder: 'BASTOS', file: 'bastos' },
 };
