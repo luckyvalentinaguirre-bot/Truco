@@ -411,7 +411,8 @@
   .play_bottomRight { transform: translate(calc(-50% + 48px), calc(-50% + 34px)); }
 }
 
-/* ---- Pila mazo + muestra (el mazo tapa ~50% de la muestra) ---- */
+/* ---- Pila mazo + muestra: la MUESTRA va arriba y COMPLETA a la vista
+   (para que 10/11/12 se lean claro); el mazo asoma por detrás. ---- */
 .pile {
   display: flex;
   flex-direction: column;
@@ -424,21 +425,26 @@
 }
 .pileStack {
   position: relative;
-  width: 76px;
-  height: 138px;
+  width: 92px;
+  height: 118px;
 }
-.pileMuestra {
-  position: absolute;
-  top: 44px;
-  left: 14px;
-  transform: rotate(9deg);
-  filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.55));
-}
+/* Mazo (reverso): detrás, asomando arriba-izquierda. */
 .pileMazo {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1;
+  transform: rotate(-8deg);
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+/* Muestra: adelante y entera. */
+.pileMuestra {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  z-index: 2;
+  transform: rotate(5deg);
+  filter: drop-shadow(0 4px 9px rgba(0, 0, 0, 0.6));
 }
 
 /* =====================================================================
