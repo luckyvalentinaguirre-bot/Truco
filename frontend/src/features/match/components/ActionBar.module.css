@@ -1,10 +1,13 @@
-/* Sin recuadro: los botones flotan directo sobre el paño (sin caja "Acciones"). */
+/* Sin recuadro: los botones flotan directo sobre el paño (sin caja "Acciones").
+   Un margen superior separa los botones de la mano (que se abre hacia arriba)
+   para que las cartas NO se superpongan con los botones. */
 .panel {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--sp-2);
   padding: var(--sp-1) 0;
+  margin-top: clamp(10px, 3vh, 30px);
   background: none;
   border: none;
   box-shadow: none;
@@ -94,7 +97,7 @@
 /* Pantallas muy bajas (celu 360×640, etc.): compactar el panel y bajar el
    alto de los botones para que TODAS las acciones entren sin cortarse. */
 @media (max-height: 660px) {
-  .panel { padding: 4px 8px 6px; gap: 4px; }
+  .panel { padding: 4px 8px 6px; gap: 4px; margin-top: 8px; }
   .grid, .confirm { gap: 5px; }
   .btn {
     min-height: 38px;
