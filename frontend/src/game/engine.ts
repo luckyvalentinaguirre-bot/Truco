@@ -494,6 +494,11 @@ function doCallFlor(
   if (hand.flor.declaredSeats.includes(seat)) {
     throw new Error('Ya cantaste tu Flor');
   }
+  // La PRIMERA Flor de la mano la canta quien está de turno (en el orden de la
+  // ronda). Los demás con Flor la anuncian después, ya sin restricción de turno.
+  if (hand.flor.declaredSeats.length === 0 && seat !== hand.turnSeat) {
+    throw new Error('La primera Flor se canta en tu turno');
+  }
 
   const team = player.team;
   const teamAlreadyIn = hand.flor.declaredBy.includes(team);
@@ -535,9 +540,21 @@ function doCallFlor(
   return maybeGameOver({ ...state, score, hand: { ...hand, flor } }, events);
 }
 
-/** Puntos de un nivel de flor: Flor=3, Con Flor Envido=5, Contraflor al resto=falta. */
-function florLevelPoints(state: MatchState, level: FlorCall): number {
+/**
+ * Puntos de un nivel de flor: Flor=3, Con Flor Envido=5, Contraflor al resto=falta.
+ * En el "al resto" QUERIDO, el que gana la flor gana la partida "de una": se
+ * lleva lo que le falta A ÉL para llegar al objetivo. Para el "no querido" no hay
+ * ganador de la flor todavía, así que se usa la falta clásica (sobre el líder).
+ */
+function florLevelPoints(
+  state: MatchState,
+  level: FlorCall,
+  winner?: TeamId,
+): number {
   if (level === 'contraflor_resto') {
+    if (winner) {
+      return Math.max(1, state.ruleset.targetPoints - state.score[winner]);
+    }
     return faltaEnvidoPoints(state.score.A, state.score.B, state.ruleset.targetPoints);
   }
   return FLOR_LEVEL_VALUE[level];
@@ -550,7 +567,7 @@ function resolveFlorDuel(
 ): Applied<MatchState> {
   const hand = state.hand;
   const { winner } = resolveFlorShowdown(state);
-  const points = florLevelPoints(state, acceptedLevel);
+  const points = florLevelPoints(state, acceptedLevel, winner);
   const flor = { ...hand.flor, pendingCall: null, resolved: true };
   const score = addPoints(state.score, winner, points, state.ruleset);
   const events: GameEvent[] = [

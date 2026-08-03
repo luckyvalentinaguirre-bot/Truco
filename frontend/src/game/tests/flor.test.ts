@@ -170,6 +170,33 @@ describe('Puntaje de la Flor (motor)', () => {
     expect(s3.score[teamA]).toBe(0);
   });
 
+  it('Contraflor al resto QUERIDA ⇒ el que gana la flor gana la partida "de una"', () => {
+    const base = forced(
+      [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor 36 (seat 0, equipo A)
+      [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')], // flor 38 (seat 1, equipo B) — más alta
+      c(1, 'oro'),
+    );
+    const teamA = base.players[0].team;
+    const teamB = base.players[1].team;
+    // El ganador (B) va PERDIENDO: aún así, al querer el resto, gana la partida.
+    const s: MatchState = {
+      ...base,
+      score: { ...base.score, [teamA]: 20, [teamB]: 5 } as typeof base.score,
+    };
+    const target = s.ruleset.targetPoints;
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state; // A: flor
+    const s2 = applyAction(s1, {
+      type: 'CALL_FLOR',
+      seat: 1,
+      call: 'contraflor_resto',
+    }).state; // B: al resto
+    const s3 = applyAction(s2, { type: 'ACCEPT', seat: 0 }).state; // A: quiero
+    // B (flor más alta) llega justo al objetivo: gana la partida de una.
+    expect(s3.score[teamB]).toBeGreaterThanOrEqual(target);
+    expect(s3.phase).toBe('finished');
+    expect(s3.winner).toBe(teamB);
+  });
+
   it('cadena Flor→Con Flor Envido→Contraflor al resto: no querida se paga 5', () => {
     const s = forced(
       [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor 36
@@ -275,6 +302,45 @@ describe('Puntaje de la Flor (motor)', () => {
       ),
     };
     expect(() => applyAction(s, { type: 'CALL_FLOR', seat: 0 })).toThrow();
+  });
+
+  it('la PRIMERA Flor se canta en el turno del jugador', () => {
+    const base = forced(
+      [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor (seat 0)
+      [c(1, 'espada'), c(6, 'copa'), c(4, 'basto')], // sin flor (seat 1)
+      c(1, 'oro'),
+    );
+    // Con el turno en el asiento 1, el 0 NO puede abrir la Flor todavía.
+    const noTurno = { ...base, hand: { ...base.hand, turnSeat: 1 } };
+    expect(() => applyAction(noTurno, { type: 'CALL_FLOR', seat: 0 })).toThrow();
+    expect(
+      legalActions(noTurno, 0).some((a) => a.type === 'CALL_FLOR'),
+    ).toBe(false);
+    // Cuando le toca (turno 0), sí puede.
+    const enTurno = { ...base, hand: { ...base.hand, turnSeat: 0 } };
+    expect(() => applyAction(enTurno, { type: 'CALL_FLOR', seat: 0 })).not.toThrow();
+  });
+
+  it('la SEGUNDA Flor (compañero) no exige estar de turno', () => {
+    const base = createMatch({ mode: '2v2', seed: 1 });
+    const s: MatchState = {
+      ...base,
+      players: base.players.map((p, i) => ({
+        ...p,
+        hand:
+          i === 0 || i === 2
+            ? [c(7, i === 0 ? 'basto' : 'copa'), c(6, i === 0 ? 'basto' : 'copa'), c(i === 0 ? 3 : 5, i === 0 ? 'basto' : 'copa')]
+            : [c(1, 'espada'), c(6, 'oro'), c(4, 'basto')],
+        played: [],
+        folded: false,
+      })),
+      hand: { ...base.hand, muestra: c(1, 'oro'), envidoWindowOpen: true, turnSeat: 0 },
+    };
+    // Asiento 0 abre en su turno.
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    // El compañero (asiento 2), aunque NO sea el turno, puede anunciar su Flor.
+    expect(s1.hand.turnSeat).toBe(0);
+    expect(() => applyAction(s1, { type: 'CALL_FLOR', seat: 2 })).not.toThrow();
   });
 
   it('no se puede cantar Flor sin tenerla', () => {

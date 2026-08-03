@@ -165,12 +165,15 @@ export function useLocalMatch(
     if (!state.hand.envidoWindowOpen) return;
     // CADA asiento de IA con flor la anuncia por separado (aunque un compañero
     // ya la haya cantado). El duelo/respuesta lo maneja el driver normal.
+    // La PRIMERA flor de la mano sólo la puede cantar quien está de turno.
+    const firstFlor = state.hand.flor.declaredSeats.length === 0;
     const ai = state.players.find(
       (p) =>
         p.seat !== humanSeat &&
         !p.folded &&
         p.played.length === 0 &&
         !state.hand.flor.declaredSeats.includes(p.seat) &&
+        (!firstFlor || p.seat === state.hand.turnSeat) &&
         calcFlor(p.hand, state.hand.muestra).hasFlor,
     );
     if (!ai) return;
