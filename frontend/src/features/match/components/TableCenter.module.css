@@ -389,29 +389,34 @@
 .seat_bottomLeft { top: 56%; left: 2%; }
 .seat_bottomRight { top: 56%; right: 2%; }
 
-/* Baza multi-jugador: cada carta desplazada bien hacia su asiento, con
-   la mesa "vista desde más atrás" (más separación) para que quede clarísimo
-   qué jugador tiró qué carta. */
-.bazaMulti {
-  position: relative;
-  width: 320px;
-  height: 280px;
-  z-index: 1;
-}
-.playCard {
+/* Cartas jugadas en 2v2/3v3: una capa sobre el paño con la carta de cada
+   jugador ENFRENTE de su asiento (anillo alrededor del centro; medio limpio).
+   Cada asiento tiene su propia posición de carta jugada. */
+.playedMulti {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  animation: drop var(--dur-med) var(--ease-out);
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
 }
-.play_bottom { transform: translate(-50%, calc(-50% + 92px)); }
-.play_top { transform: translate(-50%, calc(-50% - 92px)); }
-.play_left { transform: translate(calc(-50% - 138px), -50%); }
-.play_right { transform: translate(calc(-50% + 138px), -50%); }
-.play_topLeft { transform: translate(calc(-50% - 112px), calc(-50% - 74px)); }
-.play_topRight { transform: translate(calc(-50% + 112px), calc(-50% - 74px)); }
-.play_bottomLeft { transform: translate(calc(-50% - 112px), calc(-50% + 74px)); }
-.play_bottomRight { transform: translate(calc(-50% + 112px), calc(-50% + 74px)); }
+.playedCardMulti {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  animation: dropCentered var(--dur-med) var(--ease-out);
+}
+@keyframes dropCentered {
+  from { opacity: 0; transform: translate(-50%, calc(-50% - 14px)) scale(0.94); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+:global([data-animations='off']) .playedCardMulti { animation: none; }
+
+.playedAt_bottom { left: 50%; top: 73%; }
+.playedAt_top { left: 50%; top: 30%; }
+.playedAt_left { left: 28%; top: 50%; }
+.playedAt_right { left: 72%; top: 50%; }
+.playedAt_topLeft { left: 36%; top: 35%; }
+.playedAt_topRight { left: 64%; top: 35%; }
+.playedAt_bottomLeft { left: 36%; top: 65%; }
+.playedAt_bottomRight { left: 64%; top: 65%; }
 
 /* ---- Móvil: comprimir los asientos arriba/costados, cartas más juntas ---- */
 @media (max-width: 720px) {
@@ -431,15 +436,16 @@
   .seat_bottomLeft .seatCards,
   .seat_bottomRight .seatCards { flex-direction: row; }
 
-  .bazaMulti { width: 150px; height: 150px; }
-  .play_bottom { transform: translate(-50%, calc(-50% + 42px)); }
-  .play_top { transform: translate(-50%, calc(-50% - 42px)); }
-  .play_left { transform: translate(calc(-50% - 58px), -50%); }
-  .play_right { transform: translate(calc(-50% + 58px), -50%); }
-  .play_topLeft { transform: translate(calc(-50% - 48px), calc(-50% - 34px)); }
-  .play_topRight { transform: translate(calc(-50% + 48px), calc(-50% - 34px)); }
-  .play_bottomLeft { transform: translate(calc(-50% - 48px), calc(-50% + 34px)); }
-  .play_bottomRight { transform: translate(calc(-50% + 48px), calc(-50% + 34px)); }
+  /* Anillo de cartas jugadas más compacto y hacia arriba (los asientos van
+     en la mitad superior; abajo quedan la mano y las acciones). */
+  .playedAt_bottom { top: 62%; }
+  .playedAt_top { top: 30%; }
+  .playedAt_left { left: 30%; top: 44%; }
+  .playedAt_right { left: 70%; top: 44%; }
+  .playedAt_topLeft { left: 34%; top: 34%; }
+  .playedAt_topRight { left: 66%; top: 34%; }
+  .playedAt_bottomLeft { left: 34%; top: 52%; }
+  .playedAt_bottomRight { left: 66%; top: 52%; }
 }
 
 /* ---- Pila mazo + muestra: la MUESTRA va arriba y COMPLETA a la vista

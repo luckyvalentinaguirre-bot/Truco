@@ -277,28 +277,29 @@ function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
         <ManoDeck state={state} manoSpot={manoSpot} />
       </div>
 
+      {/* Cartas jugadas: cada una ENFRENTE del jugador que la jugó (anillo
+          alrededor del centro; el medio queda limpio). */}
+      <div className={styles.playedMulti} aria-label="Cartas jugadas">
+        {(trick?.plays ?? []).map((play) => {
+          const v = bySeat.get(play.seat);
+          const spot = v?.spot ?? 'bottom';
+          return (
+            <span
+              key={play.seat}
+              className={[styles.playedCardMulti, styles[`playedAt_${spot}`]].join(' ')}
+            >
+              <PlayingCard card={play.card} size="md" flip={!v?.isHuman} />
+            </span>
+          );
+        })}
+      </div>
+
       <div className={styles.playArea}>
         <div className={styles.center}>
           <div className={styles.logo} aria-hidden="true">
             <SunLogo />
             <span className={styles.logoTitle}>TRUCO</span>
             <span className={styles.logoSub}>URUGUAYO</span>
-          </div>
-
-          {/* Cartas jugadas: cada una desplazada hacia el asiento que la jugó */}
-          <div className={styles.bazaMulti}>
-            {(trick?.plays ?? []).map((play) => {
-              const v = bySeat.get(play.seat);
-              const spot = v?.spot ?? 'bottom';
-              return (
-                <span
-                  key={play.seat}
-                  className={[styles.playCard, styles[`play_${spot}`]].join(' ')}
-                >
-                  <PlayingCard card={play.card} size="md" flip={!v?.isHuman} />
-                </span>
-              );
-            })}
           </div>
         </div>
       </div>
