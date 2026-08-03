@@ -342,13 +342,26 @@
 }
 .seatCards {
   display: flex;
-  gap: 3px;
+  align-items: flex-start;
+  justify-content: center;
 }
 .seatCards :global(*) {
   --w: 42px !important;
 }
+/* Asientos horizontales: abanico como la mano del jugador (superpuesto). */
+.seatCards:not(.seatCardsV) > * {
+  transform-origin: top center;
+  margin: 0 -10px;
+}
+.seatCards:not(.seatCardsV) > *:nth-child(1) { transform: rotate(8deg) translateY(6px); }
+.seatCards:not(.seatCardsV) > *:nth-child(2) { transform: rotate(0deg); }
+.seatCards:not(.seatCardsV) > *:nth-child(3) { transform: rotate(-8deg) translateY(6px); }
+/* Asientos verticales (izq./der.): apiladas en columna con leve solape. */
 .seatCardsV {
   flex-direction: column;
+}
+.seatCardsV > * {
+  margin: -8px 0;
 }
 
 /* Posiciones de los asientos (escritorio) */
@@ -427,16 +440,17 @@
   width: 100px;
   height: 150px;
 }
-/* Muestra: abajo-izquierda, entera a la vista. */
+/* Muestra: abajo-izquierda, mayormente a la vista. */
 .pileMuestra {
   position: absolute;
-  left: 0;
-  top: 56px;
+  left: 14px;
+  top: 46px;
   z-index: 1;
   transform: rotate(-5deg);
   filter: drop-shadow(0 4px 9px rgba(0, 0, 0, 0.6));
 }
-/* Mazo (reverso): arriba-derecha, tapando sólo la puntita de la muestra. */
+/* Mazo (reverso): arriba-derecha, en el mismo ángulo, tapando un poco la
+   muestra (algo más que la puntita, pero sin ocultar el palo/número). */
 .pileMazo {
   position: absolute;
   right: 0;
@@ -466,6 +480,8 @@
   border-radius: var(--r-pill);
 }
 .oppText { display: flex; flex-direction: column; line-height: 1.12; }
+/* Abanico del rival: igual que la mano del jugador (cartas superpuestas e
+   inclinadas), pero boca abajo y con el pivote arriba (cuelgan hacia la mesa). */
 .oppName {
   color: var(--c-cream);
   font-weight: var(--fw-semibold);
@@ -475,7 +491,11 @@
   gap: 8px;
 }
 .oppTeam { font-size: var(--fs-2xs); color: var(--c-text-mut); }
-.oppHand { display: flex; gap: 6px; }
+.oppHand {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
 
 .selfZone {
   display: flex;
@@ -639,13 +659,26 @@
   .bubble_bottom { bottom: 16%; }
 }
 
-/* Reparto de las cartas del rival (desde el mazo, escalonado). */
+/* Cartas del rival en abanico (igual que la mano del jugador): superpuestas e
+   inclinadas, boca abajo, con pivote arriba. El reparto aterriza en la
+   posición de abanico (las mismas variables ⇒ sin salto). */
 .dealCard {
   display: inline-block;
+  --rot: 0deg;
+  --ty: 0px;
+  margin: 0 -14px;
+  transform-origin: top center;
+  transform: rotate(var(--rot)) translateY(var(--ty));
   animation: dealInOpp 340ms var(--ease-out) backwards;
 }
+.dealCard:nth-child(1) { --rot: 9deg; --ty: 9px; animation-delay: 0ms; }
+.dealCard:nth-child(2) { --rot: 0deg; --ty: 0px; animation-delay: 110ms; }
+.dealCard:nth-child(3) { --rot: -9deg; --ty: 9px; animation-delay: 220ms; }
 @keyframes dealInOpp {
   from { opacity: 0; transform: translateY(-30px) scale(0.8) rotate(4deg); }
-  to { opacity: 1; transform: none; }
+  to { opacity: 1; transform: rotate(var(--rot)) translateY(var(--ty)); }
 }
 :global([data-animations='off']) .dealCard { animation: none; }
+@media (max-width: 380px) {
+  .dealCard { margin: 0 -11px; }
+}

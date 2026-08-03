@@ -1,5 +1,4 @@
 import type { MatchState, Seat } from '@/game';
-import { cardCategory, suitLabel } from '@/game';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlayingCard } from '@/components/game/PlayingCard';
 import { seatViews, type Spot } from '../seating';
@@ -85,8 +84,6 @@ function SunLogo() {
 /** Pila mazo + muestra (reverso tapando ~50% de la muestra por debajo). */
 function DeckPile({ state }: { state: MatchState }) {
   const { muestra } = state.hand;
-  const muestraCat = cardCategory(muestra, muestra);
-  const deckRemaining = 40 - state.players.length * 3 - 1;
   return (
     <div className={styles.pile}>
       <div className={styles.pileStack} aria-label="Mazo y muestra">
@@ -97,11 +94,6 @@ function DeckPile({ state }: { state: MatchState }) {
           <PlayingCard faceDown size="sm" />
         </span>
       </div>
-      <span className={styles.muestraSuit}>
-        {suitLabel(muestra.suit)}
-        {muestraCat === 'pieza' && <em className={styles.piezaTag}> · pieza</em>}
-        <span className={styles.mazoCount}> · {deckRemaining} en el mazo</span>
-      </span>
     </div>
   );
 }
@@ -115,23 +107,6 @@ function RightStack({ state }: { state: MatchState }) {
   );
 }
 
-function Pips({ state, humanTeam }: { state: MatchState; humanTeam: string }) {
-  const resolved = state.hand.tricks.filter((t) => t.outcome !== null);
-  return (
-    <div className={styles.pips} aria-label="Bazas">
-      {[0, 1, 2].map((i) => {
-        const t = resolved[i];
-        let cls = styles.pipEmpty;
-        if (t) {
-          if (t.outcome === 'parda') cls = styles.pipParda;
-          else cls = t.outcome === humanTeam ? styles.pipWin : styles.pipLoss;
-        }
-        return <span key={i} className={[styles.pip, cls].join(' ')} />;
-      })}
-    </div>
-  );
-}
-
 // -------------------------------------------------------------
 // 1v1 (diseño original, intacto)
 // -------------------------------------------------------------
@@ -139,7 +114,6 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
   const trick = displayedTrick(state);
   const humanPlay = trick?.plays.find((p) => p.seat === humanSeat)?.card ?? null;
   const aiPlay = trick?.plays.find((p) => p.seat === aiSeat)?.card ?? null;
-  const humanTeam = state.players[humanSeat].team;
   const manoIsHuman = state.hand.manoSeat === humanSeat;
   const aiRemaining = state.players[aiSeat].hand.length;
 
@@ -203,8 +177,6 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
         >
           <DeckPile state={state} />
         </div>
-
-        <Pips state={state} humanTeam={humanTeam} />
       </div>
     </>
   );
@@ -250,7 +222,6 @@ function OpponentSeat({
 
 function TableMulti({ state, humanSeat, thinking }: TableCenterProps) {
   const trick = displayedTrick(state);
-  const humanTeam = state.players[humanSeat].team;
   const views = seatViews(state.players, humanSeat);
   const bySeat = new Map(views.map((v) => [v.seat, v]));
 
@@ -299,8 +270,6 @@ function TableMulti({ state, humanSeat, thinking }: TableCenterProps) {
               );
             })}
           </div>
-
-          <Pips state={state} humanTeam={humanTeam} />
         </div>
 
         <RightStack state={state} />
