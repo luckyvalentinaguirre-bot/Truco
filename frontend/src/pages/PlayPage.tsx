@@ -36,7 +36,8 @@ export function PlayPage() {
     () => loadSettings().difficulty,
   );
   const navigate = useNavigate();
-  const startMatch = () => navigate('/mesa', { state: { difficulty } });
+  const startMatch = (mode: GameMode = '1v1') =>
+    navigate('/mesa', { state: { difficulty, mode } });
 
   const changeDifficulty = (d: Difficulty) => {
     setDifficulty(d);
@@ -80,7 +81,7 @@ export function PlayPage() {
             <Button
               size="lg"
               leading={<Icon name="play" size={20} />}
-              onClick={startMatch}
+              onClick={() => startMatch('1v1')}
             >
               Jugar vs IA
             </Button>
@@ -132,11 +133,11 @@ export function PlayPage() {
               <Button
                 variant={m.featured ? 'primary' : 'secondary'}
                 block
-                disabled={m.mode !== '1v1'}
+                disabled={m.mode === 'custom'}
                 trailing={<Icon name="chevron" size={18} />}
-                onClick={m.mode === '1v1' ? startMatch : undefined}
+                onClick={m.mode !== 'custom' ? () => startMatch(m.mode as GameMode) : undefined}
               >
-                {m.mode === '1v1' ? 'Jugar' : 'Muy pronto'}
+                {m.mode === 'custom' ? 'Muy pronto' : 'Jugar vs IA'}
               </Button>
             </Panel>
           ))}

@@ -202,6 +202,8 @@
   flex-direction: column;
   gap: var(--sp-2);
   align-items: center;
+  /* Por encima de los asientos: la Muestra SIEMPRE visible (prioridad). */
+  z-index: 5;
 }
 .muestraBox,
 .mazoBox {
@@ -283,4 +285,122 @@
   .baza {
     gap: var(--sp-2);
   }
+}
+
+/* =====================================================================
+ * 2v2 / 3v3 — asientos alrededor del óvalo + baza multi-jugador
+ * ===================================================================== */
+.seatsLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.seat {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.seatInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: var(--r-md);
+  background: rgba(0, 0, 0, 0.34);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  max-width: 160px;
+}
+.seatText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  min-width: 0;
+}
+.seatName {
+  color: var(--c-cream);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+.seatMano {
+  color: var(--c-gold-soft);
+  font-weight: var(--fw-bold);
+}
+.seatTeam {
+  font-size: var(--fs-2xs);
+  color: var(--c-text-mut);
+  white-space: nowrap;
+}
+.seatCards {
+  display: flex;
+  gap: 3px;
+}
+.seatCards :global(*) {
+  --w: 42px !important;
+}
+.seatCardsV {
+  flex-direction: column;
+}
+
+/* Posiciones de los asientos (escritorio) */
+.seat_top { top: 1%; left: 50%; transform: translateX(-50%); }
+.seat_topLeft { top: 4%; left: 3%; }
+.seat_topRight { top: 4%; right: 3%; }
+.seat_left { top: 38%; left: 0.5%; }
+.seat_right { top: 38%; right: 0.5%; }
+.seat_bottomLeft { top: 56%; left: 2%; }
+.seat_bottomRight { top: 56%; right: 2%; }
+
+/* Baza multi-jugador: cada carta desplazada hacia su asiento */
+.bazaMulti {
+  position: relative;
+  width: 220px;
+  height: 200px;
+  z-index: 1;
+}
+.playCard {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  animation: drop var(--dur-med) var(--ease-out);
+}
+.play_bottom { transform: translate(-50%, calc(-50% + 60px)); }
+.play_top { transform: translate(-50%, calc(-50% - 60px)); }
+.play_left { transform: translate(calc(-50% - 92px), -50%); }
+.play_right { transform: translate(calc(-50% + 92px), -50%); }
+.play_topLeft { transform: translate(calc(-50% - 76px), calc(-50% - 48px)); }
+.play_topRight { transform: translate(calc(-50% + 76px), calc(-50% - 48px)); }
+.play_bottomLeft { transform: translate(calc(-50% - 76px), calc(-50% + 48px)); }
+.play_bottomRight { transform: translate(calc(-50% + 76px), calc(-50% + 48px)); }
+
+/* ---- Móvil: comprimir los asientos arriba/costados, cartas más juntas ---- */
+@media (max-width: 720px) {
+  .seatInfo { padding: 2px 6px; max-width: 120px; }
+  .seatCards :global(*) { --w: 30px !important; }
+  /* Todos los rivales/compañeros en la mitad superior (abajo están las
+     cartas propias y las acciones). */
+  .seat_top { top: 0; }
+  .seat_topLeft { top: 8%; left: 1%; }
+  .seat_topRight { top: 8%; right: 1%; }
+  .seat_left { top: 22%; left: 0; }
+  .seat_right { top: 22%; right: 0; }
+  .seat_bottomLeft { top: 22%; left: 0; }
+  .seat_bottomRight { top: 22%; right: 0; }
+  .seat_left .seatCards,
+  .seat_right .seatCards,
+  .seat_bottomLeft .seatCards,
+  .seat_bottomRight .seatCards { flex-direction: row; }
+
+  .bazaMulti { width: 150px; height: 150px; }
+  .play_bottom { transform: translate(-50%, calc(-50% + 42px)); }
+  .play_top { transform: translate(-50%, calc(-50% - 42px)); }
+  .play_left { transform: translate(calc(-50% - 58px), -50%); }
+  .play_right { transform: translate(calc(-50% + 58px), -50%); }
+  .play_topLeft { transform: translate(calc(-50% - 48px), calc(-50% - 34px)); }
+  .play_topRight { transform: translate(calc(-50% + 48px), calc(-50% - 34px)); }
+  .play_bottomLeft { transform: translate(calc(-50% - 48px), calc(-50% + 34px)); }
+  .play_bottomRight { transform: translate(calc(-50% + 48px), calc(-50% + 34px)); }
 }

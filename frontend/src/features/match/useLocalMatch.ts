@@ -17,6 +17,7 @@ import {
   startNextHand,
   type Action,
   type GameEvent,
+  type GameMode,
   type MatchState,
   type Seat,
   type TeamId,
@@ -53,15 +54,20 @@ function soundFor(event: GameEvent, humanTeam: TeamId): SoundName | null {
   }
 }
 
-export function useLocalMatch(difficulty: Difficulty = 'normal') {
+export function useLocalMatch(
+  difficulty: Difficulty = 'normal',
+  mode: GameMode = '1v1',
+) {
   const [state, setState] = useState<MatchState>(() =>
-    createMatch({ mode: '1v1', seed: randomSeed() }),
+    createMatch({ mode, seed: randomSeed() }),
   );
   const [banner, setBanner] = useState<string | null>(null);
   const [handFeedback, setHandFeedback] = useState<string | null>(null);
   const handEvents = useRef<GameEvent[]>([]);
 
   const humanSeat = HUMAN_SEAT;
+  // Primer asiento rival (compatibilidad con lecturas 1v1). En 2v2/3v3 todos
+  // los asientos != humano los maneja la IA (ver drivers de abajo).
   const aiSeat = state.players.find((p) => p.seat !== humanSeat)!.seat;
   const humanTeam = state.players[humanSeat].team;
 
@@ -98,19 +104,20 @@ export function useLocalMatch(difficulty: Difficulty = 'normal') {
     setHandFeedback(null);
     handEvents.current = [];
     playSound('deal');
-    setState(createMatch({ mode: '1v1', seed: randomSeed() }));
-  }, []);
+    setState(createMatch({ mode, seed: randomSeed() }));
+  }, [mode]);
 
-  // -------- Driver de la IA (con pausa para que se vea) --------
+  // -------- Driver de la IA (maneja TODOS los asientos no-humanos) --------
   useEffect(() => {
     if (state.phase !== 'playing' || state.hand.finished) return;
-    if (actorNow(state) !== aiSeat) return;
+    const actor = actorNow(state);
+    if (actor === null || actor === humanSeat) return;
     const t = setTimeout(() => {
-      const action = chooseAiAction(state, aiSeat, Math.random, { difficulty });
+      const action = chooseAiAction(state, actor, Math.random, { difficulty });
       if (action) applyAndTrack(action);
     }, AI_STEP_MS);
     return () => clearTimeout(t);
-  }, [state, aiSeat, applyAndTrack, difficulty]);
+  }, [state, humanSeat, applyAndTrack, difficulty]);
 
   // -------- La IA canta su Flor aunque no sea su turno --------
   // La Flor es obligatoria y se anuncia al repartir; si el humano es mano,
@@ -120,13 +127,19 @@ export function useLocalMatch(difficulty: Difficulty = 'normal') {
     if (state.phase !== 'playing' || state.hand.finished) return;
     if (!state.ruleset.withFlor || state.hand.flor.resolved) return;
     if (!state.hand.envidoWindowOpen) return;
-    const ai = state.players[aiSeat];
-    if (ai.folded || ai.played.length > 0) return;
-    if (state.hand.flor.declaredBy.includes(ai.team)) return;
-    if (!calcFlor(ai.hand, state.hand.muestra).hasFlor) return;
-    const t = setTimeout(() => applyAndTrack({ type: 'CALL_FLOR', seat: aiSeat }), AI_STEP_MS);
+    // Cualquier asiento de IA con flor sin declarar la reclama.
+    const ai = state.players.find(
+      (p) =>
+        p.seat !== humanSeat &&
+        !p.folded &&
+        p.played.length === 0 &&
+        !state.hand.flor.declaredBy.includes(p.team) &&
+        calcFlor(p.hand, state.hand.muestra).hasFlor,
+    );
+    if (!ai) return;
+    const t = setTimeout(() => applyAndTrack({ type: 'CALL_FLOR', seat: ai.seat }), AI_STEP_MS);
     return () => clearTimeout(t);
-  }, [state, aiSeat, applyAndTrack]);
+  }, [state, humanSeat, applyAndTrack]);
 
   // -------- Fin de mano: feedback corto + reparto automático --------
   useEffect(() => {

@@ -4,6 +4,7 @@ import {
   actorNow,
   getPending,
   type Card,
+  type GameMode,
   type TrucoCall,
 } from '@/game';
 import { Icon } from '@/components/ui';
@@ -28,12 +29,12 @@ import styles from './MatchPage.module.css';
 
 export function MatchPage() {
   const location = useLocation();
-  const difficulty: Difficulty =
-    (location.state as { difficulty?: Difficulty } | null)?.difficulty ??
-    loadSettings().difficulty;
+  const navState = location.state as { difficulty?: Difficulty; mode?: GameMode } | null;
+  const difficulty: Difficulty = navState?.difficulty ?? loadSettings().difficulty;
+  const mode: GameMode = navState?.mode ?? '1v1';
 
   const { state, humanSeat, aiSeat, banner, handFeedback, dispatch, restart } =
-    useLocalMatch(difficulty);
+    useLocalMatch(difficulty, mode);
   const [selected, setSelected] = useState<number | null>(null);
 
   // Tema de mesa (imagen de fondo real). Se actualiza en vivo al cambiarlo.
@@ -55,7 +56,8 @@ export function MatchPage() {
   const status = statusText(state, humanSeat);
   const hasFlor = humanHasFlor(state, humanSeat);
   const piezaKeys = piezaCardKeys(state, humanSeat);
-  const thinking = actorNow(state) === aiSeat && !state.hand.finished;
+  const actorSeat = actorNow(state);
+  const thinking = actorSeat !== null && actorSeat !== humanSeat && !state.hand.finished;
 
   const pending = getPending(state);
   const humanTeam = state.players[humanSeat].team;
