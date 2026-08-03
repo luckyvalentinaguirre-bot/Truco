@@ -1,7 +1,9 @@
 .screen {
   position: relative;
   height: 100dvh;
-  max-width: 1160px;
+  /* Se aprovecha más ancho en monitores grandes: mesa más grande y cartas
+     más claras. En pantallas chicas sigue ocupando el 100%. */
+  max-width: min(96vw, 1600px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;

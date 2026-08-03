@@ -105,6 +105,18 @@
   --w: 116px;
 }
 
+/* Monitores grandes (alto y ancho de sobra): cartas más grandes y nítidas. */
+@media (min-width: 1280px) and (min-height: 860px) {
+  .lg { --w: 140px; }
+  .md { --w: 104px; }
+  .sm { --w: 70px; }
+}
+@media (min-width: 1700px) and (min-height: 1000px) {
+  .lg { --w: 158px; }
+  .md { --w: 118px; }
+  .sm { --w: 78px; }
+}
+
 /* Escala proporcional en pantallas chicas: la mano (lg) deja margen lateral
    y no ocupa todo el ancho; las cartas jugadas (md) también se achican. */
 @media (max-width: 560px) {
