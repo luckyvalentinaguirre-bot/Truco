@@ -145,15 +145,9 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
         </div>
       </div>
 
-      {/* ── Superficie de la mesa: cartas jugadas enfrente de cada uno ── */}
-      <div className={styles.playArea}>
-        <div className={styles.logo} aria-hidden="true">
-          <SunLogo />
-          <span className={styles.logoTitle}>TRUCO</span>
-          <span className={styles.logoSub}>URUGUAYO</span>
-        </div>
-
-        {/* Carta jugada por el RIVAL — enfrente suyo (arriba) */}
+      {/* ── Cartas jugadas: capa sobre el paño usando el alto del óvalo, para
+             que rival (arriba) y jugador (abajo) NUNCA se superpongan ── */}
+      <div className={styles.playedLayer} aria-hidden={!aiPlay && !humanPlay}>
         <div className={[styles.slotPlayed, styles.slotTop].join(' ')}>
           {aiPlay ? (
             <PlayingCard card={aiPlay} size="md" flip />
@@ -161,14 +155,21 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
             <span className={styles.playGhost} />
           )}
         </div>
-
-        {/* Carta jugada por el JUGADOR — enfrente suyo (abajo) */}
         <div className={[styles.slotPlayed, styles.slotBottom].join(' ')}>
           {humanPlay ? (
             <span className={styles.dropped}><PlayingCard card={humanPlay} size="md" /></span>
           ) : (
             <span className={styles.playGhost} />
           )}
+        </div>
+      </div>
+
+      {/* ── Superficie de la mesa: logo, mazo/muestra, última baza ── */}
+      <div className={styles.playArea}>
+        <div className={styles.logo} aria-hidden="true">
+          <SunLogo />
+          <span className={styles.logoTitle}>TRUCO</span>
+          <span className={styles.logoSub}>URUGUAYO</span>
         </div>
 
         {/* Mazo + muestra integrados a la mesa (centro-derecha) */}

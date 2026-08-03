@@ -500,17 +500,25 @@
   white-space: nowrap;
 }
 
-/* Cartas jugadas: enfrente del rival (arriba) y del jugador (abajo) */
+/* Capa de cartas jugadas: cubre todo el paño y usa su alto para separar bien
+   la carta del rival (arriba) de la del jugador (abajo). */
+.playedLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
 .slotPlayed {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   display: grid;
   place-items: center;
-  z-index: 2;
 }
-.slotTop { top: 4px; }
-.slotBottom { bottom: 4px; }
+/* Ubicadas por % del alto del óvalo: enfrente de cada jugador, sin solaparse
+   y despejadas de la mano del rival (arriba) y la propia (abajo). */
+.slotTop { top: 23%; }
+.slotBottom { bottom: 38%; }
 .playGhost {
   width: 82px;
   aspect-ratio: 5 / 8;
@@ -518,6 +526,10 @@
   border: 1px dashed rgba(212, 175, 55, 0.2);
   background: rgba(0, 0, 0, 0.12);
 }
+@media (max-height: 800px) { .playGhost { width: 56px; } }
+@media (max-height: 680px) { .playGhost { width: 46px; } }
+@media (max-width: 560px) { .playGhost { width: 58px; } }
+@media (max-width: 380px) { .playGhost { width: 54px; } }
 
 /* Mazo + muestra integrados a la mesa (centro-derecha) */
 .deckArea {
@@ -535,13 +547,21 @@
     transform: translateY(-50%) scale(0.78);
     transform-origin: right center;
   }
-  .slotTop { top: 2px; }
-  .slotBottom { bottom: 2px; }
+  /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
+     mano del rival (arriba) y de las cartas propias (abajo). */
+  .slotTop { top: 26%; }
+  .slotBottom { bottom: 42%; }
 }
 
-/* Pantallas de poca altura: achicar cartas jugadas para que entren las dos. */
+/* Pantallas de poca altura: acercar un poco las posiciones (el tamaño de las
+   cartas jugadas lo maneja .md en PlayingCard según el alto). */
 @media (max-height: 820px) {
-  .slotPlayed :global(.card) { --w: 74px; }
+  .slotTop { top: 24%; }
+  .slotBottom { bottom: 42%; }
+}
+@media (max-height: 680px) {
+  .slotTop { top: 26%; }
+  .slotBottom { bottom: 42%; }
 }
 
 /* Móvil: zona de juego más compacta para que entren mano + acciones. */

@@ -109,31 +109,31 @@
    y no ocupa todo el ancho; las cartas jugadas (md) también se achican. */
 @media (max-width: 560px) {
   .lg { --w: 92px; }
-  .md { --w: 72px; }
-  .sm { --w: 50px; }
+  .md { --w: 58px; }
+  .sm { --w: 48px; }
 }
 @media (max-width: 380px) {
   .lg { --w: 82px; }
-  .md { --w: 66px; }
-  .sm { --w: 46px; }
+  .md { --w: 54px; }
+  .sm { --w: 44px; }
 }
 
 /* Pantallas de POCA ALTURA (laptops 768/720/600): achicar las cartas por alto
    para que la mano y las acciones siempre entren en el viewport. */
 @media (max-height: 800px) {
   .lg { --w: 96px; }
-  .md { --w: 78px; }
-  .sm { --w: 50px; }
+  .md { --w: 56px; }
+  .sm { --w: 46px; }
 }
 @media (max-height: 680px) {
   .lg { --w: 84px; }
-  .md { --w: 68px; }
-  .sm { --w: 46px; }
+  .md { --w: 46px; }
+  .sm { --w: 42px; }
 }
 @media (max-height: 600px) {
   .lg { --w: 74px; }
-  .md { --w: 60px; }
-  .sm { --w: 42px; }
+  .md { --w: 42px; }
+  .sm { --w: 38px; }
 }
 
 .interactive {
