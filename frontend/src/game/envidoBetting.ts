@@ -111,7 +111,8 @@ export function acceptEnvido(state: EnvidoState, team: TeamId): EnvidoState {
   if (!state.pending || state.callerTeam === team) {
     throw new Error('No hay Envido pendiente para aceptar por este equipo');
   }
-  return { ...state, pending: false };
+  // Al querer, el Envido queda RESUELTO: ya no se puede volver a cantar.
+  return { ...state, pending: false, resolved: true };
 }
 
 export interface EnvidoDeclineResult {

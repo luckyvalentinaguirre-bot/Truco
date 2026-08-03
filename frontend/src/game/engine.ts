@@ -120,10 +120,21 @@ export function responderSeat(state: MatchState): Seat | null {
     return holders[0].seat;
   }
 
-  const seat = state.players.find(
+  // Truco / Envido: responde el PIE del equipo contrario (el ÚLTIMO en la ronda,
+  // el de mayor rango de mano). Tiene la última palabra por su equipo: sólo él
+  // dice quiero / no quiero.
+  const n = state.players.length;
+  const opp = state.players.filter(
     (p) => !p.folded && p.team !== pending.callerTeam,
-  )?.seat;
-  return seat ?? null;
+  );
+  if (opp.length === 0) return null;
+  const pie = opp.reduce((last, p) =>
+    manoRank(p.seat, state.hand.manoSeat, n) >
+    manoRank(last.seat, state.hand.manoSeat, n)
+      ? p
+      : last,
+  );
+  return pie.seat;
 }
 
 /** ¿Quién debe actuar ahora? El que responde un canto, o el del turno. */

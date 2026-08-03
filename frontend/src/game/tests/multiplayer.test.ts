@@ -6,6 +6,8 @@ import {
   chooseAiAction,
   startNextHand,
   legalActions,
+  responderSeat,
+  manoRank,
   type MatchState,
   type GameMode,
 } from '../index';
@@ -72,6 +74,36 @@ describe('partidas completas por modo', () => {
       s.players.forEach((p, i) => {
         expect(p.team).toBe(i % 2 === 0 ? 'A' : 'B');
       });
+    }
+  });
+
+  it('al Envido responde el PIE del equipo contrario (último en la ronda)', () => {
+    for (const mode of ['2v2', '3v3'] as GameMode[]) {
+      // Buscar una mano donde el mano pueda cantar Envido (sin Flor de por medio).
+      let s: MatchState | null = null;
+      for (let seed = 1; seed < 60 && !s; seed++) {
+        const cand = createMatch({ mode, seed });
+        const m = cand.players[cand.hand.manoSeat];
+        if (legalActions(cand, m.seat).some((a) => a.type === 'CALL_ENVIDO')) s = cand;
+      }
+      expect(s).not.toBeNull();
+      const n = s!.players.length;
+      const caller = s!.players[s!.hand.manoSeat];
+      const s1 = applyAction(s!, {
+        type: 'CALL_ENVIDO',
+        seat: caller.seat,
+        call: 'envido',
+      }).state;
+      const resp = responderSeat(s1);
+      expect(resp).not.toBeNull();
+      // Es del equipo rival…
+      expect(s1.players[resp!].team).not.toBe(caller.team);
+      // …y es el de MAYOR rango de mano de ese equipo (el pie / último).
+      const rivals = s1.players.filter((p) => p.team !== caller.team);
+      const maxRank = Math.max(
+        ...rivals.map((p) => manoRank(p.seat, s1.hand.manoSeat, n)),
+      );
+      expect(manoRank(resp!, s1.hand.manoSeat, n)).toBe(maxRank);
     }
   });
 
