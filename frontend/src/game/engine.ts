@@ -430,17 +430,22 @@ function doCallFlor(state: MatchState, seat: Seat): Applied<MatchState> {
  */
 function resolveFlorShowdown(state: MatchState): { winner: TeamId; points: number } {
   const muestra = state.hand.muestra;
-  const best: Record<TeamId, number> = { A: -1, B: -1 };
-  for (const p of state.players) {
-    if (p.folded) continue;
-    const f = calcFlor(p.hand, muestra);
-    if (f.hasFlor && f.value > best[p.team]) best[p.team] = f.value;
-  }
-  const teams = (['A', 'B'] as TeamId[]).filter((t) => best[t] >= 0);
-  const points = FLOR_BASE_POINTS * teams.length; // 3 una flor, 6 si hay dos
-  if (teams.length === 1) return { winner: teams[0], points };
-  if (best.A === best.B) return { winner: state.hand.manoTeam, points };
-  return { winner: best.A > best.B ? 'A' : 'B', points };
+  const n = state.players.length;
+  const holders = state.players.filter(
+    (p) => !p.folded && calcFlor(p.hand, muestra).hasFlor,
+  );
+  const teams = new Set(holders.map((p) => p.team));
+  const points = FLOR_BASE_POINTS * teams.size; // 3 una flor, 6 si hay dos
+
+  // Gana la flor más alta; en empate, prioridad INDIVIDUAL de mano (el más
+  // mano), igual que el envido. Reutiliza el mismo criterio determinista.
+  const entries: EnvidoEntry[] = holders.map((p) => ({
+    seat: p.seat,
+    team: p.team,
+    value: calcFlor(p.hand, muestra).value,
+  }));
+  const winner = envidoWinnerFrom(entries, state.hand.manoSeat, n);
+  return { winner, points };
 }
 
 // -------------------------------------------------------------

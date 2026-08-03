@@ -39,6 +39,27 @@ describe('calcEnvido', () => {
     const v = calcEnvido([c(2, 'basto'), c(7, 'oro'), c(4, 'copa')], muestra).value;
     expect(v).toBe(37);
   });
+
+  it('dos piezas suman sus APORTES, no sus valores (2+4 = 39, no 59)', () => {
+    const muestra = c(7, 'basto'); // muestra no-pieza ⇒ 2 y 4 de basto son piezas
+    // 2 de basto (aporte 10) + 4 de basto (aporte 9) ⇒ 20 + 10 + 9 = 39.
+    const v = calcEnvido([c(2, 'basto'), c(4, 'basto'), c(6, 'copa')], muestra).value;
+    expect(v).toBe(39);
+  });
+
+  it('una pieza sola (resto figuras de otro palo) = valor de la pieza', () => {
+    const muestra = c(7, 'basto'); // 2 de basto es pieza (30)
+    // 2 de basto (30) + 12 oro (0) + 11 copa (0) ⇒ 30.
+    const v = calcEnvido([c(2, 'basto'), c(12, 'oro'), c(11, 'copa')], muestra).value;
+    expect(v).toBe(30);
+  });
+
+  it('muestra que ES pieza: el 12 sustituye y combina con el número del palo', () => {
+    const muestra = c(5, 'espada'); // 12 de espada ocupa la pieza "5" (28)
+    // 12 de espada (pieza 28) + 5 de espada (común, 5 unidades) ⇒ 20 + 8 + 5 = 33.
+    const v = calcEnvido([c(12, 'espada'), c(5, 'espada'), c(3, 'oro')], muestra).value;
+    expect(v).toBe(33);
+  });
 });
 
 describe('faltaEnvidoPoints', () => {

@@ -7,6 +7,7 @@ import {
   actorNow,
   getPending,
   legalActions,
+  isLegal,
   calcEnvido,
   calcFlor,
   cardCategory,
@@ -81,6 +82,12 @@ export function humanOptions(state: MatchState, seat: Seat): HumanOptions {
         canFold = true;
         break;
     }
+  }
+
+  // La Flor puede declararse ANTES de jugar la primera carta aunque no sea el
+  // turno del jugador (§17): si el motor la considera legal, se ofrece igual.
+  if (!canFlor && isLegal(state, { type: 'CALL_FLOR', seat })) {
+    canFlor = true;
   }
 
   return {

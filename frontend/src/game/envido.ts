@@ -22,6 +22,15 @@ const PIECE_ENVIDO: Record<number, number> = {
   10: 27,
 };
 
+/**
+ * "Aporte" de una pieza al envido = su valor especial menos la base 20
+ * (2→10, 4→9, 5→8, 11/10→7). El valor de la pieza es 20 + aporte, así que
+ * combinar dos piezas es 20 + aporte1 + aporte2 (NO valor1 + valor2).
+ */
+function piezaBonus(logicalRank: number): number {
+  return PIECE_ENVIDO[logicalRank] - 20;
+}
+
 export interface EnvidoResult {
   value: number;
   /** Explicación legible para UI / tooltips. */
@@ -46,21 +55,21 @@ export function calcEnvido(hand: Card[], muestra: Card): EnvidoResult {
   const nonPieces = hand.filter((c) => matchPiece(c, muestra) === null);
 
   if (pieces.length > 0) {
-    // La pieza de mayor valor especial encabeza.
-    const best = pieces
-      .map((p) => PIECE_ENVIDO[p.slot!.logicalRank])
-      .sort((a, b) => b - a)[0];
+    // Aportes de las piezas (valor especial - 20), de mayor a menor.
+    const bonuses = pieces
+      .map((p) => piezaBonus(p.slot!.logicalRank))
+      .sort((a, b) => b - a);
+    const topBonus = bonuses[0];
 
-    // Suma la mayor carta restante (cualquier palo), figuras = 0.
-    const restBest = Math.max(
-      0,
-      ...nonPieces.map((c) => commonEnvidoPoints(c.rank)),
-      ...pieces
-        .filter((_, i) => i !== 0)
-        .map((p) => PIECE_ENVIDO[p.slot!.logicalRank]),
-    );
-    const value = best + restBest;
-    return { value, detail: `Pieza (${best}) + ${restBest}` };
+    // Segunda contribución = la mejor entre: el aporte de OTRA pieza, o las
+    // unidades de la mejor carta común (cualquier palo; figuras = 0). Así una
+    // pieza sola vale 20+aporte, y dos piezas suman ambos aportes (no valores).
+    const secondBonus = bonuses.slice(1); // aportes de las demás piezas
+    const commonUnits = nonPieces.map((c) => commonEnvidoPoints(c.rank));
+    const second = Math.max(0, ...secondBonus, ...commonUnits);
+
+    const value = 20 + topBonus + second;
+    return { value, detail: `20 + ${topBonus} + ${second}` };
   }
 
   // Sin piezas: agrupar por palo.
