@@ -299,7 +299,9 @@ function playCard(state: MatchState, seat: Seat, card: Card): Applied<MatchState
     );
   }
 
-  const nextLead = result.winnerSeat ?? hand.manoSeat;
+  // El ganador de la baza abre la siguiente; en parda, sigue abriendo quien
+  // abrió esta baza (que ya es el ganador de la baza previa, o el mano).
+  const nextLead = result.winnerSeat ?? resolvedTrick.leadSeat;
   nextHand = {
     ...nextHand,
     tricks: [

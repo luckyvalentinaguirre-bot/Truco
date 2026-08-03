@@ -107,6 +107,42 @@ describe('partidas completas por modo', () => {
     }
   });
 
+  it('el ganador de la baza juega primero en la siguiente', () => {
+    for (const mode of modes) {
+      // Jugar hasta resolver la primera baza sin que sea parda.
+      for (let seed = 1; seed < 40; seed++) {
+        let s = createMatch({ mode, seed });
+        let guard = 0;
+        let resolved = false;
+        while (!s.hand.finished && guard++ < 200) {
+          const actor = actorNow(s);
+          if (actor === null) break;
+          // Sólo jugar cartas para forzar la resolución de la baza.
+          const acts = legalActions(s, actor);
+          const play = acts.find((a) => a.type === 'PLAY_CARD');
+          if (!play) {
+            // Si hay un canto pendiente, resolver con la IA.
+            s = applyAction(
+              s,
+              chooseAiAction(s, actor, () => 0, { difficulty: 'normal' })!,
+            ).state;
+            continue;
+          }
+          const before = s.hand.tricks.length;
+          s = applyAction(s, play).state;
+          const trick = s.hand.tricks[before - 1];
+          if (trick?.winnerSeat != null && s.hand.tricks.length > before) {
+            // Baza resuelta con ganador y hay una nueva baza abierta.
+            expect(s.hand.turnSeat).toBe(trick.winnerSeat);
+            resolved = true;
+            break;
+          }
+        }
+        if (resolved) break;
+      }
+    }
+  });
+
   it('el mano es el asiento siguiente al repartidor', () => {
     for (const mode of modes) {
       const s = createMatch({ mode, seed: 3 });
