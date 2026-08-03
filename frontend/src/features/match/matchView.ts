@@ -10,6 +10,7 @@ import {
   calcEnvido,
   calcFlor,
   cardCategory,
+  manoRank,
   type Action,
   type EnvidoCall,
   type MatchState,
@@ -213,6 +214,33 @@ function bestEnvidoOfTeam(state: MatchState, team: TeamId): number {
 }
 
 /**
+ * Narración tradicional del Envido en orden de mano: el más mano canta sus
+ * tantos; el siguiente, si tiene MÁS, los canta (y pasa a ganar); si tiene
+ * menos o iguala, dice "Son buenas". Devuelve una burbuja por jugador (número
+ * o "Son buenas") en el orden en que hablan. El ganador es el último que
+ * cantó un número (coincide con la resolución del motor).
+ */
+export function envidoNarration(state: MatchState, manoSeat: Seat): CantoBubble[] {
+  const n = state.players.length;
+  const order = state.players
+    .filter((p) => !p.folded)
+    .slice()
+    .sort((a, b) => manoRank(a.seat, manoSeat, n) - manoRank(b.seat, manoSeat, n));
+  let best = -1;
+  const out: CantoBubble[] = [];
+  for (const p of order) {
+    const v = calcEnvido(p.hand, state.hand.muestra).value;
+    if (v > best) {
+      out.push({ seat: p.seat, text: String(v) });
+      best = v;
+    } else {
+      out.push({ seat: p.seat, text: 'Son buenas' });
+    }
+  }
+  return out;
+}
+
+/**
  * Deriva un anuncio de un lote de eventos. Prioriza resultados (envido/flor
  * resueltos) sobre cantos. Puro: sólo lee el estado; no cambia reglas.
  */
@@ -229,14 +257,13 @@ export function announcementFromEvents(
   for (let i = events.length - 1; i >= 0; i--) {
     const e = events[i];
     if (e.type === 'ENVIDO_RESOLVED') {
-      // Resultado limpio y tradicional: se canta el tanto GANADOR y el otro
-      // reconoce "son buenas". Sólo el número del ganador (no la lista de
-      // tantos de todos); el motor ya resolvió con esa info internamente.
+      // Resumen de puntos que aparece TRAS la narración (el que gana cantó su
+      // tanto y el otro dijo "son buenas", como burbujas junto a cada jugador).
       const win = e.winner === humanTeam;
       const tantos = bestEnvidoOfTeam(state, e.winner);
       return {
         kind: 'result',
-        title: 'Son buenas',
+        title: 'Envido',
         verdict: win
           ? `Ganás con ${tantos} · +${e.points}`
           : `Gana el rival con ${tantos} · +${e.points}`,

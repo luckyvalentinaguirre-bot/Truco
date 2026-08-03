@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { createMatch, applyAction, type Seat, type GameEvent } from '@/game';
+import { createMatch, applyAction, calcEnvido, type Seat, type GameEvent } from '@/game';
 import {
   bubblesFromEvents,
   announcementFromEvents,
+  envidoNarration,
   humanOptions,
 } from './matchView';
 
@@ -46,7 +47,7 @@ describe('anuncio de resultado del Envido: limpio, sin tantos de todos', () => {
     const ann = announcementFromEvents(events, s, HUMAN);
     expect(ann).not.toBeNull();
     expect(ann!.kind).toBe('result');
-    expect(ann!.title).toBe('Son buenas');
+    expect(ann!.title).toBe('Envido');
     // No debe exponer los tantos individuales de cada jugador (nada de listas).
     expect(ann!.rows).toBeUndefined();
     // Sí muestra el tanto GANADOR (tradicional) y los puntos ganados.
@@ -65,6 +66,41 @@ describe('anuncio de resultado del Envido: limpio, sin tantos de todos', () => {
     // representa como burbuja.
     expect(bubblesFromEvents(events)).toEqual([{ seat: 1, text: 'Envido' }]);
     if (ann) expect(ann.kind).toBe('canto');
+  });
+});
+
+describe('narración del Envido (tradicional, en orden de mano)', () => {
+  it('el más mano canta primero; los números son crecientes; el último es el mayor', () => {
+    const s = createMatch({ mode: '2v2', seed: 7 });
+    const mano = s.hand.manoSeat;
+    const narr = envidoNarration(s, mano);
+    const activos = s.players.filter((p) => !p.folded).length;
+    expect(narr).toHaveLength(activos);
+    // El primero en hablar es el más mano.
+    expect(narr[0].seat).toBe(mano);
+    // Los tantos que se cantan (no "Son buenas") son estrictamente crecientes.
+    const nums = narr
+      .filter((b) => b.text !== 'Son buenas')
+      .map((b) => Number(b.text));
+    for (let i = 1; i < nums.length; i++) {
+      expect(nums[i]).toBeGreaterThan(nums[i - 1]);
+    }
+    // El último tanto cantado es el mayor de la mesa (el ganador).
+    const maxTantos = Math.max(
+      ...s.players.map((p) => calcEnvido(p.hand, s.hand.muestra).value),
+    );
+    expect(nums[nums.length - 1]).toBe(maxTantos);
+  });
+
+  it('el que tiene menos dice "Son buenas" (no un número)', () => {
+    const s = createMatch({ mode: '1v1', seed: 5 });
+    const narr = envidoNarration(s, s.hand.manoSeat);
+    expect(narr).toHaveLength(2);
+    // En 1v1 hay a lo sumo un "Son buenas" (el perdedor) y siempre un número.
+    const buenas = narr.filter((b) => b.text === 'Son buenas').length;
+    const numeros = narr.filter((b) => b.text !== 'Son buenas').length;
+    expect(numeros).toBeGreaterThanOrEqual(1);
+    expect(buenas).toBeLessThanOrEqual(1);
   });
 });
 

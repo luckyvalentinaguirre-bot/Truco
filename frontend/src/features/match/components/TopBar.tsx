@@ -30,16 +30,62 @@ export function TopBar({ state, humanSeat }: TopBarProps) {
     saveSettings({ sound: next });
   };
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className={styles.bar}>
-      <button className={styles.iconBtn} onClick={() => navigate('/')} aria-label="Menú">
-        <Icon name="menu" size={22} />
-      </button>
+      <div className={styles.menuWrap}>
+        <button
+          className={styles.iconBtn}
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Menú"
+          aria-expanded={menuOpen}
+        >
+          <Icon name="menu" size={22} />
+        </button>
+        {menuOpen && (
+          <>
+            <div className={styles.backdrop} onClick={() => setMenuOpen(false)} />
+            <div className={styles.dropdown} role="menu">
+              <button
+                className={styles.dropItem}
+                onClick={() => {
+                  toggleSound();
+                }}
+              >
+                <Icon name={sound ? 'sound' : 'mute'} size={18} />
+                {sound ? 'Silenciar' : 'Activar sonido'}
+              </button>
+              <button
+                className={styles.dropItem}
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate('/configuracion');
+                }}
+              >
+                <Icon name="settings" size={18} /> Configuración
+              </button>
+              <button
+                className={styles.dropItem}
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate('/');
+                }}
+              >
+                <Icon name="menu" size={18} /> Inicio
+              </button>
+            </div>
+          </>
+        )}
+      </div>
 
       <div className={styles.marcador}>
         <div className={styles.side}>
           <span className={[styles.team, styles.vos].join(' ')}>Vos</span>
-          <Fosforos points={half(state.score[humanTeam])} />
+          <span className={styles.sticks}>
+            <Fosforos points={half(state.score[humanTeam])} />
+          </span>
+          <span className={styles.num}>{state.score[humanTeam]}</span>
           <span className={styles.zone}>
             {zone(state.score[humanTeam])} · {state.score[humanTeam]}
           </span>
@@ -50,7 +96,10 @@ export function TopBar({ state, humanSeat }: TopBarProps) {
         </div>
         <div className={styles.side}>
           <span className={[styles.team, styles.rival].join(' ')}>Rival</span>
-          <Fosforos points={half(state.score[rivalTeam])} color="var(--c-cream)" />
+          <span className={styles.sticks}>
+            <Fosforos points={half(state.score[rivalTeam])} color="var(--c-cream)" />
+          </span>
+          <span className={styles.num}>{state.score[rivalTeam]}</span>
           <span className={styles.zone}>
             {zone(state.score[rivalTeam])} · {state.score[rivalTeam]}
           </span>
@@ -58,21 +107,6 @@ export function TopBar({ state, humanSeat }: TopBarProps) {
       </div>
 
       <div className={styles.controls}>
-        <button
-          className={[styles.iconBtn, sound ? '' : styles.off].join(' ')}
-          onClick={toggleSound}
-          aria-label={sound ? 'Silenciar' : 'Activar sonido'}
-          aria-pressed={sound}
-        >
-          <Icon name={sound ? 'sound' : 'mute'} size={20} />
-        </button>
-        <button
-          className={styles.iconBtn}
-          onClick={() => navigate('/configuracion')}
-          aria-label="Configuración"
-        >
-          <Icon name="settings" size={20} />
-        </button>
         {confirmExit ? (
           <div className={styles.confirm}>
             <span>¿Abandonar?</span>
