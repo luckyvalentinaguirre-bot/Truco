@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   actorNow,
   applyAction,
+  calcEnvido,
   calcFlor,
   chooseAiAction,
   createMatch,
@@ -184,17 +185,36 @@ export function useLocalMatch(
   useEffect(() => {
     if (state.phase !== 'playing' || !state.hand.finished) return;
 
-    const hadTantos = handEvents.current.some(
-      (e) => e.type === 'ENVIDO_RESOLVED' || e.type === 'FLOR_RESOLVED',
-    );
-    if (hadTantos) {
-      setReveal(
-        state.players
-          .filter((p) => p.seat !== humanSeat)
-          .map((p) => ({ seat: p.seat, cards: [...p.played, ...p.hand] })),
+    // Se revela SÓLO la mano del jugador que GANÓ el envido (o la flor / sus
+    // variantes), y sólo si es un rival (las cartas propias ya se ven). La flor
+    // bloquea el envido, así que a lo sumo ocurre uno de los dos por mano.
+    const muestra = state.hand.muestra;
+    const full = (p: MatchState['players'][number]) => [...p.played, ...p.hand];
+    const florEv = [...handEvents.current]
+      .reverse()
+      .find((e): e is Extract<GameEvent, { type: 'FLOR_RESOLVED' }> => e.type === 'FLOR_RESOLVED');
+    const envEv = [...handEvents.current]
+      .reverse()
+      .find((e): e is Extract<GameEvent, { type: 'ENVIDO_RESOLVED' }> => e.type === 'ENVIDO_RESOLVED');
+
+    let winner: MatchState['players'][number] | null = null;
+    if (florEv) {
+      const cand = state.players.filter((p) => p.team === florEv.winner);
+      winner = cand.reduce((b, p) =>
+        calcFlor(full(p), muestra).value > calcFlor(full(b), muestra).value ? p : b,
+      );
+    } else if (envEv) {
+      const cand = state.players.filter((p) => p.team === envEv.winner);
+      winner = cand.reduce((b, p) =>
+        calcEnvido(full(p), muestra).value > calcEnvido(full(b), muestra).value ? p : b,
       );
     }
-    const delay = hadTantos ? HAND_REVEAL_MS : HAND_FEEDBACK_MS;
+
+    const showReveal = winner !== null && winner.seat !== humanSeat;
+    if (showReveal) {
+      setReveal([{ seat: winner!.seat, cards: full(winner!) }]);
+    }
+    const delay = showReveal ? HAND_REVEAL_MS : HAND_FEEDBACK_MS;
     const t = setTimeout(() => {
       setReveal([]);
       handEvents.current = [];
