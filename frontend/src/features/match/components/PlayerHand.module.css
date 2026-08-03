@@ -2,23 +2,47 @@
   display: flex;
   justify-content: center;
 }
+/* Mano en abanico: las cartas se superponen y se inclinan como sostenidas
+   en la mano (referencia del usuario). El solapado se logra con margen
+   negativo; la inclinación/altura, con el transform de reposo por posición. */
 .fan {
   display: flex;
-  gap: var(--sp-3);
   align-items: flex-end;
-  padding-top: 28px; /* espacio para que la carta suba al seleccionarse */
+  justify-content: center;
+  padding-top: 34px; /* espacio para que la carta suba al seleccionarse */
 }
 
 /* En pantallas bajas se recorta el espacio de elevación para ganar alto. */
 @media (max-height: 800px) {
-  .fan { padding-top: 16px; }
+  .fan { padding-top: 20px; }
 }
 @media (max-height: 680px) {
-  .fan { padding-top: 10px; gap: var(--sp-2); }
+  .fan { padding-top: 12px; }
 }
 .slot {
   position: relative;
+  --rot: 0deg;
+  --ty: 0px;
+  margin: 0 -18px; /* solapado tipo abanico */
+  transform-origin: bottom center;
+  transform: rotate(var(--rot)) translateY(var(--ty));
   transition: transform var(--dur-med) var(--ease-out);
+  /* Reparto: cada carta entra desde arriba (el mazo) y aterriza en su
+     posición de abanico (el `to` usa las mismas variables → sin salto). */
+  animation: dealIn 380ms var(--ease-out) backwards;
+}
+/* Abanico de 3 cartas (izq. inclinada, centro recta, der. inclinada). */
+.slot:nth-child(1) { --rot: -9deg; --ty: 12px; animation-delay: 60ms; }
+.slot:nth-child(2) { --rot: 0deg; --ty: 0px; animation-delay: 170ms; }
+.slot:nth-child(3) { --rot: 9deg; --ty: 12px; animation-delay: 280ms; }
+/* Al pasar a 2 o 1 carta, se centran igual (el flex las recoloca). */
+@keyframes dealIn {
+  from { opacity: 0; transform: translateY(-52px) scale(0.82) rotate(-4deg); }
+  to { opacity: 1; transform: rotate(var(--rot)) translateY(var(--ty)); }
+}
+:global([data-animations='off']) .slot { animation: none; }
+@media (max-width: 380px) {
+  .slot { margin: 0 -14px; }
 }
 .blocked {
   opacity: 0.55;
@@ -27,8 +51,11 @@
 .playable {
   opacity: 1;
 }
+.slot:hover {
+  z-index: 3;
+}
 .selectedSlot {
-  z-index: 2;
+  z-index: 4;
 }
 .playBtn {
   position: absolute;
@@ -46,12 +73,6 @@
   cursor: pointer;
   box-shadow: var(--sh-md);
   white-space: nowrap;
-}
-
-@media (max-width: 560px) {
-  .fan {
-    gap: var(--sp-2);
-  }
 }
 
 /* Celular en horizontal: cartas algo más chicas para no tapar la mesa */

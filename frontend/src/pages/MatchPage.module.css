@@ -146,3 +146,9 @@
   .felt { gap: 2px; }
   .playerTag { padding: 0; }
 }
+
+/* Celulares/pantallas muy bajas: recortar el inset vertical del paño para
+   ganar alto y que el panel de acciones no se corte abajo. */
+@media (max-height: 660px) {
+  .felt { padding: 4px clamp(10px, 5%, 60px); gap: 1px; }
+}

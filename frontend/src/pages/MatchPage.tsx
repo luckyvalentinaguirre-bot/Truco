@@ -33,7 +33,7 @@ export function MatchPage() {
   const difficulty: Difficulty = navState?.difficulty ?? loadSettings().difficulty;
   const mode: GameMode = navState?.mode ?? '1v1';
 
-  const { state, humanSeat, aiSeat, banner, announcement, handFeedback, dispatch, restart } =
+  const { state, humanSeat, aiSeat, banner, announcement, dispatch, restart } =
     useLocalMatch(difficulty, mode);
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -112,12 +112,6 @@ export function MatchPage() {
           <button className={styles.chat} disabled aria-label="Chat (próximamente)">
             <Icon name="chat" size={18} /> Chat
           </button>
-
-          {handFeedback && (
-            <div className={styles.feedbackWrap} aria-live="polite">
-              <span className={styles.feedback}>{handFeedback}</span>
-            </div>
-          )}
 
           <Announcement data={announcement} />
         </div>

@@ -90,3 +90,17 @@
   .panel { padding: 6px 8px 8px; gap: 6px; }
   .grid { gap: 6px; }
 }
+
+/* Pantallas muy bajas (celu 360×640, etc.): compactar el panel y bajar el
+   alto de los botones para que TODAS las acciones entren sin cortarse. */
+@media (max-height: 660px) {
+  .panel { padding: 4px 8px 6px; gap: 4px; }
+  .grid, .confirm { gap: 5px; }
+  .btn {
+    min-height: 38px;
+    min-width: 80px;
+    padding: 0 var(--sp-3);
+    font-size: var(--fs-xs);
+  }
+  .title { font-size: 9px; }
+}

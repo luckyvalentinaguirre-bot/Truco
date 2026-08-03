@@ -360,11 +360,13 @@
 .seat_bottomLeft { top: 56%; left: 2%; }
 .seat_bottomRight { top: 56%; right: 2%; }
 
-/* Baza multi-jugador: cada carta desplazada hacia su asiento */
+/* Baza multi-jugador: cada carta desplazada bien hacia su asiento, con
+   la mesa "vista desde más atrás" (más separación) para que quede clarísimo
+   qué jugador tiró qué carta. */
 .bazaMulti {
   position: relative;
-  width: 220px;
-  height: 200px;
+  width: 320px;
+  height: 280px;
   z-index: 1;
 }
 .playCard {
@@ -373,14 +375,14 @@
   left: 50%;
   animation: drop var(--dur-med) var(--ease-out);
 }
-.play_bottom { transform: translate(-50%, calc(-50% + 60px)); }
-.play_top { transform: translate(-50%, calc(-50% - 60px)); }
-.play_left { transform: translate(calc(-50% - 92px), -50%); }
-.play_right { transform: translate(calc(-50% + 92px), -50%); }
-.play_topLeft { transform: translate(calc(-50% - 76px), calc(-50% - 48px)); }
-.play_topRight { transform: translate(calc(-50% + 76px), calc(-50% - 48px)); }
-.play_bottomLeft { transform: translate(calc(-50% - 76px), calc(-50% + 48px)); }
-.play_bottomRight { transform: translate(calc(-50% + 76px), calc(-50% + 48px)); }
+.play_bottom { transform: translate(-50%, calc(-50% + 92px)); }
+.play_top { transform: translate(-50%, calc(-50% - 92px)); }
+.play_left { transform: translate(calc(-50% - 138px), -50%); }
+.play_right { transform: translate(calc(-50% + 138px), -50%); }
+.play_topLeft { transform: translate(calc(-50% - 112px), calc(-50% - 74px)); }
+.play_topRight { transform: translate(calc(-50% + 112px), calc(-50% - 74px)); }
+.play_bottomLeft { transform: translate(calc(-50% - 112px), calc(-50% + 74px)); }
+.play_bottomRight { transform: translate(calc(-50% + 112px), calc(-50% + 74px)); }
 
 /* ---- Móvil: comprimir los asientos arriba/costados, cartas más juntas ---- */
 @media (max-width: 720px) {
@@ -413,15 +415,12 @@
 
 /* ---- Pila mazo + muestra: la MUESTRA va arriba y COMPLETA a la vista
    (para que 10/11/12 se lean claro); el mazo asoma por detrás. ---- */
+/* Sin recuadro: la pila va suelta sobre el paño. */
 .pile {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: var(--sp-2) var(--sp-2) 4px;
-  border-radius: var(--r-md);
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(212, 175, 55, 0.25);
 }
 .pileStack {
   position: relative;
@@ -537,22 +536,23 @@
 @media (max-width: 560px) { .playGhost { width: 58px; } }
 @media (max-width: 380px) { .playGhost { width: 54px; } }
 
-/* Mazo + muestra integrados a la mesa (centro-derecha) */
+/* Mazo + muestra a la IZQUIERDA del mano (sin recuadro). */
 .deckArea {
   position: absolute;
-  right: clamp(6px, 4%, 54px);
-  top: 50%;
-  transform: translateY(-50%);
+  left: clamp(4px, 3%, 40px);
   z-index: 4;
 }
+.deckLeftBottom { bottom: 6%; }
+.deckLeftTop { top: 4%; }
 
 @media (max-width: 720px) {
   .oppInfo { padding: 3px 10px 3px 5px; }
   .deckArea {
-    right: 2px;
-    transform: translateY(-50%) scale(0.78);
-    transform-origin: right center;
+    left: 2px;
+    transform: scale(0.8);
   }
+  .deckLeftBottom { transform-origin: left bottom; }
+  .deckLeftTop { transform-origin: left top; }
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
   .slotTop { top: 26%; }
@@ -579,3 +579,14 @@
 @media (max-height: 800px) {
   .oppZone { gap: 4px; padding-top: 0; }
 }
+
+/* Reparto de las cartas del rival (desde el mazo, escalonado). */
+.dealCard {
+  display: inline-block;
+  animation: dealInOpp 340ms var(--ease-out) backwards;
+}
+@keyframes dealInOpp {
+  from { opacity: 0; transform: translateY(-30px) scale(0.8) rotate(4deg); }
+  to { opacity: 1; transform: none; }
+}
+:global([data-animations='off']) .dealCard { animation: none; }

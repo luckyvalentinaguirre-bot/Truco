@@ -56,7 +56,6 @@ function DeckPile({ state }: { state: MatchState }) {
   const deckRemaining = 40 - state.players.length * 3 - 1;
   return (
     <div className={styles.pile}>
-      <span className={styles.boxLabel}>Mazo · Muestra</span>
       <div className={styles.pileStack} aria-label="Mazo y muestra">
         <span className={styles.pileMuestra}>
           <PlayingCard card={muestra} size="sm" />
@@ -108,8 +107,7 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
   const humanPlay = trick?.plays.find((p) => p.seat === humanSeat)?.card ?? null;
   const aiPlay = trick?.plays.find((p) => p.seat === aiSeat)?.card ?? null;
   const humanTeam = state.players[humanSeat].team;
-  const resolved = state.hand.tricks.filter((t) => t.outcome !== null);
-  const lastResolved = resolved[resolved.length - 1];
+  const manoIsHuman = state.hand.manoSeat === humanSeat;
   const aiRemaining = state.players[aiSeat].hand.length;
 
   return (
@@ -128,7 +126,9 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
         </div>
         <div className={styles.oppHand} aria-label={`${aiRemaining} cartas del rival`}>
           {Array.from({ length: aiRemaining }).map((_, i) => (
-            <PlayingCard key={i} faceDown size="sm" />
+            <span key={`${state.handNumber}-${i}`} className={styles.dealCard} style={{ animationDelay: `${i * 110}ms` }}>
+              <PlayingCard faceDown size="sm" />
+            </span>
           ))}
         </div>
       </div>
@@ -152,7 +152,7 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
         </div>
       </div>
 
-      {/* ── Superficie de la mesa: logo, mazo/muestra, última baza ── */}
+      {/* ── Superficie de la mesa: logo + mazo/muestra (a la izq. del mano) ── */}
       <div className={styles.playArea}>
         <div className={styles.logo} aria-hidden="true">
           <SunLogo />
@@ -160,25 +160,15 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
           <span className={styles.logoSub}>URUGUAYO</span>
         </div>
 
-        {/* Mazo + muestra integrados a la mesa (centro-derecha) */}
-        <div className={styles.deckArea}>
+        {/* Mazo + muestra, a la izquierda del que es mano (arriba si es el
+            rival, abajo si sos vos). Sin recuadro. */}
+        <div
+          className={[
+            styles.deckArea,
+            manoIsHuman ? styles.deckLeftBottom : styles.deckLeftTop,
+          ].join(' ')}
+        >
           <DeckPile state={state} />
-        </div>
-
-        {/* Última baza (centro-izquierda) */}
-        <div className={styles.ultimaBaza}>
-          <span className={styles.boxLabel}>Última baza</span>
-          <div className={styles.ultimaSlots}>
-            {[0, 1].map((i) => {
-              const card = lastResolved?.plays[i]?.card ?? null;
-              return card ? (
-                <PlayingCard key={i} card={card} size="sm" />
-              ) : (
-                <span key={i} className={styles.ultimaSlot} />
-              );
-            })}
-          </div>
-          {!lastResolved && <span className={styles.ultimaEmpty}>Aún no hay bazas</span>}
         </div>
 
         <Pips state={state} humanTeam={humanTeam} />
@@ -271,7 +261,7 @@ function TableMulti({ state, humanSeat, thinking }: TableCenterProps) {
                   key={play.seat}
                   className={[styles.playCard, styles[`play_${spot}`]].join(' ')}
                 >
-                  <PlayingCard card={play.card} size="md" flip={!v?.isHuman} />
+                  <PlayingCard card={play.card} size="sm" flip={!v?.isHuman} />
                 </span>
               );
             })}
