@@ -83,6 +83,12 @@ export function TableCenter({ state, humanSeat, aiSeat, thinking }: TableCenterP
             <PlayingCard key={i} faceDown size="sm" />
           ))}
         </div>
+
+        {/* Indicador de mano (escritorio): a la derecha para equilibrar la fila */}
+        <div className={[styles.manoBox, styles.manoTop].join(' ')}>
+          <span className={styles.manoLabel}>Mano</span>
+          <span className={styles.manoWho}>{manoIsHuman ? 'Vos' : 'Rival'}</span>
+        </div>
       </div>
 
       {/* Zona de juego */}
@@ -141,9 +147,10 @@ export function TableCenter({ state, humanSeat, aiSeat, thinking }: TableCenterP
           </div>
         </div>
 
-        {/* Mano · muestra · mazo (columna derecha) */}
+        {/* Muestra · mazo (columna derecha) */}
         <div className={styles.rightStack}>
-          <div className={styles.manoBox}>
+          {/* Indicador de mano (móvil): dentro de la columna derecha */}
+          <div className={[styles.manoBox, styles.manoSide].join(' ')}>
             <span className={styles.manoLabel}>Mano</span>
             <span className={styles.manoWho}>{manoIsHuman ? 'Vos' : 'Rival'}</span>
           </div>

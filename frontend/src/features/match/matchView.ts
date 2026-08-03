@@ -188,6 +188,11 @@ export function bannerFromEvents(
         ? `Ganaste el Envido (+${e.points})`
         : `El rival ganó el Envido (+${e.points})`;
     }
+    if (e.type === 'FLOR_RESOLVED') {
+      return e.winner === humanTeam
+        ? `Ganaste la Flor (+${e.points})`
+        : `El rival ganó la Flor (+${e.points})`;
+    }
   }
   return null;
 }

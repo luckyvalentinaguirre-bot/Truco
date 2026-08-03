@@ -86,9 +86,9 @@ export function chooseAiAction(
   }
 
   // -------- Turno propio --------
-  // Flor: cantarla casi siempre (es puntos seguros).
+  // Flor: es obligatoria y da puntos seguros ⇒ cantarla siempre.
   const florAction = legal.find((a) => a.type === 'CALL_FLOR');
-  if (florAction && hasFlor && rng() < 0.85) return florAction;
+  if (florAction && hasFlor) return florAction;
 
   // Envido en la primera baza con buen tanto.
   const envidoCalls = legal.filter((a) => a.type === 'CALL_ENVIDO');

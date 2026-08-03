@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   actorNow,
   applyAction,
+  calcFlor,
   chooseAiAction,
   createMatch,
   startNextHand,
@@ -67,7 +68,16 @@ export function useLocalMatch(difficulty: Difficulty = 'normal') {
   const applyAndTrack = useCallback(
     (action: Action) => {
       setState((prev) => {
-        const { state: next, events } = applyAction(prev, action);
+        // Blindaje: una acción fuera de turno (p. ej. la IA reclamando su
+        // Flor) puede quedar obsoleta si el estado cambió antes de aplicarse.
+        // En ese caso se ignora en vez de romper el render.
+        let applied;
+        try {
+          applied = applyAction(prev, action);
+        } catch {
+          return prev;
+        }
+        const { state: next, events } = applied;
         handEvents.current = [...handEvents.current, ...events];
         for (const e of events) {
           const s = soundFor(e, prev.players[HUMAN_SEAT].team);
@@ -101,6 +111,22 @@ export function useLocalMatch(difficulty: Difficulty = 'normal') {
     }, AI_STEP_MS);
     return () => clearTimeout(t);
   }, [state, aiSeat, applyAndTrack, difficulty]);
+
+  // -------- La IA canta su Flor aunque no sea su turno --------
+  // La Flor es obligatoria y se anuncia al repartir; si el humano es mano,
+  // la IA no sería el "actor", así que la reclama proactivamente para que
+  // sus puntos no se pierdan.
+  useEffect(() => {
+    if (state.phase !== 'playing' || state.hand.finished) return;
+    if (!state.ruleset.withFlor || state.hand.flor.resolved) return;
+    if (!state.hand.envidoWindowOpen) return;
+    const ai = state.players[aiSeat];
+    if (ai.folded || ai.played.length > 0) return;
+    if (state.hand.flor.declaredBy.includes(ai.team)) return;
+    if (!calcFlor(ai.hand, state.hand.muestra).hasFlor) return;
+    const t = setTimeout(() => applyAndTrack({ type: 'CALL_FLOR', seat: aiSeat }), AI_STEP_MS);
+    return () => clearTimeout(t);
+  }, [state, aiSeat, applyAndTrack]);
 
   // -------- Fin de mano: feedback corto + reparto automático --------
   useEffect(() => {
