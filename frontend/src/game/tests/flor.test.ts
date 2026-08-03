@@ -69,7 +69,7 @@ describe('Puntaje de la Flor (motor)', () => {
     expect(events.some((e) => e.type === 'FLOR_RESOLVED')).toBe(true);
   });
 
-  it('flor disputada: se abre el duelo; al aceptar gana la más alta y suma 6', () => {
+  it('flor disputada: se abre el duelo; al aceptar gana la más alta y suma 3', () => {
     const s = forced(
       [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor = 36
       [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')], // flor = 38
@@ -80,11 +80,49 @@ describe('Puntaje de la Flor (motor)', () => {
     const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
     expect(s1.hand.flor.pendingCall).toBe('flor');
     expect(s1.score[teamB]).toBe(0);
-    // El rival con flor (asiento 1) acepta el duelo ⇒ gana la más alta (+6).
+    // El rival con flor (asiento 1) acepta el duelo ⇒ gana la más alta (+3).
     const s2 = applyAction(s1, { type: 'ACCEPT', seat: 1 }).state;
     expect(s2.hand.flor.resolved).toBe(true);
-    expect(s2.score[teamB]).toBe(6);
+    expect(s2.score[teamB]).toBe(3);
     expect(s2.score[s.players[0].team]).toBe(0);
+  });
+
+  it('Con Flor Envido QUERIDO ⇒ gana la flor más alta y suma 5', () => {
+    const s = forced(
+      [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor = 36
+      [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')], // flor = 38
+      c(1, 'oro'),
+    );
+    const teamB = s.players[1].team;
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    // El rival (asiento 1) sube a Con Flor Envido.
+    const s2 = applyAction(s1, {
+      type: 'CALL_FLOR',
+      seat: 1,
+      call: 'contraflor_envido',
+    }).state;
+    expect(s2.hand.flor.pendingCall).toBe('contraflor_envido');
+    // El asiento 0 quiere ⇒ gana la flor más alta (B), +5.
+    const s3 = applyAction(s2, { type: 'ACCEPT', seat: 0 }).state;
+    expect(s3.hand.flor.resolved).toBe(true);
+    expect(s3.score[teamB]).toBe(5);
+  });
+
+  it('Con Flor Envido NO QUERIDO ⇒ el que lo cantó se lleva 3 (la flor)', () => {
+    const s = forced(
+      [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')],
+      [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')],
+      c(1, 'oro'),
+    );
+    const teamB = s.players[1].team;
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    const s2 = applyAction(s1, {
+      type: 'CALL_FLOR',
+      seat: 1,
+      call: 'contraflor_envido',
+    }).state;
+    const s3 = applyAction(s2, { type: 'DECLINE', seat: 0 }).state;
+    expect(s3.score[teamB]).toBe(3);
   });
 
   it('Contraflor al resto QUERIDA ⇒ la flor más alta gana la falta', () => {
@@ -111,7 +149,7 @@ describe('Puntaje de la Flor (motor)', () => {
     expect(s3.state.phase).toBe('finished');
   });
 
-  it('Contraflor al resto NO QUERIDA ⇒ el que la cantó se lleva 6', () => {
+  it('Contraflor al resto (tras la flor) NO QUERIDA ⇒ el que la cantó se lleva 3', () => {
     const s = forced(
       [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor = 36
       [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')], // flor = 38
@@ -125,11 +163,34 @@ describe('Puntaje de la Flor (motor)', () => {
       seat: 1,
       call: 'contraflor_resto',
     }).state;
-    // El asiento 0 NO quiere ⇒ el que cantó Contraflor (B) se lleva 6.
+    // No hubo Con Flor Envido en el medio ⇒ el nivel en la mesa era la Flor (3).
     const s3 = applyAction(s2, { type: 'DECLINE', seat: 0 }).state;
     expect(s3.hand.flor.resolved).toBe(true);
-    expect(s3.score[teamB]).toBe(6);
+    expect(s3.score[teamB]).toBe(3);
     expect(s3.score[teamA]).toBe(0);
+  });
+
+  it('cadena Flor→Con Flor Envido→Contraflor al resto: no querida se paga 5', () => {
+    const s = forced(
+      [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor 36
+      [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')], // flor 38
+      c(1, 'oro'),
+    );
+    const teamA = s.players[0].team;
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state; // A: flor
+    const s2 = applyAction(s1, {
+      type: 'CALL_FLOR',
+      seat: 1,
+      call: 'contraflor_envido',
+    }).state; // B: con flor envido (5)
+    const s3 = applyAction(s2, {
+      type: 'CALL_FLOR',
+      seat: 0,
+      call: 'contraflor_resto',
+    }).state; // A: al resto
+    // B no quiere ⇒ A se lleva el nivel en la mesa: Con Flor Envido = 5.
+    const s4 = applyAction(s3, { type: 'DECLINE', seat: 1 }).state;
+    expect(s4.score[teamA]).toBe(5);
   });
 
   it('no se puede cantar Flor sin tenerla', () => {

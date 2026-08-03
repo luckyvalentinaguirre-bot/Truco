@@ -46,46 +46,61 @@ export function florPointsSimple(): number {
   return FLOR_BASE_POINTS;
 }
 
-/** Puntos de una Flor DISPUTADA que se acepta sin subir (dos flores): 6. */
-export const FLOR_CONTESTED_POINTS = FLOR_BASE_POINTS * 2;
+/* -------------------------------------------------------------
+ * Escalera de la Flor disputada:
+ *   Flor (3)  →  Con Flor Envido (5)  →  Contraflor al resto (falta).
+ * Con dos flores enfrentadas, gana la más alta el valor del nivel aceptado.
+ * ----------------------------------------------------------- */
+export const FLOR_LEVEL_ORDER: FlorCall[] = [
+  'flor',
+  'contraflor_envido',
+  'contraflor_resto',
+];
+
+/** Puntos fijos por nivel (Contraflor al resto vale la FALTA, la calcula el motor). */
+export const FLOR_LEVEL_VALUE: Record<'flor' | 'contraflor_envido', number> = {
+  flor: FLOR_BASE_POINTS, // 3
+  contraflor_envido: 5,
+};
+
+function levelRank(call: FlorCall): number {
+  return FLOR_LEVEL_ORDER.indexOf(call);
+}
 
 /** ¿Ambos bandos declararon Flor? Entonces hay duelo de flores. */
 export function isFlorContested(state: FlorState): boolean {
   return new Set(state.declaredBy).size >= 2;
 }
 
-/* -------------------------------------------------------------
- * Apuesta de Flor disputada: Flor → Contraflor al Resto.
- * Sólo el equipo que NO cantó puede subir; el que subió espera respuesta.
- * ----------------------------------------------------------- */
-
 /** Abre el duelo de flores (queda esperando respuesta del rival con flor). */
 export function openFlorDuel(state: FlorState, team: TeamId): FlorState {
   return { ...state, call: 'flor', pendingCall: 'flor', callerTeam: team };
 }
 
-/** ¿Puede `team` cantar Contraflor al Resto ahora? */
+/** ¿Puede `team` subir la apuesta de flor a `call` ahora? */
 export function canCallContraflor(
   state: FlorState,
   team: TeamId,
   call: FlorCall,
 ): boolean {
-  if (state.resolved) return false;
-  if (state.pendingCall !== 'flor') return false; // sólo se sube sobre una flor
-  if (call !== 'contraflor_resto') return false; // sólo modelamos "al resto"
+  if (state.resolved || !state.pendingCall) return false;
+  if (call === 'flor') return false; // 'flor' no es una subida
+  if (levelRank(call) <= levelRank(state.pendingCall)) return false; // debe subir
   return state.callerTeam !== null && team !== state.callerTeam;
 }
 
-/** El rival con flor sube a Contraflor al Resto (espera quiero/no quiero). */
+/** El rival con flor sube (Con Flor Envido / Contraflor al resto). */
 export function callContraflor(
   state: FlorState,
   team: TeamId,
   call: FlorCall,
 ): FlorState {
   if (!canCallContraflor(state, team, call)) {
-    throw new Error(`Contraflor inválida: ${call} por equipo ${team}`);
+    throw new Error(`Subida de Flor inválida: ${call} por equipo ${team}`);
   }
-  return { ...state, call, pendingCall: call, callerTeam: team };
+  // El nivel que quedaba en la mesa (state.pendingCall) pasa a ser el "acordado":
+  // si el rival NO quiere la nueva subida, se cobra ese nivel anterior.
+  return { ...state, call: state.pendingCall!, pendingCall: call, callerTeam: team };
 }
 
 /** ¿Puede `team` responder (quiero/no quiero) el canto de flor pendiente? */

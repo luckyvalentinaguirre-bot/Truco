@@ -34,7 +34,7 @@ import {
   canCallContraflor,
   callContraflor,
   canRespondFlor,
-  FLOR_CONTESTED_POINTS,
+  FLOR_LEVEL_VALUE,
 } from './florBetting';
 import { calcEnvido, faltaEnvidoPoints } from './envido';
 import { calcFlor, FLOR_BASE_POINTS } from './flor';
@@ -150,6 +150,7 @@ export function legalActions(state: MatchState, seat: Seat): Action[] {
     { type: 'CALL_ENVIDO', seat, call: 'real_envido' },
     { type: 'CALL_ENVIDO', seat, call: 'falta_envido' },
     { type: 'CALL_FLOR', seat },
+    { type: 'CALL_FLOR', seat, call: 'contraflor_envido' },
     { type: 'CALL_FLOR', seat, call: 'contraflor_resto' },
     { type: 'ACCEPT', seat },
     { type: 'DECLINE', seat },
@@ -498,17 +499,22 @@ function doCallFlor(
   return maybeGameOver({ ...state, score, hand: { ...hand, flor } }, events);
 }
 
-/** Resuelve el duelo de flores en el nivel aceptado (Flor=6, Resto=falta). */
+/** Puntos de un nivel de flor: Flor=3, Con Flor Envido=5, Contraflor al resto=falta. */
+function florLevelPoints(state: MatchState, level: FlorCall): number {
+  if (level === 'contraflor_resto') {
+    return faltaEnvidoPoints(state.score.A, state.score.B, state.ruleset.targetPoints);
+  }
+  return FLOR_LEVEL_VALUE[level];
+}
+
+/** Resuelve el duelo de flores en el nivel aceptado (gana la flor más alta). */
 function resolveFlorDuel(
   state: MatchState,
   acceptedLevel: FlorCall,
 ): Applied<MatchState> {
   const hand = state.hand;
   const { winner } = resolveFlorShowdown(state);
-  const points =
-    acceptedLevel === 'contraflor_resto'
-      ? faltaEnvidoPoints(state.score.A, state.score.B, state.ruleset.targetPoints)
-      : FLOR_CONTESTED_POINTS;
+  const points = florLevelPoints(state, acceptedLevel);
   const flor = { ...hand.flor, pendingCall: null, resolved: true };
   const score = addPoints(state.score, winner, points, state.ruleset);
   const events: GameEvent[] = [
@@ -596,17 +602,18 @@ function doDecline(state: MatchState, seat: Seat): Applied<MatchState> {
   const hand = state.hand;
   const team = state.players[seat].team;
 
-  // Flor: sólo se puede rechazar una Contraflor al resto (a la flor simple se
-  // la acepta o se sube). El que cantó la Contraflor se lleva los 6 disputados.
+  // Flor: sólo se rechaza una SUBIDA (Con Flor Envido / Contraflor al resto);
+  // a la flor simple se la acepta o se sube. El que subió se lleva los puntos
+  // del nivel que ya estaba en la mesa (Flor=3 o Con Flor Envido=5).
   if (hand.flor.pendingCall) {
     if (!canRespondFlor(hand.flor, team)) {
       throw new Error('No te toca responder la Flor');
     }
-    if (hand.flor.pendingCall !== 'contraflor_resto') {
-      throw new Error('No podés rechazar la Flor: aceptá o cantá Contraflor');
+    if (hand.flor.pendingCall === 'flor') {
+      throw new Error('No podés rechazar la Flor: aceptá o subí la apuesta');
     }
     const winner = hand.flor.callerTeam!;
-    const points = FLOR_CONTESTED_POINTS;
+    const points = florLevelPoints(state, hand.flor.call);
     const flor = { ...hand.flor, pendingCall: null, resolved: true };
     const score = addPoints(state.score, winner, points, state.ruleset);
     const events: GameEvent[] = [

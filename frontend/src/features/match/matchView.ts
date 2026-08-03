@@ -36,7 +36,7 @@ export const ENVIDO_LABEL: Record<EnvidoCall, string> = {
 
 export const FLOR_LABEL: Record<FlorCall, string> = {
   flor: 'Flor',
-  contraflor_envido: 'Contraflor',
+  contraflor_envido: 'Con Flor Envido',
   contraflor_resto: 'Contraflor al resto',
 };
 
