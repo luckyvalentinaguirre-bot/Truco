@@ -367,11 +367,18 @@ function doCallEnvido(
   };
 }
 
-/** ¿Algún jugador tiene Flor? (anula el Envido). */
+/**
+ * ¿Algún jugador tiene Flor esta mano? (anula el Envido). Usa las 3 cartas
+ * ORIGINALES (jugadas + en mano) para que la Flor siga detectándose aunque ya
+ * se haya jugado alguna carta: si hubo flor al repartir, no se juega Envido en
+ * toda la mano.
+ */
 function anyFlorPresent(state: MatchState): boolean {
   if (!state.ruleset.withFlor) return false;
   return state.players.some(
-    (p) => !p.folded && calcFlor(p.hand, state.hand.muestra).hasFlor,
+    (p) =>
+      !p.folded &&
+      calcFlor([...p.played, ...p.hand], state.hand.muestra).hasFlor,
   );
 }
 

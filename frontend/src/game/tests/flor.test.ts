@@ -3,7 +3,7 @@ import type { Card } from '../types';
 import type { MatchState } from '../state';
 import { calcFlor } from '../flor';
 import { createMatch } from '../setup';
-import { applyAction } from '../engine';
+import { applyAction, legalActions } from '../engine';
 
 const c = (rank: Card['rank'], suit: Card['suit']): Card => ({ rank, suit });
 
@@ -191,6 +191,28 @@ describe('Puntaje de la Flor (motor)', () => {
     // B no quiere ⇒ A se lleva el nivel en la mesa: Con Flor Envido = 5.
     const s4 = applyAction(s3, { type: 'DECLINE', seat: 1 }).state;
     expect(s4.score[teamA]).toBe(5);
+  });
+
+  it('la Flor bloquea el Envido aunque ya se haya jugado una carta', () => {
+    const base = forced(
+      [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor
+      [c(1, 'espada'), c(6, 'copa'), c(4, 'basto')], // sin flor
+      c(1, 'oro'),
+    );
+    // El de la flor ya jugó una carta: quedan 2 en la mano (played + hand = 3).
+    const played = base.players[0].hand[0];
+    const s = {
+      ...base,
+      players: base.players.map((p, i) =>
+        i === 0 ? { ...p, hand: p.hand.slice(1), played: [played] } : p,
+      ),
+      hand: { ...base.hand, turnSeat: 1, envidoWindowOpen: true },
+    };
+    // El rival (asiento 1) NO puede cantar Envido: hubo flor en la mano.
+    expect(legalActions(s, 1).some((a) => a.type === 'CALL_ENVIDO')).toBe(false);
+    expect(() =>
+      applyAction(s, { type: 'CALL_ENVIDO', seat: 1, call: 'envido' }),
+    ).toThrow();
   });
 
   it('no se puede cantar Flor sin tenerla', () => {

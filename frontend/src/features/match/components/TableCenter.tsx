@@ -113,10 +113,10 @@ function DeckPile({ state }: { state: MatchState }) {
   );
 }
 
-/** Columna derecha (pila mazo+muestra) — usada por 2v2/3v3. */
-function RightStack({ state }: { state: MatchState }) {
+/** Mazo + muestra a la IZQUIERDA del mano — usado por 2v2/3v3. */
+function ManoDeck({ state, manoSpot }: { state: MatchState; manoSpot: Spot }) {
   return (
-    <div className={styles.rightStack}>
+    <div className={[styles.deckMulti, styles[`deckMano_${manoSpot}`]].join(' ')}>
       <DeckPile state={state} />
     </div>
   );
@@ -250,6 +250,7 @@ function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
   const trick = displayedTrick(state);
   const views = seatViews(state.players, humanSeat);
   const bySeat = new Map(views.map((v) => [v.seat, v]));
+  const manoSpot = bySeat.get(state.hand.manoSeat)?.spot ?? 'bottom';
 
   return (
     <>
@@ -272,6 +273,8 @@ function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
               />
             );
           })}
+        {/* Mazo + muestra: viaja a la izquierda del mano (como en 1v1). */}
+        <ManoDeck state={state} manoSpot={manoSpot} />
       </div>
 
       <div className={styles.playArea}>
@@ -292,14 +295,12 @@ function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
                   key={play.seat}
                   className={[styles.playCard, styles[`play_${spot}`]].join(' ')}
                 >
-                  <PlayingCard card={play.card} size="sm" flip={!v?.isHuman} />
+                  <PlayingCard card={play.card} size="md" flip={!v?.isHuman} />
                 </span>
               );
             })}
           </div>
         </div>
-
-        <RightStack state={state} />
       </div>
     </>
   );

@@ -199,7 +199,23 @@
 .pipLoss { background: var(--c-danger); border-color: transparent; }
 .pipParda { background: var(--c-text-dim); border-color: transparent; }
 
-/* Muestra + mazo (derecha) */
+/* Mazo + muestra en 2v2/3v3: viaja a la IZQUIERDA del mano (según su lugar en
+   la mesa) y en una zona libre para no taparse con las cartas de nadie. */
+.deckMulti {
+  position: absolute;
+  z-index: 6;
+  transform-origin: center;
+}
+.deckMano_bottom { bottom: 3%; left: clamp(6px, 4%, 90px); }
+.deckMano_top { top: 3%; left: 33%; transform: translateX(-100%); }
+.deckMano_topLeft { top: 24%; left: 2%; }
+.deckMano_topRight { top: 4%; right: 22%; }
+.deckMano_left { top: 60%; left: 2%; }
+.deckMano_right { top: 12%; right: 2%; }
+.deckMano_bottomLeft { top: 30%; left: 2%; }
+.deckMano_bottomRight { bottom: 6%; right: 22%; }
+
+/* (legacy) Columna derecha del mazo — ya no se usa en multi. */
 .rightStack {
   position: absolute;
   right: clamp(6px, 3%, 48px);
@@ -208,7 +224,6 @@
   flex-direction: column;
   gap: var(--sp-2);
   align-items: center;
-  /* Por encima de los asientos: la Muestra SIEMPRE visible (prioridad). */
   z-index: 5;
 }
 .muestraBox,
@@ -436,31 +451,30 @@
   align-items: center;
   gap: 3px;
 }
+/* La MUESTRA queda SIEMPRE clara y entera; el mazo (reverso) se apoya arriba a
+   la derecha tapando sólo una puntita/esquina. El contenedor toma el tamaño de
+   la muestra para que el solape sea proporcional en cualquier tamaño. */
 .pileStack {
   position: relative;
-  width: 100px;
-  height: 150px;
-  /* Mazo + muestra un poco más grandes que las cartas chicas de referencia. */
-  transform: scale(1.22);
+  display: inline-block;
+  transform: scale(1.18);
   transform-origin: center;
 }
-/* Muestra: abajo-izquierda, mayormente a la vista. */
 .pileMuestra {
-  position: absolute;
-  left: 14px;
-  top: 46px;
+  display: block;
+  position: relative;
   z-index: 1;
-  transform: rotate(-5deg);
+  transform: rotate(-4deg);
   filter: drop-shadow(0 4px 9px rgba(0, 0, 0, 0.6));
 }
-/* Mazo (reverso): arriba-derecha, en el mismo ángulo, tapando un poco la
-   muestra (algo más que la puntita, pero sin ocultar el palo/número). */
+/* Reverso: desplazado hacia arriba-derecha ⇒ sólo su esquina inferior-izquierda
+   pisa la punta superior-derecha de la muestra (el resto queda a la vista). */
 .pileMazo {
   position: absolute;
-  right: 0;
-  top: 0;
   z-index: 2;
-  transform: rotate(7deg);
+  top: -56%;
+  left: 60%;
+  transform: rotate(8deg);
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
