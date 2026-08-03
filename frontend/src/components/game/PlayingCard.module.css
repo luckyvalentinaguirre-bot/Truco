@@ -105,6 +105,19 @@
   --w: 116px;
 }
 
+/* Escala proporcional en pantallas chicas: la mano (lg) deja margen lateral
+   y no ocupa todo el ancho; las cartas jugadas (md) también se achican. */
+@media (max-width: 560px) {
+  .lg { --w: 92px; }
+  .md { --w: 72px; }
+  .sm { --w: 50px; }
+}
+@media (max-width: 380px) {
+  .lg { --w: 82px; }
+  .md { --w: 66px; }
+  .sm { --w: 46px; }
+}
+
 .interactive {
   cursor: pointer;
 }

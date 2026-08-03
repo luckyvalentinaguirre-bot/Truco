@@ -8,6 +8,7 @@ import {
   type TrucoCall,
 } from '@/game';
 import { Icon } from '@/components/ui';
+import { Avatar } from '@/components/ui/Avatar';
 import { loadSettings, type Difficulty, type Settings } from '@/services/settings';
 import { getMesaAsset } from '@/features/match/mesaAssets';
 import { useLocalMatch } from '@/features/match/useLocalMatch';
@@ -94,13 +95,14 @@ export function MatchPage() {
             <StatusBar status={status} banner={banner} />
           </div>
 
-          <ActionBar
-            seat={humanSeat}
-            options={options}
-            hasFlor={hasFlor}
-            respondingTo={respondingTo}
-            onAction={dispatch}
-          />
+          {/* Identidad del jugador, pegada a su mano (abajo) */}
+          <div className={styles.playerTag}>
+            <Avatar name="Vos" size={26} />
+            <span className={styles.playerName}>Vos</span>
+            {state.hand.manoSeat === humanSeat && (
+              <span className={styles.manoChip}>● de mano</span>
+            )}
+          </div>
 
           <PlayerHand
             hand={state.players[humanSeat].hand}
@@ -109,6 +111,14 @@ export function MatchPage() {
             selectedIndex={selected}
             onSelect={setSelected}
             onPlay={playCard}
+          />
+
+          <ActionBar
+            seat={humanSeat}
+            options={options}
+            hasFlor={hasFlor}
+            respondingTo={respondingTo}
+            onAction={dispatch}
           />
 
           <button className={styles.chat} disabled aria-label="Chat (próximamente)">

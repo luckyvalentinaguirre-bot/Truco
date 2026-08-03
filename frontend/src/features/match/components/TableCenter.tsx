@@ -49,36 +49,47 @@ function SunLogo() {
   );
 }
 
-/** Muestra + mazo (columna derecha), compartido por todos los modos. */
-function RightStack({ state, manoIsHuman }: { state: MatchState; manoIsHuman: boolean }) {
+/** Pila mazo + muestra (reverso tapando ~50% de la muestra por debajo). */
+function DeckPile({ state }: { state: MatchState }) {
   const { muestra } = state.hand;
   const muestraCat = cardCategory(muestra, muestra);
   const deckRemaining = 40 - state.players.length * 3 - 1;
+  return (
+    <div className={styles.pile}>
+      <span className={styles.boxLabel}>Mazo · Muestra</span>
+      <div className={styles.pileStack} aria-label="Mazo y muestra">
+        <span className={styles.pileMuestra}>
+          <PlayingCard card={muestra} size="sm" />
+        </span>
+        <span className={styles.pileMazo}>
+          <PlayingCard faceDown size="sm" />
+        </span>
+      </div>
+      <span className={styles.muestraSuit}>
+        {suitLabel(muestra.suit)}
+        {muestraCat === 'pieza' && <em className={styles.piezaTag}> · pieza</em>}
+        <span className={styles.mazoCount}> · {deckRemaining} en el mazo</span>
+      </span>
+    </div>
+  );
+}
+
+/** Columna derecha (mano + pila) — usada por 2v2/3v3. */
+function RightStack({ state, manoIsHuman }: { state: MatchState; manoIsHuman: boolean }) {
   return (
     <div className={styles.rightStack}>
       <div className={[styles.manoBox, styles.manoSide].join(' ')}>
         <span className={styles.manoLabel}>Mano</span>
         <span className={styles.manoWho}>{manoIsHuman ? 'Vos' : 'Rival'}</span>
       </div>
-      {/* Pila real: mazo (reverso) tapando ~50% de la muestra por debajo. */}
-      <div className={styles.pile}>
-        <span className={styles.boxLabel}>Mazo · Muestra</span>
-        <div className={styles.pileStack} aria-label="Mazo y muestra">
-          <span className={styles.pileMuestra}>
-            <PlayingCard card={muestra} size="sm" />
-          </span>
-          <span className={styles.pileMazo}>
-            <PlayingCard faceDown size="sm" />
-          </span>
-        </div>
-        <span className={styles.muestraSuit}>
-          {suitLabel(muestra.suit)}
-          {muestraCat === 'pieza' && <em className={styles.piezaTag}> · pieza</em>}
-          <span className={styles.mazoCount}> · {deckRemaining} en el mazo</span>
-        </span>
-      </div>
+      <DeckPile state={state} />
     </div>
   );
+}
+
+/** Chip pequeño "de mano" para ubicar cerca del jugador que corresponde. */
+function ManoChip() {
+  return <span className={styles.manoChip}>● de mano</span>;
 }
 
 function Pips({ state, humanTeam }: { state: MatchState; humanTeam: string }) {
@@ -113,29 +124,59 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
 
   return (
     <>
-      <div className={styles.rivalRow}>
-        <div className={styles.rivalInfo}>
-          <Avatar name="Rival IA" size={40} online />
-          <div>
-            <div className={styles.rivalName}>Rival IA</div>
-            <div className={styles.rivalTeam}>
+      {/* ── Zona del RIVAL (arriba): identidad + su mano boca abajo ── */}
+      <div className={styles.oppZone}>
+        <div className={styles.oppInfo}>
+          <Avatar name="Rival IA" size={38} online />
+          <div className={styles.oppText}>
+            <span className={styles.oppName}>
+              Rival IA {!manoIsHuman && <ManoChip />}
+            </span>
+            <span className={styles.oppTeam}>
               Equipo {state.players[aiSeat].team}
               {thinking && <em className={styles.think}> · pensando…</em>}
-            </div>
+            </span>
           </div>
         </div>
-        <div className={styles.rivalCards} aria-label={`${aiRemaining} cartas del rival`}>
+        <div className={styles.oppHand} aria-label={`${aiRemaining} cartas del rival`}>
           {Array.from({ length: aiRemaining }).map((_, i) => (
             <PlayingCard key={i} faceDown size="sm" />
           ))}
         </div>
-        <div className={[styles.manoBox, styles.manoTop].join(' ')}>
-          <span className={styles.manoLabel}>Mano</span>
-          <span className={styles.manoWho}>{manoIsHuman ? 'Vos' : 'Rival'}</span>
-        </div>
       </div>
 
+      {/* ── Superficie de la mesa: cartas jugadas enfrente de cada uno ── */}
       <div className={styles.playArea}>
+        <div className={styles.logo} aria-hidden="true">
+          <SunLogo />
+          <span className={styles.logoTitle}>TRUCO</span>
+          <span className={styles.logoSub}>URUGUAYO</span>
+        </div>
+
+        {/* Carta jugada por el RIVAL — enfrente suyo (arriba) */}
+        <div className={[styles.slotPlayed, styles.slotTop].join(' ')}>
+          {aiPlay ? (
+            <PlayingCard card={aiPlay} size="md" flip />
+          ) : (
+            <span className={styles.playGhost} />
+          )}
+        </div>
+
+        {/* Carta jugada por el JUGADOR — enfrente suyo (abajo) */}
+        <div className={[styles.slotPlayed, styles.slotBottom].join(' ')}>
+          {humanPlay ? (
+            <span className={styles.dropped}><PlayingCard card={humanPlay} size="md" /></span>
+          ) : (
+            <span className={styles.playGhost} />
+          )}
+        </div>
+
+        {/* Mazo + muestra integrados a la mesa (centro-derecha) */}
+        <div className={styles.deckArea}>
+          <DeckPile state={state} />
+        </div>
+
+        {/* Última baza (centro-izquierda) */}
         <div className={styles.ultimaBaza}>
           <span className={styles.boxLabel}>Última baza</span>
           <div className={styles.ultimaSlots}>
@@ -151,32 +192,7 @@ function Table1v1({ state, humanSeat, aiSeat, thinking }: TableCenterProps) {
           {!lastResolved && <span className={styles.ultimaEmpty}>Aún no hay bazas</span>}
         </div>
 
-        <div className={styles.center}>
-          <div className={styles.logo} aria-hidden="true">
-            <SunLogo />
-            <span className={styles.logoTitle}>TRUCO</span>
-            <span className={styles.logoSub}>URUGUAYO</span>
-          </div>
-          <div className={styles.baza}>
-            <div className={styles.aiSlot}>
-              {aiPlay ? (
-                <PlayingCard card={aiPlay} size="md" flip />
-              ) : (
-                <span className={styles.bazaGhost} />
-              )}
-            </div>
-            <div className={styles.humanSlot}>
-              {humanPlay ? (
-                <span className={styles.dropped}><PlayingCard card={humanPlay} size="md" /></span>
-              ) : (
-                <span className={styles.bazaGhost} />
-              )}
-            </div>
-          </div>
-          <Pips state={state} humanTeam={humanTeam} />
-        </div>
-
-        <RightStack state={state} manoIsHuman={manoIsHuman} />
+        <Pips state={state} humanTeam={humanTeam} />
       </div>
     </>
   );

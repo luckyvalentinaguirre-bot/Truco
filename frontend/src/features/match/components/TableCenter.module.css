@@ -66,11 +66,13 @@
   line-height: 1.1;
 }
 
-/* ===== Zona de juego ===== */
+/* ===== Zona de juego (superficie de la mesa) ===== */
 .playArea {
   position: relative;
   flex: 1;
-  min-height: 0;
+  /* No colapsar: garantiza separación vertical entre carta del rival (arriba)
+     y carta del jugador (abajo). */
+  min-height: clamp(150px, 30vh, 340px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,11 +85,12 @@
   color: var(--c-gold-soft);
 }
 
-/* Última baza (izquierda) */
+/* Última baza (centro-izquierda) */
 .ultimaBaza {
   position: absolute;
   left: clamp(6px, 3%, 48px);
-  top: clamp(4px, 3%, 28px);
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -176,11 +179,12 @@
 }
 .pips {
   position: absolute;
-  bottom: -22px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   display: flex;
   gap: 6px;
+  z-index: 1;
 }
 .pip {
   width: 11px;
@@ -433,4 +437,112 @@
   top: 0;
   left: 0;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+/* =====================================================================
+ * 1v1 — mesa vista desde arriba (zonas rival / mesa / jugador)
+ * ===================================================================== */
+.oppZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 2px;
+}
+.oppInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px 4px 6px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: var(--r-pill);
+}
+.oppText { display: flex; flex-direction: column; line-height: 1.12; }
+.oppName {
+  color: var(--c-cream);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.oppTeam { font-size: var(--fs-2xs); color: var(--c-text-mut); }
+.oppHand { display: flex; gap: 6px; }
+
+.selfZone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+.selfName {
+  color: var(--c-cream);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.manoChip {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--c-gold-soft);
+  font-weight: var(--fw-bold);
+  background: rgba(212, 175, 55, 0.16);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+
+/* Cartas jugadas: enfrente del rival (arriba) y del jugador (abajo) */
+.slotPlayed {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  z-index: 2;
+}
+.slotTop { top: 4px; }
+.slotBottom { bottom: 4px; }
+.playGhost {
+  width: 82px;
+  aspect-ratio: 5 / 8;
+  border-radius: var(--r-md);
+  border: 1px dashed rgba(212, 175, 55, 0.2);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* Mazo + muestra integrados a la mesa (centro-derecha) */
+.deckArea {
+  position: absolute;
+  right: clamp(6px, 4%, 54px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+}
+
+@media (max-width: 720px) {
+  .oppInfo { padding: 3px 10px 3px 5px; }
+  .deckArea {
+    right: 2px;
+    transform: translateY(-50%) scale(0.78);
+    transform-origin: right center;
+  }
+  .slotTop { top: 2px; }
+  .slotBottom { bottom: 2px; }
+}
+
+/* Pantallas de poca altura: achicar cartas jugadas para que entren las dos. */
+@media (max-height: 820px) {
+  .slotPlayed :global(.card) { --w: 74px; }
+}
+
+/* Móvil: zona de juego más compacta para que entren mano + acciones. */
+@media (max-width: 560px) {
+  .playArea { min-height: clamp(104px, 17vh, 190px); }
 }
