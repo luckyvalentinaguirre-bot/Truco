@@ -119,7 +119,7 @@ export function TableCenter({ state, humanSeat, aiSeat, thinking }: TableCenterP
           <div className={styles.baza}>
             <div className={styles.aiSlot}>
               {aiPlay ? (
-                <span className={styles.dropped}><PlayingCard card={aiPlay} size="md" /></span>
+                <PlayingCard card={aiPlay} size="md" flip />
               ) : (
                 <span className={styles.bazaGhost} />
               )}

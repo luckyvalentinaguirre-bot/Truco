@@ -1,5 +1,6 @@
-/* La carta es un SVG con viewBox fijo: escala sin recortarse jamás.
-   El tamaño lo fija el ancho; el alto sale del aspect-ratio 5:8. */
+/* La carta es el PNG real de la baraja. El ancho fija el tamaño; el alto
+   sale del aspect-ratio 5:8. La imagen se contiene (nunca se deforma ni se
+   recorta) y conserva su proporción original. */
 .card {
   --w: 88px;
   display: block;
@@ -10,15 +11,88 @@
   border: none;
   background: none;
   border-radius: 14px;
+  perspective: 800px;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
   transition: transform var(--dur-med) var(--ease-out),
     filter var(--dur-med) var(--ease-out);
 }
-.svg {
+.img {
   display: block;
   width: 100%;
   height: 100%;
-  overflow: visible;
+  object-fit: contain;
+  border-radius: 12px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ----- Volteo reverso → carta real ----- */
+.flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: flipIn 460ms var(--ease-out) both;
+}
+.face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.faceBack {
+  transform: rotateY(0deg);
+}
+.faceFront {
+  transform: rotateY(180deg);
+}
+@keyframes flipIn {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(180deg);
+  }
+}
+:global([data-animations='off']) .flip {
+  animation: none;
+}
+:global([data-animations='off']) .faceBack {
+  display: none;
+}
+:global([data-animations='off']) .faceFront {
+  transform: none; /* sin volteo: la carta real, derecha */
+}
+
+/* ----- Asset faltante: se informa cuál, NO se sustituye en silencio ----- */
+.missing {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  text-align: center;
+  border-radius: 12px;
+  border: 2px dashed #c0392b;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(192, 57, 43, 0.12),
+    rgba(192, 57, 43, 0.12) 6px,
+    rgba(192, 57, 43, 0.04) 6px,
+    rgba(192, 57, 43, 0.04) 12px
+  );
+}
+.missingLabel {
+  font-size: 9px;
+  line-height: 1.2;
+  color: #e74c3c;
+  word-break: break-word;
+  font-family: var(--font-mono, monospace);
 }
 
 .sm {
