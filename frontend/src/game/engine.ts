@@ -30,7 +30,7 @@ import {
 } from './envidoBetting';
 import { declareFlor } from './florBetting';
 import { calcEnvido } from './envido';
-import { calcFlor } from './flor';
+import { calcFlor, FLOR_BASE_POINTS } from './flor';
 import { addPoints, gameWinner } from './scoring';
 import { dealHand, nextSeat } from './setup';
 
@@ -360,15 +360,51 @@ function resolveEnvidoShowdown(state: MatchState): {
 function doCallFlor(state: MatchState, seat: Seat): Applied<MatchState> {
   const hand = state.hand;
   if (!state.ruleset.withFlor) throw new Error('Reglamento sin Flor');
+  if (hand.flor.resolved) throw new Error('La Flor ya fue resuelta');
   const player = state.players[seat];
+  if (player.folded) throw new Error('El jugador se fue al mazo');
+  if (player.played.length > 0) {
+    throw new Error('Ya jugaste: no podés cantar Flor');
+  }
+  if (!hand.envidoWindowOpen) throw new Error('La ventana de Flor está cerrada');
   if (!calcFlor(player.hand, hand.muestra).hasFlor) {
     throw new Error('El jugador no tiene Flor');
   }
-  const flor = declareFlor(hand.flor, player.team);
-  return {
-    state: { ...state, hand: { ...hand, flor } },
-    events: [{ type: 'FLOR_DECLARED', seat, team: player.team }],
-  };
+
+  // Se canta la Flor. Como es obligatoria y se muestra, se resuelve al
+  // instante comparando los valores reales de ambos bandos (el que canta
+  // primero dispara la comparación; el ganador se define por el tanto de
+  // flor más alto, no por quién cantó).
+  const declared = declareFlor(hand.flor, player.team);
+  const { winner, points } = resolveFlorShowdown(state);
+  const flor = { ...declared, resolved: true, callerTeam: player.team };
+  const score = addPoints(state.score, winner, points, state.ruleset);
+  const events: GameEvent[] = [
+    { type: 'FLOR_DECLARED', seat, team: player.team },
+    { type: 'FLOR_RESOLVED', winner, points },
+    { type: 'POINTS_AWARDED', team: winner, points, reason: 'flor' },
+  ];
+  return maybeGameOver({ ...state, score, hand: { ...hand, flor } }, events);
+}
+
+/**
+ * Showdown de Flor: gana el bando con la flor más alta (empate ⇒ mano).
+ * Una sola flor vale la base (3); si ambos bandos tienen flor, el ganador
+ * se lleva 3 por la propia + 3 por la contra (6 en 1v1).
+ */
+function resolveFlorShowdown(state: MatchState): { winner: TeamId; points: number } {
+  const muestra = state.hand.muestra;
+  const best: Record<TeamId, number> = { A: -1, B: -1 };
+  for (const p of state.players) {
+    if (p.folded) continue;
+    const f = calcFlor(p.hand, muestra);
+    if (f.hasFlor && f.value > best[p.team]) best[p.team] = f.value;
+  }
+  const teams = (['A', 'B'] as TeamId[]).filter((t) => best[t] >= 0);
+  const points = FLOR_BASE_POINTS * teams.length; // 3 una flor, 6 si hay dos
+  if (teams.length === 1) return { winner: teams[0], points };
+  if (best.A === best.B) return { winner: state.hand.manoTeam, points };
+  return { winner: best.A > best.B ? 'A' : 'B', points };
 }
 
 // -------------------------------------------------------------
