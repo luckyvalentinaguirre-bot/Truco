@@ -409,7 +409,9 @@
 }
 :global([data-animations='off']) .playedCardMulti { animation: none; }
 
-.playedAt_bottom { left: 50%; top: 73%; }
+/* La carta del humano se juega hacia el CENTRO (apenas debajo del medio), nunca
+   encima de su mano (que queda abajo de todo). */
+.playedAt_bottom { left: 50%; top: 50%; }
 .playedAt_top { left: 50%; top: 30%; }
 .playedAt_left { left: 28%; top: 50%; }
 .playedAt_right { left: 72%; top: 50%; }
@@ -437,8 +439,9 @@
   .seat_bottomRight .seatCards { flex-direction: row; }
 
   /* Anillo de cartas jugadas más compacto y hacia arriba (los asientos van
-     en la mitad superior; abajo quedan la mano y las acciones). */
-  .playedAt_bottom { top: 62%; }
+     en la mitad superior; abajo quedan la mano y las acciones). La carta del
+     humano queda hacia el centro, nunca sobre su mano. */
+  .playedAt_bottom { top: 46%; }
   .playedAt_top { top: 30%; }
   .playedAt_left { left: 30%; top: 44%; }
   .playedAt_right { left: 70%; top: 44%; }
