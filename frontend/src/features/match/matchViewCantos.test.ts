@@ -47,8 +47,11 @@ describe('anuncio de resultado del Envido: limpio, sin tantos de todos', () => {
     expect(ann).not.toBeNull();
     expect(ann!.kind).toBe('result');
     expect(ann!.title).toBe('Son buenas');
-    // No debe exponer los tantos individuales de cada jugador.
+    // No debe exponer los tantos individuales de cada jugador (nada de listas).
     expect(ann!.rows).toBeUndefined();
+    // Sí muestra el tanto GANADOR (tradicional) y los puntos ganados.
+    expect(ann!.verdict).toMatch(/\d+/);
+    expect(ann!.verdict).toContain('+2');
   });
 
   it('los cantos NO viajan por el anuncio central (van como burbuja)', () => {

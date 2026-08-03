@@ -201,6 +201,17 @@ export interface MatchAnnouncement {
   tone: 'call' | 'win' | 'lose' | 'neutral';
 }
 
+/** Mejor tanto de envido de un equipo (el número que "canta" el ganador). */
+function bestEnvidoOfTeam(state: MatchState, team: TeamId): number {
+  let best = 0;
+  for (const p of state.players) {
+    if (p.folded || p.team !== team) continue;
+    const v = calcEnvido(p.hand, state.hand.muestra).value;
+    if (v > best) best = v;
+  }
+  return best;
+}
+
 /**
  * Deriva un anuncio de un lote de eventos. Prioriza resultados (envido/flor
  * resueltos) sobre cantos. Puro: sólo lee el estado; no cambia reglas.
@@ -218,14 +229,17 @@ export function announcementFromEvents(
   for (let i = events.length - 1; i >= 0; i--) {
     const e = events[i];
     if (e.type === 'ENVIDO_RESOLVED') {
-      // Resultado limpio y tradicional: "Son buenas" (el que pierde reconoce
-      // que los tantos del otro son buenos). NO se muestran los tantos de
-      // cada jugador; el motor ya resolvió con esa info internamente.
+      // Resultado limpio y tradicional: se canta el tanto GANADOR y el otro
+      // reconoce "son buenas". Sólo el número del ganador (no la lista de
+      // tantos de todos); el motor ya resolvió con esa info internamente.
       const win = e.winner === humanTeam;
+      const tantos = bestEnvidoOfTeam(state, e.winner);
       return {
         kind: 'result',
         title: 'Son buenas',
-        verdict: win ? `Ganás el envido · +${e.points}` : `Gana el rival · +${e.points}`,
+        verdict: win
+          ? `Ganás con ${tantos} · +${e.points}`
+          : `Gana el rival con ${tantos} · +${e.points}`,
         tone: win ? 'win' : 'lose',
       };
     }

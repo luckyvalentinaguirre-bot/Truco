@@ -1,13 +1,13 @@
+/* Sin recuadro: los botones flotan directo sobre el paño (sin caja "Acciones"). */
 .panel {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--sp-2);
-  padding: var(--sp-2) var(--sp-4) var(--sp-3);
-  border-radius: var(--r-lg);
-  background: rgba(0, 0, 0, 0.32);
-  border: 1px solid rgba(212, 175, 55, 0.28);
-  box-shadow: var(--sh-md), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  padding: var(--sp-1) 0;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 .title {
   font-size: var(--fs-2xs);

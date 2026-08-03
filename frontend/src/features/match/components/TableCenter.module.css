@@ -348,14 +348,15 @@
 .seatCards :global(*) {
   --w: 42px !important;
 }
-/* Asientos horizontales: abanico como la mano del jugador (superpuesto). */
+/* Asientos horizontales: abanico como la mano del jugador, con las puntas
+   unidas ABAJO (pivote inferior) y abriéndose hacia arriba. */
 .seatCards:not(.seatCardsV) > * {
-  transform-origin: top center;
+  transform-origin: bottom center;
   margin: 0 -10px;
 }
-.seatCards:not(.seatCardsV) > *:nth-child(1) { transform: rotate(8deg) translateY(6px); }
+.seatCards:not(.seatCardsV) > *:nth-child(1) { transform: rotate(-8deg) translateY(7px); }
 .seatCards:not(.seatCardsV) > *:nth-child(2) { transform: rotate(0deg); }
-.seatCards:not(.seatCardsV) > *:nth-child(3) { transform: rotate(-8deg) translateY(6px); }
+.seatCards:not(.seatCardsV) > *:nth-child(3) { transform: rotate(8deg) translateY(7px); }
 /* Asientos verticales (izq./der.): apiladas en columna con leve solape. */
 .seatCardsV {
   flex-direction: column;
@@ -659,21 +660,22 @@
   .bubble_bottom { bottom: 16%; }
 }
 
-/* Cartas del rival en abanico (igual que la mano del jugador): superpuestas e
-   inclinadas, boca abajo, con pivote arriba. El reparto aterriza en la
-   posición de abanico (las mismas variables ⇒ sin salto). */
+/* Cartas del rival en abanico IDÉNTICO a la mano del jugador: superpuestas e
+   inclinadas, boca abajo, con las puntas unidas ABAJO (pivote inferior) y
+   abriéndose hacia arriba. El reparto aterriza en la posición de abanico (las
+   mismas variables ⇒ sin salto). */
 .dealCard {
   display: inline-block;
   --rot: 0deg;
   --ty: 0px;
   margin: 0 -14px;
-  transform-origin: top center;
+  transform-origin: bottom center;
   transform: rotate(var(--rot)) translateY(var(--ty));
   animation: dealInOpp 340ms var(--ease-out) backwards;
 }
-.dealCard:nth-child(1) { --rot: 9deg; --ty: 9px; animation-delay: 0ms; }
+.dealCard:nth-child(1) { --rot: -9deg; --ty: 12px; animation-delay: 0ms; }
 .dealCard:nth-child(2) { --rot: 0deg; --ty: 0px; animation-delay: 110ms; }
-.dealCard:nth-child(3) { --rot: -9deg; --ty: 9px; animation-delay: 220ms; }
+.dealCard:nth-child(3) { --rot: 9deg; --ty: 12px; animation-delay: 220ms; }
 @keyframes dealInOpp {
   from { opacity: 0; transform: translateY(-30px) scale(0.8) rotate(4deg); }
   to { opacity: 1; transform: rotate(var(--rot)) translateY(var(--ty)); }

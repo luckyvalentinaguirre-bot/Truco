@@ -48,7 +48,9 @@ export function ActionBar({
 
   return (
     <div className={styles.panel}>
-      <span className={styles.title}>{respondingTo ? `¿Querés el ${respondingTo}?` : 'Acciones'}</span>
+      {respondingTo && (
+        <span className={styles.title}>¿Querés el {respondingTo}?</span>
+      )}
 
       {!hasAny && <span className={styles.waiting}>Esperá tu turno…</span>}
 
