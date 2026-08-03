@@ -179,19 +179,92 @@ export function bannerFromEvents(
   const humanTeam = state.players[humanSeat].team;
   for (let i = events.length - 1; i >= 0; i--) {
     const e = events[i];
+    // Los resultados de Envido/Flor los muestra el anuncio grande
+    // (announcementFromEvents); acá sólo el resultado de la baza.
     if (e.type === 'TRICK_RESOLVED') {
       if (e.outcome === 'parda') return 'Parda';
       return e.outcome === humanTeam ? 'Ganaste la baza' : 'El rival ganó la baza';
     }
+  }
+  return null;
+}
+
+/** Anuncio grande y transitorio en la mesa (canto o resultado). */
+export interface MatchAnnouncement {
+  kind: 'canto' | 'result';
+  /** 'Vos' | 'Rival' — quién originó el anuncio. */
+  who?: string;
+  subtitle?: string;
+  title: string;
+  rows?: { label: string; value: number; you: boolean }[];
+  verdict?: string;
+  tone: 'call' | 'win' | 'lose' | 'neutral';
+}
+
+function bestByTeam(state: MatchState, team: TeamId): number {
+  let best = -1;
+  for (const p of state.players) {
+    if (p.folded || p.team !== team) continue;
+    const v = calcEnvido(p.hand, state.hand.muestra).value;
+    if (v > best) best = v;
+  }
+  return best;
+}
+
+/**
+ * Deriva un anuncio de un lote de eventos. Prioriza resultados (envido/flor
+ * resueltos) sobre cantos. Puro: sólo lee el estado; no cambia reglas.
+ */
+export function announcementFromEvents(
+  events: GameEvent[],
+  state: MatchState,
+  humanSeat: Seat,
+): MatchAnnouncement | null {
+  const humanTeam = state.players[humanSeat].team;
+  const rivalTeam: TeamId = humanTeam === 'A' ? 'B' : 'A';
+  const whoOf = (seat: Seat) =>
+    state.players[seat].team === humanTeam ? 'Vos' : 'Rival';
+
+  // 1) Resultados (tienen prioridad visual).
+  for (let i = events.length - 1; i >= 0; i--) {
+    const e = events[i];
     if (e.type === 'ENVIDO_RESOLVED') {
-      return e.winner === humanTeam
-        ? `Ganaste el Envido (+${e.points})`
-        : `El rival ganó el Envido (+${e.points})`;
+      const you = bestByTeam(state, humanTeam);
+      const rival = bestByTeam(state, rivalTeam);
+      const win = e.winner === humanTeam;
+      return {
+        kind: 'result',
+        title: 'Envido',
+        rows: [
+          { label: 'Vos', value: you, you: true },
+          { label: 'Rival', value: rival, you: false },
+        ],
+        verdict: win ? `¡Es buena!  +${e.points}` : `Es del rival  +${e.points}`,
+        tone: win ? 'win' : 'lose',
+      };
     }
     if (e.type === 'FLOR_RESOLVED') {
-      return e.winner === humanTeam
-        ? `Ganaste la Flor (+${e.points})`
-        : `El rival ganó la Flor (+${e.points})`;
+      const win = e.winner === humanTeam;
+      return {
+        kind: 'result',
+        title: 'Flor',
+        verdict: win ? `¡Flor tuya!  +${e.points}` : `Flor del rival  +${e.points}`,
+        tone: win ? 'win' : 'lose',
+      };
+    }
+  }
+
+  // 2) Cantos (último del lote).
+  for (let i = events.length - 1; i >= 0; i--) {
+    const e = events[i];
+    if (e.type === 'TRUCO_CALLED') {
+      return { kind: 'canto', who: whoOf(e.seat), subtitle: 'canta', title: TRUCO_LABEL[e.call], tone: 'call' };
+    }
+    if (e.type === 'ENVIDO_CALLED') {
+      return { kind: 'canto', who: whoOf(e.seat), subtitle: 'canta', title: ENVIDO_LABEL[e.call], tone: 'call' };
+    }
+    if (e.type === 'FLOR_DECLARED') {
+      return { kind: 'canto', who: whoOf(e.seat), subtitle: 'canta', title: 'Flor', tone: 'call' };
     }
   }
   return null;

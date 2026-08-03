@@ -24,6 +24,7 @@ import { TableCenter } from '@/features/match/components/TableCenter';
 import { PlayerHand } from '@/features/match/components/PlayerHand';
 import { ActionBar } from '@/features/match/components/ActionBar';
 import { StatusBar } from '@/features/match/components/StatusBar';
+import { Announcement } from '@/features/match/components/Announcement';
 import { GameOverModal } from '@/features/match/components/EndModals';
 import styles from './MatchPage.module.css';
 
@@ -33,7 +34,7 @@ export function MatchPage() {
   const difficulty: Difficulty = navState?.difficulty ?? loadSettings().difficulty;
   const mode: GameMode = navState?.mode ?? '1v1';
 
-  const { state, humanSeat, aiSeat, banner, handFeedback, dispatch, restart } =
+  const { state, humanSeat, aiSeat, banner, announcement, handFeedback, dispatch, restart } =
     useLocalMatch(difficulty, mode);
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -119,6 +120,8 @@ export function MatchPage() {
               <span className={styles.feedback}>{handFeedback}</span>
             </div>
           )}
+
+          <Announcement data={announcement} />
         </div>
       </div>
 

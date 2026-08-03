@@ -24,7 +24,7 @@ import {
 } from '@/game';
 import type { Difficulty } from '@/services/settings';
 import { playSound, type SoundName } from '@/services/sound';
-import { bannerFromEvents } from './matchView';
+import { bannerFromEvents, announcementFromEvents, type MatchAnnouncement } from './matchView';
 
 const HUMAN_SEAT: Seat = 0;
 const AI_STEP_MS = 750;
@@ -62,6 +62,7 @@ export function useLocalMatch(
     createMatch({ mode, seed: randomSeed() }),
   );
   const [banner, setBanner] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState<MatchAnnouncement | null>(null);
   const [handFeedback, setHandFeedback] = useState<string | null>(null);
   const handEvents = useRef<GameEvent[]>([]);
 
@@ -91,6 +92,8 @@ export function useLocalMatch(
         }
         const b = bannerFromEvents(events, next, HUMAN_SEAT);
         if (b) setBanner(b);
+        const ann = announcementFromEvents(events, next, HUMAN_SEAT);
+        if (ann) setAnnouncement(ann);
         return next;
       });
     },
@@ -174,11 +177,20 @@ export function useLocalMatch(
     return () => clearTimeout(t);
   }, [banner]);
 
+  // -------- Auto-ocultar el anuncio (canto / resultado) --------
+  useEffect(() => {
+    if (!announcement) return;
+    const ms = announcement.kind === 'result' ? 2600 : 1700;
+    const t = setTimeout(() => setAnnouncement(null), ms);
+    return () => clearTimeout(t);
+  }, [announcement]);
+
   return {
     state,
     humanSeat,
     aiSeat,
     banner,
+    announcement,
     handFeedback,
     dispatch,
     restart,

@@ -404,3 +404,33 @@
   .play_bottomLeft { transform: translate(calc(-50% - 48px), calc(-50% + 34px)); }
   .play_bottomRight { transform: translate(calc(-50% + 48px), calc(-50% + 34px)); }
 }
+
+/* ---- Pila mazo + muestra (el mazo tapa ~50% de la muestra) ---- */
+.pile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--sp-2) var(--sp-2) 4px;
+  border-radius: var(--r-md);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+}
+.pileStack {
+  position: relative;
+  width: 76px;
+  height: 138px;
+}
+.pileMuestra {
+  position: absolute;
+  top: 44px;
+  left: 14px;
+  transform: rotate(9deg);
+  filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.55));
+}
+.pileMazo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
