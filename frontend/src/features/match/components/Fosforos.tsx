@@ -7,9 +7,11 @@
 import styles from './Fosforos.module.css';
 
 interface FosforosProps {
-  /** Puntos de la mitad actual (0..20). */
+  /** Puntos de la mitad actual (0..max). */
   points: number;
   color?: string;
+  /** Cantidad de cuadros a dibujar (cada uno = 5 puntos). Por defecto 4 (=20). */
+  boxes?: number;
 }
 
 // Trazos de un cuadro (caja 24×24), en el orden en que se anotan.
@@ -54,11 +56,16 @@ function Cuadro({ strokes, color }: { strokes: number; color: string }) {
   );
 }
 
-export function Fosforos({ points, color = 'var(--c-gold-soft)' }: FosforosProps) {
-  const p = Math.max(0, Math.min(20, points));
+export function Fosforos({
+  points,
+  color = 'var(--c-gold-soft)',
+  boxes = 4,
+}: FosforosProps) {
+  const n = Math.max(1, boxes);
+  const p = Math.max(0, Math.min(n * 5, points));
   return (
     <span className={styles.row} role="img" aria-label={`${p} puntos`}>
-      {[0, 1, 2, 3].map((i) => {
+      {Array.from({ length: n }, (_, i) => {
         const strokes = Math.max(0, Math.min(5, p - i * 5));
         return <Cuadro key={i} strokes={strokes} color={color} />;
       })}

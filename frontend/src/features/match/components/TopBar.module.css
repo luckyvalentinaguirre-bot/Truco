@@ -91,14 +91,40 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   line-height: 1.05;
   min-width: 84px;
 }
-.zone {
-  font-size: var(--fs-2xs);
+/* Fila con las dos zonas del tanteador (Malas | Buenas). */
+.sticks {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.zoneBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 6px 2px;
+  border-radius: var(--r-sm);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+/* La zona de Buenas se resalta con borde dorado. */
+.buenasBox {
+  border-color: rgba(212, 175, 55, 0.3);
+}
+/* Cuando el equipo ya está en Buenas, se atenúan las Malas (completas). */
+.zoneBox.done {
+  opacity: 0.55;
+}
+.zoneLbl {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
   color: var(--c-text-mut);
-  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
 }
 .team {
   font-size: var(--fs-2xs);
@@ -248,9 +274,6 @@
   }
   /* En celular no hace falta el "A 40" del medio: se gana lugar. */
   .mid {
-    display: none;
-  }
-  .zone {
     display: none;
   }
 }

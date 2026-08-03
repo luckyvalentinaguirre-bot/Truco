@@ -20,9 +20,12 @@ export function TopBar({ state, humanSeat }: TopBarProps) {
   const humanTeam: TeamId = state.players[humanSeat].team;
   const rivalTeam: TeamId = humanTeam === 'A' ? 'B' : 'A';
   const malas = state.ruleset.malas;
+  const malasBoxes = Math.ceil(malas / 5);
+  const buenasBoxes = Math.ceil((state.ruleset.targetPoints - malas) / 5);
 
-  const half = (pts: number) => (pts >= malas ? pts - malas : pts);
-  const zone = (pts: number) => (pts >= malas ? 'Buenas' : 'Malas');
+  const enBuenas = (pts: number) => pts >= malas;
+  const malasPts = (pts: number) => Math.min(pts, malas);
+  const buenasPts = (pts: number) => Math.max(0, pts - malas);
 
   const toggleSound = () => {
     const next = !sound;
@@ -81,28 +84,56 @@ export function TopBar({ state, humanSeat }: TopBarProps) {
 
       <div className={styles.marcador}>
         <div className={styles.side}>
-          <span className={[styles.team, styles.vos].join(' ')}>Vos</span>
+          <span className={[styles.team, styles.vos].join(' ')}>Nosotros</span>
           <span className={styles.sticks}>
-            <Fosforos points={half(state.score[humanTeam])} />
+            <span
+              className={[styles.zoneBox, enBuenas(state.score[humanTeam]) ? styles.done : ''].join(' ')}
+            >
+              <Fosforos
+                points={malasPts(state.score[humanTeam])}
+                boxes={malasBoxes}
+                color="var(--c-noquiero)"
+              />
+              <span className={styles.zoneLbl}>Malas</span>
+            </span>
+            <span className={[styles.zoneBox, styles.buenasBox].join(' ')}>
+              <Fosforos
+                points={buenasPts(state.score[humanTeam])}
+                boxes={buenasBoxes}
+                color="var(--c-gold-soft)"
+              />
+              <span className={styles.zoneLbl}>Buenas</span>
+            </span>
           </span>
           <span className={styles.num}>{state.score[humanTeam]}</span>
-          <span className={styles.zone}>
-            {zone(state.score[humanTeam])} · {state.score[humanTeam]}
-          </span>
         </div>
         <div className={styles.mid}>
           <span className={styles.dash}>—</span>
           <span className={styles.target}>A {state.ruleset.targetPoints}</span>
         </div>
         <div className={styles.side}>
-          <span className={[styles.team, styles.rival].join(' ')}>Rival</span>
+          <span className={[styles.team, styles.rival].join(' ')}>Ellos</span>
           <span className={styles.sticks}>
-            <Fosforos points={half(state.score[rivalTeam])} color="var(--c-cream)" />
+            <span
+              className={[styles.zoneBox, enBuenas(state.score[rivalTeam]) ? styles.done : ''].join(' ')}
+            >
+              <Fosforos
+                points={malasPts(state.score[rivalTeam])}
+                boxes={malasBoxes}
+                color="var(--c-noquiero)"
+              />
+              <span className={styles.zoneLbl}>Malas</span>
+            </span>
+            <span className={[styles.zoneBox, styles.buenasBox].join(' ')}>
+              <Fosforos
+                points={buenasPts(state.score[rivalTeam])}
+                boxes={buenasBoxes}
+                color="var(--c-cream)"
+              />
+              <span className={styles.zoneLbl}>Buenas</span>
+            </span>
           </span>
           <span className={styles.num}>{state.score[rivalTeam]}</span>
-          <span className={styles.zone}>
-            {zone(state.score[rivalTeam])} · {state.score[rivalTeam]}
-          </span>
         </div>
       </div>
 
