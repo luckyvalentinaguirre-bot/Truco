@@ -179,6 +179,9 @@ export function useLocalMatch(
     if (state.phase !== 'playing' || state.hand.finished) return;
     if (!state.ruleset.withFlor || state.hand.flor.resolved) return;
     if (!state.hand.envidoWindowOpen) return;
+    // Si ya hay un duelo de flores abierto, lo maneja el driver normal (la IA
+    // responde por turno); no volver a declarar.
+    if (state.hand.flor.pendingCall) return;
     // Cualquier asiento de IA con flor sin declarar la reclama.
     const ai = state.players.find(
       (p) =>

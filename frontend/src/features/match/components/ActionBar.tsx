@@ -3,8 +3,10 @@ import type { Action, Seat } from '@/game';
 import {
   TRUCO_LABEL,
   ENVIDO_LABEL,
+  FLOR_LABEL,
   trucoAction,
   envidoAction,
+  florAction,
   type HumanOptions,
 } from '../matchView';
 import styles from './ActionBar.module.css';
@@ -42,6 +44,7 @@ export function ActionBar({
     options.trucoCalls.length > 0 ||
     options.envidoCalls.length > 0 ||
     options.canFlor ||
+    options.florCalls.length > 0 ||
     options.canFold ||
     options.canAccept ||
     options.canDecline;
@@ -134,6 +137,17 @@ export function ActionBar({
               Flor
             </button>
           )}
+
+          {/* Subidas de Flor (Contraflor al resto) al responder un duelo. */}
+          {options.florCalls.map((call) => (
+            <button
+              key={call}
+              className={[styles.btn, styles.flor].join(' ')}
+              onClick={() => onAction(florAction(seat, call))}
+            >
+              {FLOR_LABEL[call]}
+            </button>
+          ))}
 
           {/* Cantos de truco */}
           {options.trucoCalls.map((call) => (

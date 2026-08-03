@@ -69,17 +69,67 @@ describe('Puntaje de la Flor (motor)', () => {
     expect(events.some((e) => e.type === 'FLOR_RESOLVED')).toBe(true);
   });
 
-  it('flor disputada ⇒ gana la más alta y suma 6 (aunque cante el perdedor)', () => {
+  it('flor disputada: se abre el duelo; al aceptar gana la más alta y suma 6', () => {
     const s = forced(
       [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor = 36
       [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')], // flor = 38
       c(1, 'oro'),
     );
     const teamB = s.players[1].team;
-    // Canta el que tiene la flor MÁS BAJA (asiento 0); igual gana el rival.
-    const { state } = applyAction(s, { type: 'CALL_FLOR', seat: 0 });
-    expect(state.score[teamB]).toBe(6);
-    expect(state.score[s.players[0].team]).toBe(0);
+    // Canta el que tiene la flor MÁS BAJA (asiento 0): NO se resuelve todavía.
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    expect(s1.hand.flor.pendingCall).toBe('flor');
+    expect(s1.score[teamB]).toBe(0);
+    // El rival con flor (asiento 1) acepta el duelo ⇒ gana la más alta (+6).
+    const s2 = applyAction(s1, { type: 'ACCEPT', seat: 1 }).state;
+    expect(s2.hand.flor.resolved).toBe(true);
+    expect(s2.score[teamB]).toBe(6);
+    expect(s2.score[s.players[0].team]).toBe(0);
+  });
+
+  it('Contraflor al resto QUERIDA ⇒ la flor más alta gana la falta', () => {
+    const s = forced(
+      [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor = 36
+      [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')], // flor = 38
+      c(1, 'oro'),
+    );
+    const teamB = s.players[1].team;
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    // El rival (asiento 1) sube a Contraflor al resto.
+    const s2 = applyAction(s1, {
+      type: 'CALL_FLOR',
+      seat: 1,
+      call: 'contraflor_resto',
+    }).state;
+    expect(s2.hand.flor.pendingCall).toBe('contraflor_resto');
+    // El que cantó primero (asiento 0) acepta ⇒ gana la flor más alta (B) por
+    // la falta (targetPoints - líder = 40 con marcador 0-0).
+    const s3 = applyAction(s2, { type: 'ACCEPT', seat: 0 });
+    expect(s3.state.hand.flor.resolved).toBe(true);
+    // La partida se define: B alcanza el objetivo.
+    expect(s3.state.score[teamB]).toBeGreaterThanOrEqual(40);
+    expect(s3.state.phase).toBe('finished');
+  });
+
+  it('Contraflor al resto NO QUERIDA ⇒ el que la cantó se lleva 6', () => {
+    const s = forced(
+      [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')], // flor = 36
+      [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')], // flor = 38
+      c(1, 'oro'),
+    );
+    const teamB = s.players[1].team;
+    const teamA = s.players[0].team;
+    const s1 = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    const s2 = applyAction(s1, {
+      type: 'CALL_FLOR',
+      seat: 1,
+      call: 'contraflor_resto',
+    }).state;
+    // El asiento 0 NO quiere ⇒ el que cantó Contraflor (B) se lleva 6.
+    const s3 = applyAction(s2, { type: 'DECLINE', seat: 0 }).state;
+    expect(s3.hand.flor.resolved).toBe(true);
+    expect(s3.score[teamB]).toBe(6);
+    expect(s3.score[teamA]).toBe(0);
   });
 
   it('no se puede cantar Flor sin tenerla', () => {

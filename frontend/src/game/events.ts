@@ -5,7 +5,7 @@
  * La UI (y en el futuro el cliente de red) los usa para animar y
  * mostrar mensajes. Los eventos son un registro, no deciden nada.
  * ============================================================= */
-import type { Card, EnvidoCall, Seat, TeamId, TrickOutcome, TrucoCall } from './types';
+import type { Card, EnvidoCall, FlorCall, Seat, TeamId, TrickOutcome, TrucoCall } from './types';
 
 export type GameEvent =
   | { type: 'CARD_PLAYED'; seat: Seat; card: Card }
@@ -13,6 +13,7 @@ export type GameEvent =
   | { type: 'TRUCO_CALLED'; seat: Seat; call: TrucoCall }
   | { type: 'ENVIDO_CALLED'; seat: Seat; call: EnvidoCall }
   | { type: 'FLOR_DECLARED'; seat: Seat; team: TeamId }
+  | { type: 'FLOR_CONTRA_CALLED'; seat: Seat; call: FlorCall }
   | { type: 'CALL_ACCEPTED'; seat: Seat }
   | { type: 'CALL_DECLINED'; seat: Seat }
   | { type: 'ENVIDO_RESOLVED'; winner: TeamId; points: number }

@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { createMatch, applyAction, calcEnvido, type Seat, type GameEvent } from '@/game';
+import {
+  createMatch,
+  applyAction,
+  calcEnvido,
+  type Card,
+  type MatchState,
+  type Seat,
+  type GameEvent,
+} from '@/game';
 import {
   bubblesFromEvents,
   announcementFromEvents,
@@ -101,6 +109,47 @@ describe('narración del Envido (tradicional, en orden de mano)', () => {
     const numeros = narr.filter((b) => b.text !== 'Son buenas').length;
     expect(numeros).toBeGreaterThanOrEqual(1);
     expect(buenas).toBeLessThanOrEqual(1);
+  });
+});
+
+describe('Contraflor: el view-model ofrece la subida al responder un duelo', () => {
+  const c = (rank: number, suit: string): Card => ({
+    rank: rank as Card['rank'],
+    suit: suit as Card['suit'],
+  });
+  function florDuel(): MatchState {
+    const base = createMatch({ mode: '1v1', seed: 1 });
+    const s: MatchState = {
+      ...base,
+      players: base.players.map((p, i) => ({
+        ...p,
+        hand:
+          i === 0
+            ? [c(7, 'basto'), c(6, 'basto'), c(3, 'basto')] // flor 36
+            : [c(7, 'copa'), c(6, 'copa'), c(5, 'copa')], // flor 38
+        played: [],
+        folded: false,
+      })),
+      hand: { ...base.hand, muestra: c(1, 'oro'), envidoWindowOpen: true },
+    };
+    // Asiento 0 declara flor ⇒ se abre el duelo, responde el asiento 1.
+    return applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+  }
+
+  it('el que responde puede aceptar o subir a Contraflor al resto', () => {
+    const s = florDuel();
+    const opts = humanOptions(s, 1);
+    expect(opts.canAccept).toBe(true);
+    expect(opts.florCalls).toContain('contraflor_resto');
+    // Aún no jugó nadie ⇒ no hay cartas jugables durante la fase de flor.
+    expect(opts.playableCardIds).toEqual([]);
+  });
+
+  it('el que cantó la flor NO ve opciones mientras espera respuesta', () => {
+    const s = florDuel();
+    const opts = humanOptions(s, 0);
+    expect(opts.florCalls).toEqual([]);
+    expect(opts.canAccept).toBe(false);
   });
 });
 

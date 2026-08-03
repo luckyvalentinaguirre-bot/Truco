@@ -17,6 +17,7 @@ import {
   piezaCardKeys,
   TRUCO_LABEL,
   ENVIDO_LABEL,
+  FLOR_LABEL,
 } from '@/features/match/matchView';
 import { TopBar } from '@/features/match/components/TopBar';
 import { TableCenter } from '@/features/match/components/TableCenter';
@@ -68,8 +69,10 @@ export function MatchPage() {
   const respondingTo = humanMustRespond
     ? pending!.kind === 'truco'
       ? TRUCO_LABEL[state.hand.truco.level as TrucoCall] ?? 'Truco'
-      : ENVIDO_LABEL[state.hand.envido.calls[state.hand.envido.calls.length - 1]] ??
-        'Envido'
+      : pending!.kind === 'flor'
+        ? FLOR_LABEL[state.hand.flor.call] ?? 'Flor'
+        : ENVIDO_LABEL[state.hand.envido.calls[state.hand.envido.calls.length - 1]] ??
+          'Envido'
     : null;
 
   const playCard = (card: Card) => {

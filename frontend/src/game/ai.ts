@@ -70,6 +70,22 @@ export function chooseAiAction(
     const accept = legal.find((a) => a.type === 'ACCEPT');
     const decline = legal.find((a) => a.type === 'DECLINE');
 
+    if (pending.kind === 'flor') {
+      const florValue = calcFlor(hand, muestra).value;
+      const contra = legal.find(
+        (a) => a.type === 'CALL_FLOR' && a.call === 'contraflor_resto',
+      );
+      if (contra) {
+        // Responder a la flor simple: con flor muy alta, subir a Contraflor
+        // al resto; si no, aceptar el duelo (mostrar y comparar).
+        if (florValue >= 38 && rng() < 0.5) return contra;
+        return accept ?? contra;
+      }
+      // Responder a una Contraflor al resto: aceptar sólo con flor alta.
+      if (accept && decline) return florValue >= 35 ? accept : decline;
+      return accept ?? decline ?? legal[0];
+    }
+
     if (pending.kind === 'envido') {
       const raises = legal.filter((a) => a.type === 'CALL_ENVIDO');
       if (envido >= 31 && raises.length > 0 && rng() < 0.45) return pick(raises, rng);

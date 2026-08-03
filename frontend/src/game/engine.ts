@@ -11,7 +11,7 @@
 import type { Action } from './actions';
 import type { GameEvent, Applied } from './events';
 import type { HandState, MatchState, Player, Trick } from './state';
-import type { Card, Seat, TeamId } from './types';
+import type { Card, FlorCall, Seat, TeamId } from './types';
 import { sameCard } from './deck';
 import { resolveTrick, resolveHand, type Play } from './tricks';
 import {
@@ -28,8 +28,15 @@ import {
   declineEnvido,
   envidoPointsAtStake,
 } from './envidoBetting';
-import { declareFlor } from './florBetting';
-import { calcEnvido } from './envido';
+import {
+  declareFlor,
+  openFlorDuel,
+  canCallContraflor,
+  callContraflor,
+  canRespondFlor,
+  FLOR_CONTESTED_POINTS,
+} from './florBetting';
+import { calcEnvido, faltaEnvidoPoints } from './envido';
 import { calcFlor, FLOR_BASE_POINTS } from './flor';
 import { addPoints, gameWinner } from './scoring';
 import { dealHand, nextSeat, manoRank } from './setup';
@@ -50,13 +57,15 @@ function activeSeats(state: MatchState): Seat[] {
 }
 
 /** ¿Hay algún canto esperando respuesta? */
-export type PendingKind = 'truco' | 'envido';
+export type PendingKind = 'truco' | 'envido' | 'flor';
 export interface PendingInfo {
   kind: PendingKind;
   callerTeam: TeamId;
 }
 
 function pendingResponse(hand: HandState): PendingInfo | null {
+  // La Flor tiene prioridad: su fase se resuelve antes que Envido/Truco.
+  if (hand.flor.pendingCall) return { kind: 'flor', callerTeam: hand.flor.callerTeam! };
   if (hand.truco.pending) return { kind: 'truco', callerTeam: hand.truco.callerTeam! };
   if (hand.envido.pending) return { kind: 'envido', callerTeam: hand.envido.callerTeam! };
   return null;
@@ -92,6 +101,25 @@ export function isLegal(state: MatchState, action: Action): boolean {
 export function responderSeat(state: MatchState): Seat | null {
   const pending = pendingResponse(state.hand);
   if (!pending) return null;
+
+  // Flor: responde el jugador CON FLOR del equipo rival más mano.
+  if (pending.kind === 'flor') {
+    const n = state.players.length;
+    const holders = state.players.filter(
+      (p) =>
+        !p.folded &&
+        p.team !== pending.callerTeam &&
+        calcFlor(p.hand, state.hand.muestra).hasFlor,
+    );
+    if (holders.length === 0) return null;
+    holders.sort(
+      (a, b) =>
+        manoRank(a.seat, state.hand.manoSeat, n) -
+        manoRank(b.seat, state.hand.manoSeat, n),
+    );
+    return holders[0].seat;
+  }
+
   const seat = state.players.find(
     (p) => !p.folded && p.team !== pending.callerTeam,
   )?.seat;
@@ -122,6 +150,7 @@ export function legalActions(state: MatchState, seat: Seat): Action[] {
     { type: 'CALL_ENVIDO', seat, call: 'real_envido' },
     { type: 'CALL_ENVIDO', seat, call: 'falta_envido' },
     { type: 'CALL_FLOR', seat },
+    { type: 'CALL_FLOR', seat, call: 'contraflor_resto' },
     { type: 'ACCEPT', seat },
     { type: 'DECLINE', seat },
     { type: 'FOLD', seat },
@@ -150,7 +179,7 @@ export function applyAction(state: MatchState, action: Action): Applied<MatchSta
     case 'CALL_ENVIDO':
       return doCallEnvido(state, action.seat, action.call);
     case 'CALL_FLOR':
-      return doCallFlor(state, action.seat);
+      return doCallFlor(state, action.seat, action.call ?? 'flor');
     case 'ACCEPT':
       return doAccept(state, action.seat);
     case 'DECLINE':
@@ -282,6 +311,9 @@ function doCallTruco(
 ): Applied<MatchState> {
   const hand = state.hand;
   const team = state.players[seat].team;
+  if (hand.flor.pendingCall) {
+    throw new Error('Resolvé primero la Flor pendiente');
+  }
   if (hand.envido.pending) {
     throw new Error('Resolvé primero el Envido pendiente');
   }
@@ -307,6 +339,9 @@ function doCallEnvido(
   const hand = state.hand;
   const team = state.players[seat].team;
 
+  if (hand.flor.pendingCall) {
+    throw new Error('Resolvé primero la Flor pendiente');
+  }
   if (!hand.envidoWindowOpen && hand.envido.calls.length === 0) {
     throw new Error('La ventana de Envido está cerrada');
   }
@@ -393,30 +428,90 @@ function resolveEnvidoShowdown(state: MatchState): { winner: TeamId } {
 // FLOR
 // -------------------------------------------------------------
 
-function doCallFlor(state: MatchState, seat: Seat): Applied<MatchState> {
+/** Jugadores del equipo rival a `team` que TIENEN flor (para saber si hay duelo). */
+function rivalFlorHolders(state: MatchState, team: TeamId): Player[] {
+  return state.players.filter(
+    (p) =>
+      !p.folded &&
+      p.team !== team &&
+      calcFlor(p.hand, state.hand.muestra).hasFlor,
+  );
+}
+
+function doCallFlor(
+  state: MatchState,
+  seat: Seat,
+  call: FlorCall,
+): Applied<MatchState> {
   const hand = state.hand;
+  const player = state.players[seat];
   if (!state.ruleset.withFlor) throw new Error('Reglamento sin Flor');
   if (hand.flor.resolved) throw new Error('La Flor ya fue resuelta');
-  const player = state.players[seat];
   if (player.folded) throw new Error('El jugador se fue al mazo');
-  if (player.played.length > 0) {
-    throw new Error('Ya jugaste: no podés cantar Flor');
-  }
-  if (!hand.envidoWindowOpen) throw new Error('La ventana de Flor está cerrada');
   if (!calcFlor(player.hand, hand.muestra).hasFlor) {
     throw new Error('El jugador no tiene Flor');
   }
 
-  // Se canta la Flor. Como es obligatoria y se muestra, se resuelve al
-  // instante comparando los valores reales de ambos bandos (el que canta
-  // primero dispara la comparación; el ganador se define por el tanto de
-  // flor más alto, no por quién cantó).
+  // ---- Subir a Contraflor al resto (respuesta a una flor rival) ----
+  if (call !== 'flor') {
+    if (!canCallContraflor(hand.flor, player.team, call)) {
+      throw new Error('No se puede cantar Contraflor ahora');
+    }
+    const flor = callContraflor(hand.flor, player.team, call);
+    return {
+      state: { ...state, hand: { ...hand, flor } },
+      events: [{ type: 'FLOR_CONTRA_CALLED', seat, call }],
+    };
+  }
+
+  // ---- Declaración inicial de Flor ----
+  if (hand.flor.pendingCall) throw new Error('Ya hay una Flor en juego');
+  if (player.played.length > 0) {
+    throw new Error('Ya jugaste: no podés cantar Flor');
+  }
+  if (!hand.envidoWindowOpen) throw new Error('La ventana de Flor está cerrada');
+  if (hand.flor.declaredBy.includes(player.team)) {
+    throw new Error('Tu equipo ya declaró la Flor');
+  }
+
   const declared = declareFlor(hand.flor, player.team);
+
+  // Si el equipo rival también tiene flor, se abre el duelo (queda esperando
+  // su respuesta: aceptar o subir a Contraflor al resto). Si no, se resuelve
+  // al instante como flor simple (+3).
+  if (rivalFlorHolders(state, player.team).length > 0) {
+    const flor = openFlorDuel(declared, player.team);
+    return {
+      state: { ...state, hand: { ...hand, flor } },
+      events: [{ type: 'FLOR_DECLARED', seat, team: player.team }],
+    };
+  }
+
   const { winner, points } = resolveFlorShowdown(state);
   const flor = { ...declared, resolved: true, callerTeam: player.team };
   const score = addPoints(state.score, winner, points, state.ruleset);
   const events: GameEvent[] = [
     { type: 'FLOR_DECLARED', seat, team: player.team },
+    { type: 'FLOR_RESOLVED', winner, points },
+    { type: 'POINTS_AWARDED', team: winner, points, reason: 'flor' },
+  ];
+  return maybeGameOver({ ...state, score, hand: { ...hand, flor } }, events);
+}
+
+/** Resuelve el duelo de flores en el nivel aceptado (Flor=6, Resto=falta). */
+function resolveFlorDuel(
+  state: MatchState,
+  acceptedLevel: FlorCall,
+): Applied<MatchState> {
+  const hand = state.hand;
+  const { winner } = resolveFlorShowdown(state);
+  const points =
+    acceptedLevel === 'contraflor_resto'
+      ? faltaEnvidoPoints(state.score.A, state.score.B, state.ruleset.targetPoints)
+      : FLOR_CONTESTED_POINTS;
+  const flor = { ...hand.flor, pendingCall: null, resolved: true };
+  const score = addPoints(state.score, winner, points, state.ruleset);
+  const events: GameEvent[] = [
     { type: 'FLOR_RESOLVED', winner, points },
     { type: 'POINTS_AWARDED', team: winner, points, reason: 'flor' },
   ];
@@ -456,6 +551,18 @@ function doAccept(state: MatchState, seat: Seat): Applied<MatchState> {
   const hand = state.hand;
   const team = state.players[seat].team;
 
+  // Flor: aceptar el duelo de flores en el nivel pendiente (Flor=6, Resto=falta).
+  if (hand.flor.pendingCall) {
+    if (!canRespondFlor(hand.flor, team)) {
+      throw new Error('No te toca responder la Flor');
+    }
+    const applied = resolveFlorDuel(state, hand.flor.pendingCall);
+    return {
+      state: applied.state,
+      events: [{ type: 'CALL_ACCEPTED', seat }, ...applied.events],
+    };
+  }
+
   if (hand.envido.pending) {
     const envido = acceptEnvido(hand.envido, team);
     const withEnvido = { ...state, hand: { ...hand, envido } };
@@ -488,6 +595,27 @@ function doAccept(state: MatchState, seat: Seat): Applied<MatchState> {
 function doDecline(state: MatchState, seat: Seat): Applied<MatchState> {
   const hand = state.hand;
   const team = state.players[seat].team;
+
+  // Flor: sólo se puede rechazar una Contraflor al resto (a la flor simple se
+  // la acepta o se sube). El que cantó la Contraflor se lleva los 6 disputados.
+  if (hand.flor.pendingCall) {
+    if (!canRespondFlor(hand.flor, team)) {
+      throw new Error('No te toca responder la Flor');
+    }
+    if (hand.flor.pendingCall !== 'contraflor_resto') {
+      throw new Error('No podés rechazar la Flor: aceptá o cantá Contraflor');
+    }
+    const winner = hand.flor.callerTeam!;
+    const points = FLOR_CONTESTED_POINTS;
+    const flor = { ...hand.flor, pendingCall: null, resolved: true };
+    const score = addPoints(state.score, winner, points, state.ruleset);
+    const events: GameEvent[] = [
+      { type: 'CALL_DECLINED', seat },
+      { type: 'FLOR_RESOLVED', winner, points },
+      { type: 'POINTS_AWARDED', team: winner, points, reason: 'flor_no_querido' },
+    ];
+    return maybeGameOver({ ...state, score, hand: { ...hand, flor } }, events);
+  }
 
   if (hand.envido.pending) {
     const res = declineEnvido(

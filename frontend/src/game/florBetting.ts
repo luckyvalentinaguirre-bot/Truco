@@ -41,16 +41,59 @@ export function declareFlor(state: FlorState, team: TeamId): FlorState {
   return { ...state, declaredBy: [...state.declaredBy, team] };
 }
 
-/**
- * Puntos de la Flor cuando no hay Flor rival: base 3 para el equipo que
- * la cantó. (Con Flor Envido / Contra Flor al Resto se resuelven con la
- * comparación de tantos, a implementar en la etapa de duelo de flores.)
- */
+/** Puntos de la Flor simple (rival sin flor): base 3. */
 export function florPointsSimple(): number {
   return FLOR_BASE_POINTS;
 }
 
+/** Puntos de una Flor DISPUTADA que se acepta sin subir (dos flores): 6. */
+export const FLOR_CONTESTED_POINTS = FLOR_BASE_POINTS * 2;
+
 /** ¿Ambos bandos declararon Flor? Entonces hay duelo de flores. */
 export function isFlorContested(state: FlorState): boolean {
   return new Set(state.declaredBy).size >= 2;
+}
+
+/* -------------------------------------------------------------
+ * Apuesta de Flor disputada: Flor → Contraflor al Resto.
+ * Sólo el equipo que NO cantó puede subir; el que subió espera respuesta.
+ * ----------------------------------------------------------- */
+
+/** Abre el duelo de flores (queda esperando respuesta del rival con flor). */
+export function openFlorDuel(state: FlorState, team: TeamId): FlorState {
+  return { ...state, call: 'flor', pendingCall: 'flor', callerTeam: team };
+}
+
+/** ¿Puede `team` cantar Contraflor al Resto ahora? */
+export function canCallContraflor(
+  state: FlorState,
+  team: TeamId,
+  call: FlorCall,
+): boolean {
+  if (state.resolved) return false;
+  if (state.pendingCall !== 'flor') return false; // sólo se sube sobre una flor
+  if (call !== 'contraflor_resto') return false; // sólo modelamos "al resto"
+  return state.callerTeam !== null && team !== state.callerTeam;
+}
+
+/** El rival con flor sube a Contraflor al Resto (espera quiero/no quiero). */
+export function callContraflor(
+  state: FlorState,
+  team: TeamId,
+  call: FlorCall,
+): FlorState {
+  if (!canCallContraflor(state, team, call)) {
+    throw new Error(`Contraflor inválida: ${call} por equipo ${team}`);
+  }
+  return { ...state, call, pendingCall: call, callerTeam: team };
+}
+
+/** ¿Puede `team` responder (quiero/no quiero) el canto de flor pendiente? */
+export function canRespondFlor(state: FlorState, team: TeamId): boolean {
+  return (
+    !state.resolved &&
+    state.pendingCall !== null &&
+    state.callerTeam !== null &&
+    team !== state.callerTeam
+  );
 }

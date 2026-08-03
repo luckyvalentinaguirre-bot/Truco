@@ -14,6 +14,7 @@ import {
   manoRank,
   type Action,
   type EnvidoCall,
+  type FlorCall,
   type MatchState,
   type Seat,
   type TeamId,
@@ -33,12 +34,20 @@ export const ENVIDO_LABEL: Record<EnvidoCall, string> = {
   falta_envido: 'Falta Envido',
 };
 
+export const FLOR_LABEL: Record<FlorCall, string> = {
+  flor: 'Flor',
+  contraflor_envido: 'Contraflor',
+  contraflor_resto: 'Contraflor al resto',
+};
+
 /** Acciones legales del humano, agrupadas para la barra/overlay. */
 export interface HumanOptions {
   playableCardIds: string[];
   trucoCalls: TrucoCall[];
   envidoCalls: EnvidoCall[];
   canFlor: boolean;
+  /** Subidas de Flor disponibles (Contraflor al resto) al responder un duelo. */
+  florCalls: FlorCall[];
   canAccept: boolean;
   canDecline: boolean;
   canFold: boolean;
@@ -52,6 +61,7 @@ export function humanOptions(state: MatchState, seat: Seat): HumanOptions {
   const acts = actorNow(state) === seat ? legalActions(state, seat) : [];
   const trucoCalls: TrucoCall[] = [];
   const envidoCalls: EnvidoCall[] = [];
+  const florCalls: FlorCall[] = [];
   const playableCardIds: string[] = [];
   let canFlor = false;
   let canAccept = false;
@@ -70,7 +80,8 @@ export function humanOptions(state: MatchState, seat: Seat): HumanOptions {
         envidoCalls.push(a.call);
         break;
       case 'CALL_FLOR':
-        canFlor = true;
+        if (a.call && a.call !== 'flor') florCalls.push(a.call);
+        else canFlor = true;
         break;
       case 'ACCEPT':
         canAccept = true;
@@ -95,6 +106,7 @@ export function humanOptions(state: MatchState, seat: Seat): HumanOptions {
     trucoCalls,
     envidoCalls,
     canFlor,
+    florCalls,
     canAccept,
     canDecline,
     canFold,
@@ -328,6 +340,9 @@ export function bubblesFromEvents(events: GameEvent[]): CantoBubble[] {
       case 'FLOR_DECLARED':
         out.push({ seat: e.seat, text: 'Flor' });
         break;
+      case 'FLOR_CONTRA_CALLED':
+        out.push({ seat: e.seat, text: FLOR_LABEL[e.call] });
+        break;
       case 'CALL_ACCEPTED':
         out.push({ seat: e.seat, text: 'Quiero' });
         break;
@@ -345,4 +360,7 @@ export function trucoAction(seat: Seat, call: TrucoCall): Action {
 }
 export function envidoAction(seat: Seat, call: EnvidoCall): Action {
   return { type: 'CALL_ENVIDO', seat, call };
+}
+export function florAction(seat: Seat, call: FlorCall): Action {
+  return { type: 'CALL_FLOR', seat, call };
 }
