@@ -8,14 +8,20 @@ import { ProfilePage } from '@/pages/ProfilePage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { CardsDevPage } from '@/pages/CardsDevPage';
 
 /**
  * Rutas de la plataforma. Preparado para agregar rutas de
  * partida (/mesa/:id), autenticación y protección más adelante.
  */
+const devRoutes = import.meta.env.DEV
+  ? [{ path: '/dev/cartas', element: <CardsDevPage /> }]
+  : [];
+
 export const router = createBrowserRouter([
   // Mesa a pantalla completa (fuera del shell de navegación).
   { path: '/mesa', element: <MatchPage /> },
+  ...devRoutes,
   {
     path: '/',
     element: <AppLayout />,
