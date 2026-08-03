@@ -440,6 +440,9 @@
   position: relative;
   width: 100px;
   height: 150px;
+  /* Mazo + muestra un poco más grandes que las cartas chicas de referencia. */
+  transform: scale(1.22);
+  transform-origin: center;
 }
 /* Muestra: abajo-izquierda, mayormente a la vista. */
 .pileMuestra {
