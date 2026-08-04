@@ -70,6 +70,16 @@ export class UserNotFoundError extends RepositoryError {
   }
 }
 
+/**
+ * Credenciales inválidas. Deliberadamente NO distingue entre "email
+ * inexistente" y "contraseña incorrecta": el mismo error para ambos.
+ */
+export class InvalidCredentialsError extends RepositoryError {
+  constructor() {
+    super('Credenciales inválidas');
+  }
+}
+
 /** Error de validación de datos de entrada (campo + motivo). */
 export class ValidationError extends RepositoryError {
   readonly field: string;
