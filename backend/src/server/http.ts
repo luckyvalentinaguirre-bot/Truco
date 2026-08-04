@@ -1,24 +1,33 @@
 /* =============================================================
  * Backend · Servidor HTTP base (Node http nativo)
  * -------------------------------------------------------------
- * Servidor mínimo, sin dependencias extra. Sólo expone /healthz
- * por ahora; el resto de la API llega en etapas posteriores.
+ * Servidor mínimo, sin dependencias extra. Expone /healthz y las
+ * rutas de autenticación (/auth/*) vía un router pequeño.
  * ============================================================= */
 import { createServer, type Server } from 'node:http';
+import { Router } from '../http/router.js';
+import { registerAuthRoutes } from '../http/auth.routes.js';
+import { sendJson } from '../http/respond.js';
+
+/** Construye el router con todas las rutas registradas. */
+function buildRouter(): Router {
+  const router = new Router();
+  router.add('GET', '/healthz', (_req, res) => {
+    sendJson(res, 200, { status: 'ok' });
+  });
+  registerAuthRoutes(router);
+  return router;
+}
 
 /** Crea el servidor HTTP con las rutas base. */
 export function createHttpServer(): Server {
+  const router = buildRouter();
   return createServer((req, res) => {
-    const url = (req.url ?? '').split('?')[0];
-
-    if (req.method === 'GET' && (url === '/healthz' || url === '/')) {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok' }));
-      return;
-    }
-
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'not_found' }));
+    void router.handle(req, res).then((handled) => {
+      if (!handled) {
+        sendJson(res, 404, { error: { code: 'not_found', message: 'Ruta no encontrada' } });
+      }
+    });
   });
 }
 

@@ -66,11 +66,26 @@ npm run dev        # arranque en modo watch
 
 `npm start` levanta un servidor HTTP (Node nativo, sin dependencias extra) que
 escucha en `0.0.0.0:$PORT` (fallback `10000`) y **permanece vivo** esperando
-peticiones. Endpoint de salud para Render y monitoreo:
+peticiones. Router mínimo en `src/http/` (sin Express).
 
 ```bash
 curl http://localhost:10000/healthz   # → 200 {"status":"ok"}
 ```
+
+### API de autenticación
+
+| Método | Ruta             | Descripción                                  | Éxito |
+| ------ | ---------------- | -------------------------------------------- | ----- |
+| POST   | `/auth/register` | `{email,password,username}` → cuenta pública | 201   |
+| POST   | `/auth/login`    | `{email,password}` → `{token,user}`          | 200   |
+| POST   | `/auth/logout`   | `Authorization: Bearer <token>` (idempotente)| 204   |
+| GET    | `/auth/me`       | `Authorization: Bearer <token>` → user+profile| 200  |
+
+Errores: `400` (validación / JSON inválido / body vacío), `401`
+(credenciales o sesión inválidas / falta Bearer), `409` (email o username en
+uso), `413` (body > 10 KB), `415` (Content-Type no JSON), `500` (genérico, sin
+detalles internos). El token de sesión sólo aparece en la respuesta de login;
+nunca se loguea ni se incluye en errores. Sin cookies ni JWT todavía.
 
 ### Probar la conexión a PostgreSQL
 
