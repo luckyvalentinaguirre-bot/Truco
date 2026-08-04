@@ -12,7 +12,8 @@
     "start": "tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "db:test": "tsx src/db/testConnection.ts"
+    "db:test": "tsx src/db/testConnection.ts",
+    "db:migrate": "tsx src/db/migrate.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

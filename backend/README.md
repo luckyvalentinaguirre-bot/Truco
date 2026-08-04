@@ -57,6 +57,7 @@ npm install        # instala dependencias
 npm run typecheck  # chequeo de tipos (tsc --noEmit)
 npm run build      # compila a dist/
 npm run db:test    # prueba real de conexión: SELECT NOW()
+npm run db:migrate # aplica las migraciones pendientes (migrations/*.sql)
 npm start          # levanta el servidor HTTP (queda escuchando)
 npm run dev        # arranque en modo watch
 ```
@@ -79,6 +80,27 @@ npm run db:test
 
 Ejecuta `SELECT NOW()` contra `DATABASE_URL` y reporta hora del servidor,
 versión de PostgreSQL y latencia. Requiere que `DATABASE_URL` esté definida.
+
+## Migraciones
+
+Runner propio y mínimo (sin dependencias extra), en `src/db/migrate.ts`. Aplica
+en orden los archivos `migrations/NNN_*.sql` **una sola vez** cada uno, dentro de
+una transacción, y registra lo aplicado en la tabla `schema_migrations`. Es
+idempotente: volver a correrlo no reaplica nada.
+
+```
+migrations/
+├── 001_create_users.sql      # cuentas (UUID, email único, password_hash)
+├── 002_create_profiles.sql   # perfil 1:1 con users (username único)
+└── 003_create_sessions.sql   # sesiones de auth (token_hash, expires_at, …)
+```
+
+```bash
+npm run db:migrate
+```
+
+> En Render conviene ejecutar `npm run db:migrate` como paso previo al deploy
+> (o manualmente una vez), no en el arranque del servidor HTTP.
 
 ## Dependencias
 
