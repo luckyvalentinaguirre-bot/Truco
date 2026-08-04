@@ -7,7 +7,9 @@ import {
   startNextHand,
   legalActions,
   responderSeat,
+  envidoWinnerFrom,
   manoRank,
+  type EnvidoEntry,
   type MatchState,
   type GameMode,
 } from '../index';
@@ -141,6 +143,39 @@ describe('partidas completas por modo', () => {
         if (resolved) break;
       }
     }
+  });
+
+  it('3v3 · envido "pico a pico": gana el mejor tanto de cualquier jugador', () => {
+    // Asientos 0,2,4 = equipo A ; 1,3,5 = equipo B (intercalados). Mano = 0.
+    // El pie de B (asiento 5) tiene el tanto más alto: su equipo gana el envido
+    // aunque esté último en la ronda (se compara pico a pico, no por posición).
+    const entries: EnvidoEntry[] = [
+      { seat: 0, team: 'A', value: 27 },
+      { seat: 1, team: 'B', value: 20 },
+      { seat: 2, team: 'A', value: 31 },
+      { seat: 3, team: 'B', value: 18 },
+      { seat: 4, team: 'A', value: 25 },
+      { seat: 5, team: 'B', value: 33 }, // el más alto de la mesa
+    ];
+    expect(envidoWinnerFrom(entries, 0, 6)).toBe('B');
+  });
+
+  it('3v3 · pico a pico: a igual mejor tanto, gana el equipo más mano', () => {
+    // Mejor tanto de A = 30 (asiento 2) ; mejor de B = 30 (asiento 3).
+    // Empate: gana quien tenga MENOR rango de mano. Con mano=0, el asiento 2
+    // (rank 2) es más mano que el 3 (rank 3) ⇒ gana A.
+    const entries: EnvidoEntry[] = [
+      { seat: 0, team: 'A', value: 22 },
+      { seat: 1, team: 'B', value: 19 },
+      { seat: 2, team: 'A', value: 30 },
+      { seat: 3, team: 'B', value: 30 },
+      { seat: 4, team: 'A', value: 28 },
+      { seat: 5, team: 'B', value: 26 },
+    ];
+    expect(envidoWinnerFrom(entries, 0, 6)).toBe('A');
+    // Si movemos la mano al asiento 3, ahora B (asiento 3, rank 0) es el más
+    // mano de los dos empatados ⇒ gana B.
+    expect(envidoWinnerFrom(entries, 3, 6)).toBe('B');
   });
 
   it('el mano es el asiento siguiente al repartidor', () => {
