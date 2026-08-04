@@ -114,6 +114,17 @@ queries **siempre parametrizadas**:
 - `errors.ts` — traduce errores SQLSTATE de PostgreSQL a errores de dominio
   (`EmailAlreadyExistsError`, `UsernameTakenError`, `UserNotFoundError`, …).
 
+## Servicios de dominio
+
+En `src/services/`:
+
+- `account.service.ts` — `createAccount(email, password, username)`: valida y
+  normaliza los datos, hashea la contraseña y crea `users` + `profiles` dentro
+  de **una única transacción** (`withTransaction`), con rollback conjunto. Nunca
+  deja un user sin profile y nunca devuelve el hash ni la contraseña.
+- `password.ts` — `hashPassword` / `verifyPassword` con **scrypt** de
+  `node:crypto` (sin dependencias externas). Sólo se persiste el hash.
+
 ### Tests
 
 ```bash

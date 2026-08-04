@@ -69,3 +69,12 @@ export class UserNotFoundError extends RepositoryError {
     super('No existe el usuario referenciado');
   }
 }
+
+/** Error de validación de datos de entrada (campo + motivo). */
+export class ValidationError extends RepositoryError {
+  readonly field: string;
+  constructor(field: string, message: string) {
+    super(message);
+    this.field = field;
+  }
+}

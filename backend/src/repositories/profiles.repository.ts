@@ -4,7 +4,7 @@
  * Relación 1:1 con `users` (PK = user_id). Queries parametrizadas.
  * ============================================================= */
 import type { QueryResultRow } from 'pg';
-import { query } from '../db/pool.js';
+import { getPool, type Executor } from '../db/pool.js';
 import {
   isForeignKeyViolation,
   isUniqueViolation,
@@ -61,9 +61,12 @@ const COLUMNS =
  *  - ProfileAlreadyExistsError si el usuario ya tiene perfil,
  *  - UserNotFoundError si el user_id no existe.
  */
-export async function createProfile(input: CreateProfileInput): Promise<Profile> {
+export async function createProfile(
+  input: CreateProfileInput,
+  exec: Executor = getPool(),
+): Promise<Profile> {
   try {
-    const res = await query<ProfileRow>(
+    const res = await exec.query<ProfileRow>(
       `INSERT INTO profiles (user_id, username, display_name, avatar)
        VALUES ($1, $2, $3, $4)
        RETURNING ${COLUMNS}`,
@@ -88,8 +91,11 @@ export async function createProfile(input: CreateProfileInput): Promise<Profile>
 }
 
 /** Busca el perfil de un usuario por user_id. Null si no existe. */
-export async function findProfileByUserId(userId: string): Promise<Profile | null> {
-  const res = await query<ProfileRow>(
+export async function findProfileByUserId(
+  userId: string,
+  exec: Executor = getPool(),
+): Promise<Profile | null> {
+  const res = await exec.query<ProfileRow>(
     `SELECT ${COLUMNS} FROM profiles WHERE user_id = $1`,
     [userId],
   );
@@ -97,8 +103,11 @@ export async function findProfileByUserId(userId: string): Promise<Profile | nul
 }
 
 /** Busca un perfil por username (case-insensitive). Null si no existe. */
-export async function findProfileByUsername(username: string): Promise<Profile | null> {
-  const res = await query<ProfileRow>(
+export async function findProfileByUsername(
+  username: string,
+  exec: Executor = getPool(),
+): Promise<Profile | null> {
+  const res = await exec.query<ProfileRow>(
     `SELECT ${COLUMNS} FROM profiles WHERE lower(username) = lower($1)`,
     [username],
   );
@@ -106,8 +115,11 @@ export async function findProfileByUsername(username: string): Promise<Profile |
 }
 
 /** ¿Está disponible ese username (case-insensitive)? */
-export async function isUsernameAvailable(username: string): Promise<boolean> {
-  const res = await query<{ taken: boolean }>(
+export async function isUsernameAvailable(
+  username: string,
+  exec: Executor = getPool(),
+): Promise<boolean> {
+  const res = await exec.query<{ taken: boolean }>(
     'SELECT EXISTS(SELECT 1 FROM profiles WHERE lower(username) = lower($1)) AS taken',
     [username],
   );

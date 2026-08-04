@@ -23,6 +23,13 @@ function sslOption(mode: Env['dbSslMode']): pg.PoolConfig['ssl'] {
   }
 }
 
+/**
+ * Ejecutor de queries: tanto el Pool como un PoolClient (dentro de una
+ * transacción) exponen `query`. Los repositories aceptan cualquiera de los dos,
+ * así una misma transacción puede compartir el mismo client.
+ */
+export type Executor = Pick<pg.Pool | pg.PoolClient, 'query'>;
+
 let pool: pg.Pool | null = null;
 
 /** Devuelve el Pool compartido, creándolo la primera vez. */
@@ -61,4 +68,26 @@ export async function query<T extends pg.QueryResultRow = pg.QueryResultRow>(
   params?: unknown[],
 ): Promise<pg.QueryResult<T>> {
   return getPool().query<T>(text, params as never[]);
+}
+
+/**
+ * Ejecuta `fn` dentro de una TRANSACCIÓN sobre un único client:
+ * BEGIN → fn → COMMIT; ante cualquier error, ROLLBACK y se relanza.
+ * El client se libera siempre.
+ */
+export async function withTransaction<T>(
+  fn: (client: pg.PoolClient) => Promise<T>,
+): Promise<T> {
+  const client = await getPool().connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
 }

@@ -6,7 +6,7 @@
  * más adelante). Nunca guarda contraseñas en texto plano.
  * ============================================================= */
 import type { QueryResultRow } from 'pg';
-import { query } from '../db/pool.js';
+import { getPool, type Executor } from '../db/pool.js';
 import { EmailAlreadyExistsError, isUniqueViolation } from './errors.js';
 
 /** Usuario tal como lo expone el repository (camelCase). */
@@ -55,10 +55,13 @@ const COLUMNS =
   'id, email, email_normalized, password_hash, created_at, updated_at';
 
 /** Crea un usuario. Lanza EmailAlreadyExistsError si el email ya existe. */
-export async function createUser(input: CreateUserInput): Promise<User> {
+export async function createUser(
+  input: CreateUserInput,
+  exec: Executor = getPool(),
+): Promise<User> {
   const emailNormalized = normalizeEmail(input.email);
   try {
-    const res = await query<UserRow>(
+    const res = await exec.query<UserRow>(
       `INSERT INTO users (email, email_normalized, password_hash)
        VALUES ($1, $2, $3)
        RETURNING ${COLUMNS}`,
@@ -74,8 +77,11 @@ export async function createUser(input: CreateUserInput): Promise<User> {
 }
 
 /** Busca un usuario por email (normalizado). Devuelve null si no existe. */
-export async function findUserByEmail(email: string): Promise<User | null> {
-  const res = await query<UserRow>(
+export async function findUserByEmail(
+  email: string,
+  exec: Executor = getPool(),
+): Promise<User | null> {
+  const res = await exec.query<UserRow>(
     `SELECT ${COLUMNS} FROM users WHERE email_normalized = $1`,
     [normalizeEmail(email)],
   );
@@ -83,8 +89,11 @@ export async function findUserByEmail(email: string): Promise<User | null> {
 }
 
 /** Busca un usuario por id. Devuelve null si no existe. */
-export async function findUserById(id: string): Promise<User | null> {
-  const res = await query<UserRow>(
+export async function findUserById(
+  id: string,
+  exec: Executor = getPool(),
+): Promise<User | null> {
+  const res = await exec.query<UserRow>(
     `SELECT ${COLUMNS} FROM users WHERE id = $1`,
     [id],
   );
@@ -92,8 +101,11 @@ export async function findUserById(id: string): Promise<User | null> {
 }
 
 /** ¿Ya existe un usuario con ese email? */
-export async function emailExists(email: string): Promise<boolean> {
-  const res = await query<{ exists: boolean }>(
+export async function emailExists(
+  email: string,
+  exec: Executor = getPool(),
+): Promise<boolean> {
+  const res = await exec.query<{ exists: boolean }>(
     'SELECT EXISTS(SELECT 1 FROM users WHERE email_normalized = $1) AS exists',
     [normalizeEmail(email)],
   );
