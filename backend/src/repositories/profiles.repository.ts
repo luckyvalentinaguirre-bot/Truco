@@ -114,6 +114,46 @@ export async function findProfileByUsername(
   return res.rows[0] ? mapProfile(res.rows[0]) : null;
 }
 
+/** Campos actualizables de un perfil (sólo estos, nunca user_id/username/etc). */
+export interface UpdateProfileInput {
+  displayName?: string | null;
+  avatar?: string | null;
+}
+
+/**
+ * Actualiza parcialmente el perfil del `userId` indicado (sólo display_name y/o
+ * avatar) y `updated_at`. Devuelve el perfil actualizado, o null si no existe.
+ * El `userId` SIEMPRE lo provee el llamador autenticado, nunca el cliente.
+ */
+export async function updateProfile(
+  userId: string,
+  input: UpdateProfileInput,
+  exec: Executor = getPool(),
+): Promise<Profile | null> {
+  const sets: string[] = [];
+  const params: unknown[] = [];
+  let i = 1;
+  if (input.displayName !== undefined) {
+    sets.push(`display_name = $${i++}`);
+    params.push(input.displayName);
+  }
+  if (input.avatar !== undefined) {
+    sets.push(`avatar = $${i++}`);
+    params.push(input.avatar);
+  }
+  if (sets.length === 0) {
+    // Sin cambios: devolvemos el perfil actual sin tocar la base.
+    return findProfileByUserId(userId, exec);
+  }
+  sets.push('updated_at = now()');
+  params.push(userId);
+  const res = await exec.query<ProfileRow>(
+    `UPDATE profiles SET ${sets.join(', ')} WHERE user_id = $${i} RETURNING ${COLUMNS}`,
+    params,
+  );
+  return res.rows[0] ? mapProfile(res.rows[0]) : null;
+}
+
 /** ¿Está disponible ese username (case-insensitive)? */
 export async function isUsernameAvailable(
   username: string,

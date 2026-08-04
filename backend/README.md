@@ -80,6 +80,13 @@ curl http://localhost:10000/healthz   # → 200 {"status":"ok"}
 | POST   | `/auth/login`    | `{email,password}` → `{token,user}`          | 200   |
 | POST   | `/auth/logout`   | `Authorization: Bearer <token>` (idempotente)| 204   |
 | GET    | `/auth/me`       | `Authorization: Bearer <token>` → user+profile| 200  |
+| GET    | `/profile`       | perfil público (requiere Bearer)             | 200   |
+| PATCH  | `/profile`       | edita `displayName`/`avatar` (requiere Bearer)| 200  |
+
+Las rutas autenticadas se protegen con `requireAuth` (`src/http/requireAuth.ts`),
+que resuelve el Bearer con `getSessionUser` y adjunta `req.auth = { user, profile,
+session }`. `PATCH /profile` sólo permite `displayName` y `avatar` (rechaza
+cualquier otro campo con 400); el `user_id` siempre proviene de la sesión.
 
 Errores: `400` (validación / JSON inválido / body vacío), `401`
 (credenciales o sesión inválidas / falta Bearer), `409` (email o username en

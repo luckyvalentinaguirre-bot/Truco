@@ -7,6 +7,7 @@
 import { createServer, type Server } from 'node:http';
 import { Router } from '../http/router.js';
 import { registerAuthRoutes } from '../http/auth.routes.js';
+import { registerProfileRoutes } from '../http/profile.routes.js';
 import { sendJson } from '../http/respond.js';
 
 /** Construye el router con todas las rutas registradas. */
@@ -16,6 +17,7 @@ function buildRouter(): Router {
     sendJson(res, 200, { status: 'ok' });
   });
   registerAuthRoutes(router);
+  registerProfileRoutes(router);
   return router;
 }
 
