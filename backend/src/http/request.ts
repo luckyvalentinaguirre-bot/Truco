@@ -1,8 +1,8 @@
 /* =============================================================
- * Backend · Lectura segura del request (body JSON + Bearer token)
+ * Backend · Lectura segura del request (body JSON con límites)
  * ============================================================= */
 import type { IncomingMessage } from 'node:http';
-import { badRequest, payloadTooLarge, unauthorized, unsupportedMediaType } from './httpError.js';
+import { badRequest, payloadTooLarge, unsupportedMediaType } from './httpError.js';
 
 /** Límite de tamaño del body para endpoints de auth (evita agotar memoria). */
 export const AUTH_BODY_LIMIT_BYTES = 10 * 1024; // 10 KB
@@ -43,20 +43,4 @@ export async function readJsonBody<T = unknown>(
   } catch {
     throw badRequest('JSON inválido');
   }
-}
-
-/**
- * Extrae el token de `Authorization: Bearer <token>`. Lanza 401 si el header
- * falta o el formato es incorrecto. Nunca incluye el token en el error.
- */
-export function getBearerToken(req: IncomingMessage): string {
-  const header = req.headers['authorization'];
-  if (!header || Array.isArray(header)) {
-    throw unauthorized('Falta el header Authorization');
-  }
-  const match = /^Bearer (.+)$/.exec(header.trim());
-  if (!match || match[1]!.trim().length === 0) {
-    throw unauthorized('Formato de Authorization inválido');
-  }
-  return match[1]!.trim();
 }

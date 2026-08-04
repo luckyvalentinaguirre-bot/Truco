@@ -21,10 +21,13 @@ describe('HTTP · CORS', () => {
     await new Promise<void>((r) => server.close(() => r()));
   });
 
-  it('origin permitido ⇒ headers CORS correctos', async () => {
+  it('origin permitido ⇒ headers CORS correctos + credentials', async () => {
     const res = await fetch(`${base}/healthz`, { headers: { Origin: ALLOWED } });
     expect(res.headers.get('access-control-allow-origin')).toBe(ALLOWED);
     expect(res.headers.get('vary')).toContain('Origin');
+    // Credenciales habilitadas y nunca "*" (requisito para cookies).
+    expect(res.headers.get('access-control-allow-credentials')).toBe('true');
+    expect(res.headers.get('access-control-allow-origin')).not.toBe('*');
     expect(res.status).toBe(200);
   });
 

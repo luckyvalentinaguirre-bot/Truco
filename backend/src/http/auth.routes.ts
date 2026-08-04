@@ -6,8 +6,14 @@
  * ============================================================= */
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { badRequest } from './httpError.js';
-import { readJsonBody, getBearerToken } from './request.js';
+import { readJsonBody } from './request.js';
 import { sendJson, sendNoContent } from './respond.js';
+import {
+  getSessionToken,
+  requireSessionToken,
+  sessionSetCookie,
+  sessionClearCookie,
+} from './cookies.js';
 import type { Router } from './router.js';
 import { createAccount } from '../services/account.service.js';
 import { verifyCredentials } from '../services/auth.service.js';
@@ -58,23 +64,24 @@ async function login(req: IncomingMessage, res: ServerResponse): Promise<void> {
     requireString(body, 'password'),
   );
   const session = await createSession(identity.userId);
+  // El token viaja SÓLO en una cookie HttpOnly; nunca en el JSON.
+  res.setHeader('Set-Cookie', sessionSetCookie(session.token));
   sendJson(res, 200, {
-    token: session.token, // única aparición del token; no se loguea
-    expiresAt: session.expiresAt,
     user: { id: identity.userId, email: identity.email },
   });
 }
 
-/** POST /auth/logout → 204 (idempotente). */
+/** POST /auth/logout → 204 (idempotente). Revoca y borra la cookie. */
 async function logout(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const token = getBearerToken(req);
-  await revokeSession(token); // idempotente: no importa si ya estaba revocada
+  const token = getSessionToken(req); // sin cookie ⇒ igual respondemos 204
+  if (token) await revokeSession(token); // idempotente
+  res.setHeader('Set-Cookie', sessionClearCookie());
   sendNoContent(res);
 }
 
-/** GET /auth/me → 200 con user + profile (requiere Bearer válido). */
+/** GET /auth/me → 200 con user + profile (requiere cookie de sesión válida). */
 async function me(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const token = getBearerToken(req);
+  const token = requireSessionToken(req);
   const authed = await getSessionUser(token);
   sendJson(res, 200, authed);
 }

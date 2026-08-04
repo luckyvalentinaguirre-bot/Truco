@@ -36,6 +36,8 @@ export function applyCors(req: IncomingMessage, res: ServerResponse): boolean {
     res.setHeader('Vary', 'Origin');
     res.setHeader('Access-Control-Allow-Methods', ALLOWED_METHODS);
     res.setHeader('Access-Control-Allow-Headers', ALLOWED_HEADERS);
+    // Necesario para que el navegador envíe/acepte la cookie de sesión.
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Max-Age', '600');
   }
 

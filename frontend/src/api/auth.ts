@@ -2,7 +2,6 @@
  * API de autenticación y perfil.
  * ============================================================= */
 import { apiFetch } from './client';
-import { clearToken, setToken } from './token';
 
 export interface AuthUser {
   id: string;
@@ -36,29 +35,22 @@ export async function register(
 ): Promise<{ user: AuthUser & { username: string } }> {
   return apiFetch('/auth/register', {
     method: 'POST',
-    auth: false,
     body: { email, password, username },
   });
 }
 
-/** POST /auth/login → guarda el token y devuelve el usuario. */
+/** POST /auth/login → el backend setea la cookie HttpOnly; devuelve el usuario. */
 export async function login(email: string, password: string): Promise<AuthUser> {
-  const res = await apiFetch<{ token: string; user: AuthUser }>('/auth/login', {
+  const res = await apiFetch<{ user: AuthUser }>('/auth/login', {
     method: 'POST',
-    auth: false,
     body: { email, password },
   });
-  setToken(res.token);
   return res.user;
 }
 
-/** POST /auth/logout → revoca en el backend y limpia el token local. */
+/** POST /auth/logout → el backend revoca la sesión y borra la cookie. */
 export async function logout(): Promise<void> {
-  try {
-    await apiFetch<void>('/auth/logout', { method: 'POST' });
-  } finally {
-    clearToken();
-  }
+  await apiFetch<void>('/auth/logout', { method: 'POST' });
 }
 
 /** GET /auth/me → identidad autenticada actual. */

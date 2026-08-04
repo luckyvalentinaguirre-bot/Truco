@@ -13,8 +13,6 @@ import {
   type ReactNode,
 } from 'react';
 import * as authApi from '@/api/auth';
-import { ApiError } from '@/api/client';
-import { getToken } from '@/api/token';
 
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -38,23 +36,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<authApi.AuthProfile | null>(null);
 
   const refreshUser = useCallback(async () => {
-    if (!getToken()) {
-      setUser(null);
-      setProfile(null);
-      setStatus('unauthenticated');
-      return;
-    }
+    // La cookie de sesión (si existe) la envía el navegador automáticamente.
+    // Un 401 significa simplemente que no hay sesión válida.
     try {
       const me = await authApi.getMe();
       setUser(me.user);
       setProfile(me.profile);
       setStatus('authenticated');
-    } catch (err) {
-      // 401 (u otro fallo de sesión): limpiar estado. El client ya borró token.
+    } catch {
+      // 401 o fallo de red: no hay sesión válida.
       setUser(null);
       setProfile(null);
       setStatus('unauthenticated');
-      if (!(err instanceof ApiError)) throw err;
     }
   }, []);
 

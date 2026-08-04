@@ -1,10 +1,10 @@
 /* =============================================================
  * Cliente HTTP central para la API del backend.
  * -------------------------------------------------------------
- * Centraliza fetch, base URL, Content-Type, Authorization (Bearer),
- * parseo de JSON y manejo de errores. La URL sale de VITE_API_URL.
+ * La sesión viaja en una cookie HttpOnly: el navegador la envía
+ * automáticamente con `credentials: "include"`. JavaScript NO tiene
+ * acceso al token. No se usa Authorization ni sessionStorage.
  * ============================================================= */
-import { clearToken, getToken } from './token';
 
 /** URL base del backend (configurable por entorno de Vite). */
 export const API_URL: string =
@@ -26,34 +26,26 @@ export class ApiError extends Error {
 interface RequestOptions {
   method?: string;
   body?: unknown;
-  /** Enviar el Authorization: Bearer si hay token (default true). */
-  auth?: boolean;
 }
 
 /**
- * Realiza una request a la API. Agrega Authorization si corresponde, parsea
- * JSON y lanza ApiError en respuestas no OK. Ante 401 limpia el token local.
+ * Realiza una request a la API con la cookie de sesión (credentials: include),
+ * parsea JSON y lanza ApiError en respuestas no OK.
  */
 export async function apiFetch<T = unknown>(
   path: string,
   opts: RequestOptions = {},
 ): Promise<T> {
-  const { method = 'GET', body, auth = true } = opts;
+  const { method = 'GET', body } = opts;
   const headers: Record<string, string> = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
-  const token = auth ? getToken() : null;
-  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${API_URL}${path}`, {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
+    credentials: 'include', // envía/recibe la cookie de sesión
   });
-
-  if (res.status === 401) {
-    // Sesión inválida/expirada: se descarta el token local.
-    clearToken();
-  }
 
   // 204 No Content: sin cuerpo.
   if (res.status === 204) {

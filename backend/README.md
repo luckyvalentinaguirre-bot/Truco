@@ -90,10 +90,33 @@ session }`. `PATCH /profile` sólo permite `displayName` y `avatar` (rechaza
 cualquier otro campo con 400); el `user_id` siempre proviene de la sesión.
 
 Errores: `400` (validación / JSON inválido / body vacío), `401`
-(credenciales o sesión inválidas / falta Bearer), `409` (email o username en
+(credenciales o sesión inválidas / falta cookie), `409` (email o username en
 uso), `413` (body > 10 KB), `415` (Content-Type no JSON), `500` (genérico, sin
-detalles internos). El token de sesión sólo aparece en la respuesta de login;
-nunca se loguea ni se incluye en errores. Sin cookies ni JWT todavía.
+detalles internos).
+
+### Sesión por cookie HttpOnly
+
+`POST /auth/login` responde con `Set-Cookie: session=<token>; HttpOnly; Path=/;
+Max-Age=604800; SameSite=…` (`src/http/cookies.ts`). El token **nunca** viaja
+en el JSON ni es accesible desde JavaScript. `logout` borra la cookie
+(`Max-Age=0`, mismos atributos) y revoca la sesión. `requireAuth`, `/auth/me` y
+`/profile` leen la sesión **sólo** de la cookie.
+
+- **SameSite/Secure:** en producción `SameSite=None; Secure` (frontend y backend
+  en dominios distintos); en desarrollo `SameSite=Lax` sin Secure
+  (`localhost:5173` ↔ `localhost:10000` son *same-site*: SameSite ignora el
+  puerto), para no romper el flujo local sobre http.
+- **CORS + credenciales:** con origin permitido se envía
+  `Access-Control-Allow-Credentials: true` y `Access-Control-Allow-Origin`
+  específico (nunca `*`). El frontend usa `fetch(..., { credentials: 'include' })`.
+
+### CSRF
+
+La defensa de esta etapa es **`SameSite` + allowlist de CORS con Origin
+explícito** (nunca `*`, credenciales sólo para orígenes conocidos). En
+producción `SameSite=None` requiere reforzar: como paso siguiente se puede
+agregar validación de `Origin` en las mutaciones (POST/PATCH) y/o un token
+anti-CSRF de doble envío. No se agregó ninguna dependencia para esto.
 
 ### Probar la conexión a PostgreSQL
 
