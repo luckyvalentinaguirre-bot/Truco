@@ -324,6 +324,11 @@
   align-items: center;
   gap: 4px;
 }
+/* Pico a pico: jugador que espera su turno al pico (no está en el duelo). */
+.seat.waiting {
+  opacity: 0.42;
+  filter: grayscale(0.5);
+}
 .seatInfo {
   display: flex;
   align-items: center;

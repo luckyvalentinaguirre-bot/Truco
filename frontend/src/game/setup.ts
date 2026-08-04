@@ -9,6 +9,7 @@ import { initTrucoState } from './trucoBetting';
 import { initEnvidoState } from './envidoBetting';
 import { initFlorState } from './florBetting';
 import { initScore } from './scoring';
+import { initPicoActive, picoPhaseActive } from './pico';
 import type { HandState, MatchState, Player } from './state';
 
 /** Cantidad de jugadores por modo. */
@@ -35,6 +36,8 @@ export interface CreateMatchOptions {
   ruleset?: Ruleset;
   /** Semilla del PRNG para partidas deterministas / reproducibles. */
   seed?: number;
+  /** Modalidad "pico a pico" (sólo tiene efecto en 3v3). */
+  picoAPico?: boolean;
 }
 
 /** Crea una partida nueva y reparte la primera mano. */
@@ -44,6 +47,8 @@ export function createMatch(opts: CreateMatchOptions = {}): MatchState {
   const seed = opts.seed ?? Math.floor(Math.random() * 0xffffffff);
   const n = PLAYER_COUNT[mode];
   const teams = assignTeams(mode);
+  // La modalidad pico a pico sólo aplica al 3v3.
+  const picoAPico = mode === '3v3' && opts.picoAPico === true;
 
   const players: Player[] = Array.from({ length: n }, (_, seat) => ({
     seat,
@@ -67,6 +72,9 @@ export function createMatch(opts: CreateMatchOptions = {}): MatchState {
     winner: null,
     handNumber: 0,
     seed,
+    ...(picoAPico
+      ? { picoAPico: true, picoActive: initPicoActive(), picoManoTeam: 'A' as TeamId }
+      : {}),
   };
 
   return dealHand(base);
@@ -127,13 +135,32 @@ export function dealHand(state: MatchState): MatchState {
     folded: false,
   }));
 
-  // Reparto de 3 cartas por jugador (comenzando por el mano).
-  const manoSeat = nextSeat(state.dealerSeat, n);
   let cursor = 0;
-  for (let round = 0; round < 3; round++) {
-    for (let i = 0; i < n; i++) {
-      const seat = nextSeat(manoSeat + i - 1, n);
-      players[seat].hand.push(deck[cursor++] as Card);
+  let manoSeat: Seat;
+
+  // ---- Reparto "pico a pico" (3v3, ambos en malas): sólo juegan los 2 al pico.
+  if (picoPhaseActive(state) && state.picoActive) {
+    const manoTeam = state.picoManoTeam ?? 'A';
+    const pieTeam: TeamId = manoTeam === 'A' ? 'B' : 'A';
+    manoSeat = state.picoActive[manoTeam];
+    const pieSeat = state.picoActive[pieTeam];
+    // Los otros cuatro quedan fuera del duelo (se los trata como "al mazo").
+    players.forEach((p) => {
+      if (p.seat !== manoSeat && p.seat !== pieSeat) p.folded = true;
+    });
+    // 3 cartas a cada duelista (mano primero, luego el pie).
+    for (let round = 0; round < 3; round++) {
+      players[manoSeat].hand.push(deck[cursor++] as Card);
+      players[pieSeat].hand.push(deck[cursor++] as Card);
+    }
+  } else {
+    // ---- Reparto normal: 3 cartas por jugador (comenzando por el mano).
+    manoSeat = nextSeat(state.dealerSeat, n);
+    for (let round = 0; round < 3; round++) {
+      for (let i = 0; i < n; i++) {
+        const seat = nextSeat(manoSeat + i - 1, n);
+        players[seat].hand.push(deck[cursor++] as Card);
+      }
     }
   }
   // La muestra es la siguiente carta del pozo.

@@ -40,6 +40,7 @@ import { calcEnvido, faltaEnvidoPoints } from './envido';
 import { calcFlor, FLOR_BASE_POINTS } from './flor';
 import { addPoints, gameWinner } from './scoring';
 import { dealHand, nextSeat, manoRank } from './setup';
+import { picoPhaseActive, picoNextPair } from './pico';
 
 function otherTeam(t: TeamId): TeamId {
   return t === 'A' ? 'B' : 'A';
@@ -790,6 +791,16 @@ export function startNextHand(state: MatchState): MatchState {
     throw new Error('La mano actual todavía no terminó');
   }
   const n = state.players.length;
-  const rotated: MatchState = { ...state, dealerSeat: nextSeat(state.dealerSeat, n) };
+  let rotated: MatchState = { ...state, dealerSeat: nextSeat(state.dealerSeat, n) };
+
+  // Pico a pico: si seguimos en fase de duelos, entra el siguiente par
+  // ENFRENTADO (ronda por medio) y el mano alterna de equipo. Si un equipo
+  // entró a buenas, picoPhaseActive() será false y dealHand reparte 3v3 normal.
+  if (rotated.picoAPico && picoPhaseActive(rotated) && rotated.picoActive) {
+    const active = picoNextPair(rotated.picoActive);
+    const manoTeam: TeamId = (rotated.picoManoTeam ?? 'A') === 'A' ? 'B' : 'A';
+    rotated = { ...rotated, picoActive: active, picoManoTeam: manoTeam };
+  }
+
   return dealHand(rotated);
 }

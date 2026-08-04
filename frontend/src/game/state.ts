@@ -71,6 +71,12 @@ export interface MatchState {
   handNumber: number;
   /** Semilla del PRNG: hace la partida determinista y serializable. */
   seed: number;
+  /** Modalidad "pico a pico" (sólo 3v3): duelos 1v1 mientras haya malas. */
+  picoAPico?: boolean;
+  /** Duelistas actualmente "al pico" (uno por equipo), si la modalidad está on. */
+  picoActive?: { A: Seat; B: Seat };
+  /** Equipo cuyo duelista es mano en la mano pico actual (alterna cada mano). */
+  picoManoTeam?: TeamId;
 }
 
 /** Ayuda: obtener un jugador por asiento. */

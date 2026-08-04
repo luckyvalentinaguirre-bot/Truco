@@ -79,9 +79,10 @@ export function useLocalMatch(
   difficulty: Difficulty = 'normal',
   mode: GameMode = '1v1',
   ruleset?: Ruleset,
+  picoAPico = false,
 ) {
   const [state, setState] = useState<MatchState>(() =>
-    createMatch({ mode, seed: randomSeed(), ruleset }),
+    createMatch({ mode, seed: randomSeed(), ruleset, picoAPico }),
   );
   const [bubbles, setBubbles] = useState<ActiveBubble[]>([]);
   // Narración diferida del Envido: burbujas de tantos/"son buenas" en orden de mano.
@@ -142,8 +143,8 @@ export function useLocalMatch(
     setReveal([]);
     handEvents.current = [];
     playSound('deal');
-    setState(createMatch({ mode, seed: randomSeed(), ruleset }));
-  }, [mode, ruleset]);
+    setState(createMatch({ mode, seed: randomSeed(), ruleset, picoAPico }));
+  }, [mode, ruleset, picoAPico]);
 
   // -------- Driver de la IA (maneja TODOS los asientos no-humanos) --------
   useEffect(() => {

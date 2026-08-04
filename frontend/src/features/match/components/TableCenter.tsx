@@ -212,6 +212,7 @@ function OpponentSeat({
   spot,
   thinking,
   revealCards,
+  waiting = false,
 }: {
   name: string;
   team: string;
@@ -219,10 +220,14 @@ function OpponentSeat({
   spot: Spot;
   thinking: boolean;
   revealCards?: Card[];
+  /** En pico a pico: el jugador no está al pico (espera su turno). */
+  waiting?: boolean;
 }) {
   const vertical = spot === 'left' || spot === 'right';
   return (
-    <div className={[styles.seat, styles[`seat_${spot}`]].join(' ')}>
+    <div
+      className={[styles.seat, styles[`seat_${spot}`], waiting ? styles.waiting : ''].join(' ')}
+    >
       <div className={styles.seatInfo}>
         <Avatar name={name} size={30} online />
         <div className={styles.seatText}>
@@ -230,6 +235,7 @@ function OpponentSeat({
           <span className={styles.seatTeam}>
             Equipo {team}
             {thinking && <em className={styles.think}> · pensando…</em>}
+            {waiting && <em className={styles.think}> · espera</em>}
           </span>
         </div>
       </div>
@@ -270,6 +276,7 @@ function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
                 spot={v.spot}
                 thinking={thinking && isActor}
                 revealCards={reveal?.find((r) => r.seat === v.seat)?.cards}
+                waiting={state.picoAPico === true && p.folded && !state.hand.finished}
               />
             );
           })}

@@ -17,9 +17,11 @@ export function MatchPage() {
   const mode: GameMode = navState?.mode ?? '1v1';
   const puntos: Puntos = navState?.puntos ?? settings.puntos;
   const ruleset = puntos === 40 ? OFFICIAL_40 : SHORT_30;
+  // El 3v3 se juega en modalidad "pico a pico" (duelos 1v1 durante las malas).
+  const picoAPico = mode === '3v3';
 
   const { state, humanSeat, aiSeat, bubbles, reveal, dispatch, restart } =
-    useLocalMatch(difficulty, mode, ruleset);
+    useLocalMatch(difficulty, mode, ruleset, picoAPico);
 
   return (
     <MatchBoard
