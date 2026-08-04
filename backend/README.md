@@ -44,6 +44,7 @@ Variables soportadas (ver `.env.example`):
 | `DATABASE_SSL` | Modo TLS: `require` \| `no-verify` \| `disable`.       | `require`     |
 | `NODE_ENV`     | `development` \| `test` \| `production`.               | `development` |
 | `PORT`         | Puerto del servidor HTTP (Render lo inyecta).          | `10000`       |
+| `CORS_ORIGINS` | Orígenes permitidos (coma). Sin definir ⇒ dev localhost.| `http://localhost:5173` |
 
 > 🔒 El `.env` real está en `.gitignore` y **no** debe commitearse. El código
 > nunca imprime `DATABASE_URL`; los logs sólo muestran host/base.

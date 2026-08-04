@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
+import { AuthProvider } from './features/auth/AuthContext';
 import { loadSettings, applyAnimationPreference } from './services/settings';
 import './styles/global.css';
 
@@ -13,6 +14,8 @@ if (!rootEl) throw new Error('No se encontró el elemento #root');
 
 createRoot(rootEl).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>,
 );

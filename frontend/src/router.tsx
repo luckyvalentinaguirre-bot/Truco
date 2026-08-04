@@ -6,6 +6,7 @@ import { LanPage } from '@/pages/LanPage';
 import { FriendsPage } from '@/pages/FriendsPage';
 import { RankingPage } from '@/pages/RankingPage';
 import { ProfilePage } from '@/pages/ProfilePage';
+import { AuthPage } from '@/pages/AuthPage';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
       { path: 'amigos', element: <FriendsPage /> },
       { path: 'ranking', element: <RankingPage /> },
       { path: 'perfil', element: <ProfilePage /> },
+      { path: 'cuenta', element: <AuthPage /> },
       { path: 'historial', element: <HistoryPage /> },
       { path: 'configuracion', element: <SettingsPage /> },
       { path: '*', element: <NotFoundPage /> },
