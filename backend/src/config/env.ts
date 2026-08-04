@@ -53,7 +53,8 @@ export function loadEnv(): Env {
   }
 
   const nodeEnv = (process.env.NODE_ENV as Env['nodeEnv']) || 'development';
-  const port = Number.parseInt(process.env.PORT ?? '4000', 10);
+  // Render inyecta PORT; en local, fallback a 10000.
+  const port = Number.parseInt(process.env.PORT ?? '10000', 10);
   const dbSslMode = (process.env.DATABASE_SSL as Env['dbSslMode']) || 'require';
 
   return { databaseUrl, nodeEnv, port, dbSslMode };

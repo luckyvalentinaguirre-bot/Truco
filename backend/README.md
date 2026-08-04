@@ -43,7 +43,7 @@ Variables soportadas (ver `.env.example`):
 | `DATABASE_URL` | Cadena de conexión a PostgreSQL (Neon). **Requerida.** | —             |
 | `DATABASE_SSL` | Modo TLS: `require` \| `no-verify` \| `disable`.       | `require`     |
 | `NODE_ENV`     | `development` \| `test` \| `production`.               | `development` |
-| `PORT`         | Puerto reservado para el futuro servidor HTTP.         | `4000`        |
+| `PORT`         | Puerto del servidor HTTP (Render lo inyecta).          | `10000`       |
 
 > 🔒 El `.env` real está en `.gitignore` y **no** debe commitearse. El código
 > nunca imprime `DATABASE_URL`; los logs sólo muestran host/base.
@@ -57,8 +57,18 @@ npm install        # instala dependencias
 npm run typecheck  # chequeo de tipos (tsc --noEmit)
 npm run build      # compila a dist/
 npm run db:test    # prueba real de conexión: SELECT NOW()
-npm start          # arranca el backend (health-check de la base)
+npm start          # levanta el servidor HTTP (queda escuchando)
 npm run dev        # arranque en modo watch
+```
+
+### Servidor HTTP
+
+`npm start` levanta un servidor HTTP (Node nativo, sin dependencias extra) que
+escucha en `0.0.0.0:$PORT` (fallback `10000`) y **permanece vivo** esperando
+peticiones. Endpoint de salud para Render y monitoreo:
+
+```bash
+curl http://localhost:10000/healthz   # → 200 {"status":"ok"}
 ```
 
 ### Probar la conexión a PostgreSQL
