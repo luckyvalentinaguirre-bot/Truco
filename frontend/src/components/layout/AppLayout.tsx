@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { NAV_ITEMS, MOBILE_PRIMARY } from '@/config/navigation';
 import { Icon } from '@/components/ui';
 import { Avatar } from '@/components/ui/Avatar';
 import { BrandLogo } from './BrandLogo';
-import { currentUser } from '@/services/mockData';
-import { getRank } from '@/data/ranks';
+import { useAuth } from '@/features/auth/AuthContext';
 import styles from './AppLayout.module.css';
 
 /**
@@ -17,7 +16,14 @@ import styles from './AppLayout.module.css';
 export function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const location = useLocation();
-  const rank = getRank(currentUser.rankId);
+  const navigate = useNavigate();
+  const { isAuthenticated, profile, logout } = useAuth();
+  const authName = profile?.displayName || profile?.username || 'Jugador';
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/cuenta');
+  };
 
   // Cerrar el drawer al navegar.
   useEffect(() => {
@@ -54,15 +60,28 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        <NavLink to="/perfil" className={styles.userCard}>
-          <Avatar name={currentUser.displayName} size={40} online />
-          <span className={styles.userMeta}>
-            <span className={styles.userName}>{currentUser.displayName}</span>
-            <span className={styles.userRank} style={{ color: rank.color }}>
-              {rank.name} · Nv {currentUser.level}
+        {isAuthenticated ? (
+          <div className={[styles.userCard, styles.userCardAuth].join(' ')}>
+            <NavLink to="/perfil" className={styles.userCardLink} aria-label="Ir al perfil">
+              <Avatar name={authName} size={40} online />
+              <span className={styles.userMeta}>
+                <span className={styles.userName}>{authName}</span>
+                <span className={styles.userRank}>@{profile?.username}</span>
+              </span>
+            </NavLink>
+            <button className={styles.logoutBtn} onClick={handleLogout}>
+              Cerrar sesión
+            </button>
+          </div>
+        ) : (
+          <NavLink to="/cuenta" className={styles.userCard}>
+            <Avatar name="Invitado" size={40} />
+            <span className={styles.userMeta}>
+              <span className={styles.userName}>Iniciar sesión</span>
+              <span className={styles.userRank}>Cuenta</span>
             </span>
-          </span>
-        </NavLink>
+          </NavLink>
+        )}
       </aside>
 
       {/* -------- Topbar (mobile/tablet) -------- */}
@@ -75,8 +94,12 @@ export function AppLayout() {
           <Icon name="menu" size={24} />
         </button>
         <BrandLogo />
-        <NavLink to="/perfil" className={styles.topAvatar} aria-label="Perfil">
-          <Avatar name={currentUser.displayName} size={36} online />
+        <NavLink
+          to={isAuthenticated ? '/perfil' : '/cuenta'}
+          className={styles.topAvatar}
+          aria-label={isAuthenticated ? 'Perfil' : 'Cuenta'}
+        >
+          <Avatar name={isAuthenticated ? authName : 'Invitado'} size={36} online={isAuthenticated} />
         </NavLink>
       </header>
 
@@ -115,6 +138,16 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
+        {isAuthenticated ? (
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            Cerrar sesión ({authName})
+          </button>
+        ) : (
+          <NavLink to="/cuenta" className={styles.navLink}>
+            <Icon name="menu" size={22} />
+            <span>Iniciar sesión</span>
+          </NavLink>
+        )}
       </aside>
 
       {/* -------- Contenido -------- */}

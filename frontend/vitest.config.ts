@@ -12,7 +12,7 @@ export default defineConfig({
     environment: 'node',
     include: [
       'src/game/**/*.test.ts',
-      'src/features/**/*.test.ts',
+      'src/features/**/*.test.{ts,tsx}',
       'server/**/*.test.ts',
     ],
   },

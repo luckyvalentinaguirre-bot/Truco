@@ -7,6 +7,7 @@ import { FriendsPage } from '@/pages/FriendsPage';
 import { RankingPage } from '@/pages/RankingPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { AuthPage } from '@/pages/AuthPage';
+import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -32,7 +33,14 @@ export const router = createBrowserRouter([
       { index: true, element: <PlayPage /> },
       { path: 'amigos', element: <FriendsPage /> },
       { path: 'ranking', element: <RankingPage /> },
-      { path: 'perfil', element: <ProfilePage /> },
+      {
+        path: 'perfil',
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
       { path: 'cuenta', element: <AuthPage /> },
       { path: 'historial', element: <HistoryPage /> },
       { path: 'configuracion', element: <SettingsPage /> },

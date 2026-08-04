@@ -77,6 +77,39 @@
 .userRank {
   font-size: var(--fs-xs);
   font-weight: var(--fw-semibold);
+  color: var(--c-text-mut);
+}
+/* Tarjeta de usuario autenticada: avatar/nombre arriba, logout abajo. */
+.userCardAuth {
+  flex-direction: column;
+  align-items: stretch;
+}
+/* Enlace interno de la tarjeta de usuario (avatar + nombre). */
+.userCardLink {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+  flex: 1;
+  color: inherit;
+  text-decoration: none;
+}
+/* Botón de cerrar sesión (sidebar y drawer). */
+.logoutBtn {
+  margin-top: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--c-border);
+  background: transparent;
+  color: var(--c-text-mut);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: border-color var(--dur-fast), color var(--dur-fast);
+}
+.logoutBtn:hover {
+  border-color: var(--c-border-strong);
+  color: var(--c-text-hi);
 }
 
 /* ============ TOPBAR + DRAWER (mobile) ============ */

@@ -4,6 +4,7 @@ import { PageHeader, Panel, Button, Badge, StatTile, Icon } from '@/components/u
 import { Avatar } from '@/components/ui/Avatar';
 import { MatchRow } from '@/components/game/MatchRow';
 import { api } from '@/services/api';
+import { ProfileIdentity } from '@/features/auth/ProfileIdentity';
 import { getRank } from '@/data/ranks';
 import { formatPercent } from '@/lib/format';
 import type { MatchRecord, UserProfile } from '@/types/domain';
@@ -28,6 +29,9 @@ export function ProfilePage() {
   return (
     <div className={styles.page}>
       <PageHeader eyebrow="Cuenta" title="Perfil" />
+
+      {/* Identidad real (backend) + edición de displayName/avatar */}
+      <ProfileIdentity />
 
       {/* Cabecera del perfil */}
       <Panel raised className={styles.header}>
