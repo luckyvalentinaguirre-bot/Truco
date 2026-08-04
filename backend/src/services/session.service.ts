@@ -13,6 +13,8 @@ import {
   touchSession,
   revokeSessionByTokenHash,
 } from '../repositories/sessions.repository.js';
+import { findUserById } from '../repositories/users.repository.js';
+import { findProfileByUserId } from '../repositories/profiles.repository.js';
 import { generateSessionToken, hashToken } from './token.js';
 
 /** Duración de una sesión inicial (centralizada/configurable). */
@@ -30,6 +32,22 @@ export interface CreatedSession {
 export interface SessionIdentity {
   userId: string;
   sessionId: string;
+}
+
+/** Usuario autenticado resuelto desde un token de sesión (sin datos sensibles). */
+export interface AuthenticatedUser {
+  user: {
+    id: string;
+    email: string;
+  };
+  profile: {
+    username: string;
+    displayName: string | null;
+    avatar: string | null;
+  };
+  session: {
+    id: string;
+  };
 }
 
 /**
@@ -79,4 +97,31 @@ export async function validateSession(token: string): Promise<SessionIdentity> {
  */
 export async function revokeSession(token: string): Promise<boolean> {
   return revokeSessionByTokenHash(hashToken(token));
+}
+
+/**
+ * Resuelve el usuario autenticado a partir de un token de sesión: valida la
+ * sesión y carga user + profile. Lanza InvalidSessionError si la sesión no es
+ * válida o si el usuario/perfil asociado ya no existe. No crea tokens ni
+ * expone password_hash/token/token_hash.
+ */
+export async function getSessionUser(token: string): Promise<AuthenticatedUser> {
+  const { userId, sessionId } = await validateSession(token);
+
+  const user = await findUserById(userId);
+  const profile = user ? await findProfileByUserId(userId) : null;
+  if (!user || !profile) {
+    // El usuario/perfil ya no existe: se trata igual que sesión inválida.
+    throw new InvalidSessionError();
+  }
+
+  return {
+    user: { id: user.id, email: user.email },
+    profile: {
+      username: profile.username,
+      displayName: profile.displayName,
+      avatar: profile.avatar,
+    },
+    session: { id: sessionId },
+  };
 }

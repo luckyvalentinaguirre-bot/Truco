@@ -7,6 +7,7 @@ import {
   createSession,
   validateSession,
   revokeSession,
+  getSessionUser,
 } from './session.service.js';
 import { hashToken } from './token.js';
 
@@ -116,5 +117,49 @@ d('session.service · createSession/validateSession/revokeSession', () => {
     const asJson = JSON.stringify(id);
     expect(asJson).not.toContain(s.token);
     expect(asJson).not.toMatch(/hash/i);
+  });
+
+  // ---- getSessionUser ----
+  it('getSessionUser: token válido ⇒ user + profile + session', async () => {
+    const s = await createSession(userId);
+    const me = await getSessionUser(s.token);
+    expect(me.user.id).toBe(userId);
+    expect(me.user.email).toBe('sess@mail.com');
+    expect(me.profile.username).toBe('SessUser');
+    expect(me.profile.displayName).toBeNull();
+    expect(me.profile.avatar).toBeNull();
+    expect(me.session.id).toBe(s.sessionId);
+  });
+
+  it('getSessionUser: token inválido ⇒ InvalidSessionError', async () => {
+    await expect(getSessionUser('no-existe')).rejects.toBeInstanceOf(InvalidSessionError);
+  });
+
+  it('getSessionUser: sesión expirada ⇒ InvalidSessionError', async () => {
+    const s = await createSession(userId, -1000);
+    await expect(getSessionUser(s.token)).rejects.toBeInstanceOf(InvalidSessionError);
+  });
+
+  it('getSessionUser: sesión revocada ⇒ InvalidSessionError', async () => {
+    const s = await createSession(userId);
+    await revokeSession(s.token);
+    await expect(getSessionUser(s.token)).rejects.toBeInstanceOf(InvalidSessionError);
+  });
+
+  it('getSessionUser: usuario inexistente ⇒ manejo seguro (InvalidSessionError)', async () => {
+    const s = await createSession(userId);
+    // Borrar el user elimina en cascada su sesión: getSessionUser falla seguro.
+    await query('DELETE FROM users WHERE id = $1', [userId]);
+    await expect(getSessionUser(s.token)).rejects.toBeInstanceOf(InvalidSessionError);
+  });
+
+  it('getSessionUser: el resultado nunca contiene password_hash/token/token_hash', async () => {
+    const s = await createSession(userId);
+    const me = await getSessionUser(s.token);
+    const asJson = JSON.stringify(me);
+    expect(asJson).not.toMatch(/password/i);
+    expect(asJson).not.toMatch(/hash/i);
+    expect(asJson).not.toContain(s.token);
+    expect(asJson).not.toContain(hashToken(s.token));
   });
 });
