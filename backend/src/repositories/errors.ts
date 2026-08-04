@@ -80,6 +80,13 @@ export class InvalidCredentialsError extends RepositoryError {
   }
 }
 
+/** Sesión inválida: inexistente, revocada o expirada (indistinguibles). */
+export class InvalidSessionError extends RepositoryError {
+  constructor() {
+    super('Sesión inválida');
+  }
+}
+
 /** Error de validación de datos de entrada (campo + motivo). */
 export class ValidationError extends RepositoryError {
   readonly field: string;

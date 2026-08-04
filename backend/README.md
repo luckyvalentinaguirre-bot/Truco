@@ -124,6 +124,14 @@ En `src/services/`:
   deja un user sin profile y nunca devuelve el hash ni la contraseña.
 - `password.ts` — `hashPassword` / `verifyPassword` con **scrypt** de
   `node:crypto` (sin dependencias externas). Sólo se persiste el hash.
+- `auth.service.ts` — `verifyCredentials(email, password)`: identidad mínima si
+  son válidas; mismo `InvalidCredentialsError` para email inexistente y clave
+  incorrecta.
+- `session.service.ts` + `token.ts` — sesiones sobre la tabla `sessions`:
+  `createSession(userId)` genera un token seguro (`node:crypto`, 256 bits) y
+  guarda sólo su hash (SHA-256); `validateSession(token)` y `revokeSession(token)`
+  (idempotente). El token en claro sólo se devuelve al crear la sesión.
+  Duración por defecto: **7 días** (`SESSION_TTL_MS`).
 
 ### Tests
 
