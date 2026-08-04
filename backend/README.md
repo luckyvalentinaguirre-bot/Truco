@@ -102,6 +102,28 @@ npm run db:migrate
 > En Render conviene ejecutar `npm run db:migrate` como paso previo al deploy
 > (o manualmente una vez), no en el arranque del servidor HTTP.
 
+## Capa de datos (repositories)
+
+Acceso a datos tipado en `src/repositories/`, sobre el `pool` compartido y con
+queries **siempre parametrizadas**:
+
+- `users.repository.ts` — `createUser`, `findUserByEmail`, `findUserById`,
+  `emailExists` (recibe un `password_hash` ya generado; el hashing llega luego).
+- `profiles.repository.ts` — `createProfile`, `findProfileByUserId`,
+  `findProfileByUsername`, `isUsernameAvailable`.
+- `errors.ts` — traduce errores SQLSTATE de PostgreSQL a errores de dominio
+  (`EmailAlreadyExistsError`, `UsernameTakenError`, `UserNotFoundError`, …).
+
+### Tests
+
+```bash
+npm test   # vitest
+```
+
+Los tests de repositorios corren contra una base PostgreSQL **real** (la de
+`DATABASE_URL`): aplican las migraciones y limpian las tablas entre casos. Si
+`DATABASE_URL` no está definida, la suite se **salta** (no falla).
+
 ## Dependencias
 
 - **[`pg`](https://node-postgres.com/)** — cliente PostgreSQL para Node.js.
