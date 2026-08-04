@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+
+# Nunca commitear entornos reales (el .env de la raíz ya está ignorado).
+.env
+.env.local
+.env.*.local
