@@ -257,6 +257,10 @@ function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
   const views = seatViews(state.players, humanSeat);
   const bySeat = new Map(views.map((v) => [v.seat, v]));
   const manoSpot = bySeat.get(state.hand.manoSeat)?.spot ?? 'bottom';
+  // Pico a pico: si el humano NO está en el duelo actual (espera su turno),
+  // no puede ver las cartas jugadas hasta que termine la vuelta.
+  const humanSpectating =
+    state.picoAPico === true && state.players[humanSeat].folded && !state.hand.finished;
 
   return (
     <>
@@ -295,7 +299,11 @@ function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
               key={play.seat}
               className={[styles.playedCardMulti, styles[`playedAt_${spot}`]].join(' ')}
             >
-              <PlayingCard card={play.card} size="md" flip={!v?.isHuman} />
+              {humanSpectating ? (
+                <PlayingCard faceDown size="md" />
+              ) : (
+                <PlayingCard card={play.card} size="md" flip={!v?.isHuman} />
+              )}
             </span>
           );
         })}
