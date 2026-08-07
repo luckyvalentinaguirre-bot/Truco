@@ -22,10 +22,10 @@ body {
   line-height: var(--lh-normal);
   color: var(--c-text);
   background: var(--c-bg-900);
-  /* Textura sutil de mesa: viñeta + brillo cálido superior */
+  /* Textura sutil de mesa: brillo cálido de madera + apunte de paño verde */
   background-image:
-    radial-gradient(1200px 600px at 50% -10%, rgba(224, 102, 42, 0.08), transparent 60%),
-    radial-gradient(900px 700px at 100% 0%, rgba(28, 90, 63, 0.12), transparent 55%),
+    radial-gradient(1200px 620px at 50% -12%, rgba(212, 175, 55, 0.08), transparent 60%),
+    radial-gradient(1000px 720px at 100% 0%, rgba(20, 80, 60, 0.10), transparent 55%),
     linear-gradient(180deg, var(--c-bg-800), var(--c-bg-900));
   background-attachment: fixed;
   min-height: 100dvh;

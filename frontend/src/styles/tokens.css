@@ -6,17 +6,20 @@
    ============================================================= */
 
 :root {
-  /* ---------- Paleta base (mesa de truco, nocturna) ---------- */
-  --c-bg-900: #0b0e13; /* fondo app */
-  --c-bg-800: #0e1116; /* fondo secciones */
-  --c-bg-700: #141922; /* paneles */
-  --c-bg-600: #1b2230; /* paneles elevados */
-  --c-bg-500: #232c3d; /* hover paneles */
+  /* ---------- Paleta base (madera cálida, nocturna) ----------
+     Neutros CÁLIDOS (marrón-carbón), no azulados: dan identidad de
+     mesa de truco a TODA la plataforma sin tocar layouts. */
+  --c-bg-900: #16110b; /* fondo app (nogal muy oscuro) */
+  --c-bg-800: #1c150d; /* fondo secciones */
+  --c-bg-700: #241b11; /* paneles */
+  --c-bg-600: #2f2316; /* paneles elevados */
+  --c-bg-500: #3b2d1c; /* hover paneles */
 
-  --c-surface: rgba(255, 255, 255, 0.03);
-  --c-surface-strong: rgba(255, 255, 255, 0.06);
-  --c-border: rgba(255, 255, 255, 0.08);
-  --c-border-strong: rgba(255, 255, 255, 0.14);
+  /* Superficies y bordes con tinte cálido (marfil/dorado tenue). */
+  --c-surface: rgba(247, 243, 233, 0.035);
+  --c-surface-strong: rgba(247, 243, 233, 0.07);
+  --c-border: rgba(232, 207, 122, 0.11);
+  --c-border-strong: rgba(232, 207, 122, 0.22);
 
   /* Fieltro de la mesa (acento verde profundo) */
   --c-felt-900: #0c2a1e;
@@ -41,11 +44,11 @@
   --c-quiero: #1e6b3a;
   --c-noquiero: #a12626; /* rojo no quiero */
 
-  /* Acento primario (brasa / naranja madera) */
-  --c-accent-500: #e0662a;
-  --c-accent-600: #c1440e;
-  --c-accent-400: #f2884a;
-  --c-accent-glow: rgba(224, 102, 42, 0.35);
+  /* Acento primario (terracota / brasa de madera, más cálido y sobrio) */
+  --c-accent-500: #c96a2f;
+  --c-accent-600: #a54c1a;
+  --c-accent-400: #dd8a51;
+  --c-accent-glow: rgba(201, 106, 47, 0.32);
 
   /* Acento secundario (dorado, para rangos / premium) */
   --c-gold-500: #d9b168;
@@ -57,11 +60,11 @@
   --c-warning: #e5b454;
   --c-info: #4b93d6;
 
-  /* Texto */
-  --c-text-hi: #f4efe4; /* pergamino claro */
-  --c-text: #cdd3de;
-  --c-text-mut: #8a93a5;
-  --c-text-dim: #5c6576;
+  /* Texto (pergamino/crema cálidos, buen contraste sobre madera) */
+  --c-text-hi: #f6f0e2; /* pergamino claro (títulos) */
+  --c-text: #ddd1bb; /* texto principal, crema apagado */
+  --c-text-mut: #a99a80; /* secundario, madera clara */
+  --c-text-dim: #7c6d56; /* terciario */
   --c-text-on-accent: #1a0d05;
 
   /* Palos de la baraja española */
