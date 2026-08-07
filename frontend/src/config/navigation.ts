@@ -15,6 +15,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/ranking', label: 'Ranking', icon: 'ranking', primaryMobile: true },
   { to: '/perfil', label: 'Perfil', icon: 'profile', primaryMobile: true },
   { to: '/amigos', label: 'Amigos', icon: 'friends', primaryMobile: true },
+  { to: '/cartas', label: 'Cartas', icon: 'cards' },
   { to: '/historial', label: 'Historial', icon: 'history' },
   { to: '/configuracion', label: 'Configuración', icon: 'settings' },
 ];

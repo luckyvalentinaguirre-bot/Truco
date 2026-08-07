@@ -42,6 +42,7 @@ export const router = createBrowserRouter([
         ),
       },
       { path: 'cuenta', element: <AuthPage /> },
+      { path: 'cartas', element: <CardsDevPage /> },
       { path: 'historial', element: <HistoryPage /> },
       { path: 'configuracion', element: <SettingsPage /> },
       { path: '*', element: <NotFoundPage /> },

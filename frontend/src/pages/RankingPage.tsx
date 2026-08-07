@@ -7,10 +7,12 @@ import { currentUser } from '@/services/mockData';
 import styles from './RankingPage.module.css';
 
 type Scope = 'global' | 'amigos' | 'temporada';
+type ModeFilter = 'todas' | '1v1' | '2v2' | '3v3';
 
 export function RankingPage() {
   const [board, setBoard] = useState<LeaderboardEntry[] | null>(null);
   const [scope, setScope] = useState<Scope>('global');
+  const [modalidad, setModalidad] = useState<ModeFilter>('todas');
 
   useEffect(() => {
     api.getLeaderboard().then(setBoard);
@@ -60,6 +62,22 @@ export function RankingPage() {
             { value: 'global', label: 'Global' },
             { value: 'amigos', label: 'Amigos' },
             { value: 'temporada', label: 'Temporada' },
+          ]}
+        />
+      </div>
+
+      {/* Ranking por modalidad (§21). */}
+      <div className={styles.boardHead}>
+        <span className={styles.sectionTitle}>Modalidad</span>
+        <SegmentedControl<ModeFilter>
+          ariaLabel="Ranking por modalidad"
+          value={modalidad}
+          onChange={setModalidad}
+          options={[
+            { value: 'todas', label: 'Todas' },
+            { value: '1v1', label: '1 vs 1' },
+            { value: '2v2', label: '2 vs 2' },
+            { value: '3v3', label: '3 vs 3' },
           ]}
         />
       </div>
