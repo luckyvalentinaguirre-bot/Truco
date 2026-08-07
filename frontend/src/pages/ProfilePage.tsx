@@ -4,6 +4,7 @@ import { PageHeader, Panel, Button, Badge, StatTile, Icon } from '@/components/u
 import { Avatar } from '@/components/ui/Avatar';
 import { MatchRow } from '@/components/game/MatchRow';
 import { api } from '@/services/api';
+import { useAuth } from '@/features/auth/AuthContext';
 import { ProfileIdentity } from '@/features/auth/ProfileIdentity';
 import { getRank } from '@/data/ranks';
 import { formatPercent } from '@/lib/format';
@@ -11,6 +12,7 @@ import type { MatchRecord, UserProfile } from '@/types/domain';
 import styles from './ProfilePage.module.css';
 
 export function ProfilePage() {
+  const { profile: authProfile } = useAuth();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [matches, setMatches] = useState<MatchRecord[]>([]);
 
@@ -25,6 +27,10 @@ export function ProfilePage() {
 
   const rank = getRank(user.rankId);
   const xpPct = Math.min(100, Math.round((user.xp / user.xpToNext) * 100));
+  // Identidad REAL del backend (auth); las estadísticas/rango siguen siendo
+  // placeholders hasta que exista su backend (§9: no inventar datos).
+  const realName = authProfile?.displayName || authProfile?.username || user.displayName;
+  const realHandle = authProfile?.username || user.username;
 
   return (
     <div className={styles.page}>
@@ -35,13 +41,13 @@ export function ProfilePage() {
 
       {/* Cabecera del perfil */}
       <Panel raised className={styles.header}>
-        <Avatar name={user.displayName} size={96} framed online />
+        <Avatar name={realName} size={96} framed online />
         <div className={styles.identity}>
           <div className={styles.nameRow}>
-            <h2 className={styles.name}>{user.displayName}</h2>
+            <h2 className={styles.name}>{realName}</h2>
             <Badge color={rank.color}>{rank.name}</Badge>
           </div>
-          <span className={styles.handle}>@{user.username}</span>
+          <span className={styles.handle}>@{realHandle}</span>
 
           <div className={styles.levelRow}>
             <span className={styles.levelBadge}>

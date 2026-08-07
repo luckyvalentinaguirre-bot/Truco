@@ -4,6 +4,7 @@ import { PageHeader, Panel, Button, Badge, Icon, SegmentedControl } from '@/comp
 import { PlayingCard } from '@/components/game/PlayingCard';
 import type { Card, GameMode } from '@/game';
 import { loadSettings, saveSettings, type Difficulty, type Puntos } from '@/services/settings';
+import { useAuth } from '@/features/auth/AuthContext';
 import styles from './PlayPage.module.css';
 
 interface ModeCardData {
@@ -35,6 +36,7 @@ export function PlayPage() {
     () => loadSettings().difficulty,
   );
   const [puntos, setPuntos] = useState<Puntos>(() => loadSettings().puntos);
+  const { isAuthenticated, profile } = useAuth();
   const navigate = useNavigate();
   const startMatch = (mode: GameMode = '1v1') =>
     navigate('/mesa', { state: { difficulty, mode, puntos } });
@@ -52,7 +54,11 @@ export function PlayPage() {
   return (
     <div className={styles.page}>
       <PageHeader
-        eyebrow="Truco Uruguayo"
+        eyebrow={
+          isAuthenticated
+            ? `Hola, ${profile?.displayName || profile?.username || 'jugador'}`
+            : 'Truco Uruguayo'
+        }
         title="Jugá una partida"
         subtitle={
           puntos === 40
