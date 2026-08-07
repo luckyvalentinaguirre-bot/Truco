@@ -1,0 +1,46 @@
+/* Estilo PROVISIONAL neutro (la estética final es la Etapa 3). */
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.mode {
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--c-gold-soft, #e6d6a8);
+  white-space: nowrap;
+}
+.chip {
+  font-size: var(--fs-2xs);
+  color: var(--c-text-mut, #b8b2a6);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--r-sm);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.pico {
+  color: var(--c-cream, #efe9dd);
+  border-color: rgba(212, 175, 55, 0.35);
+}
+.duel {
+  color: var(--c-text-mut, #b8b2a6);
+  font-style: normal;
+}
+
+/* Celular: sólo modalidad + pico/ronda; se oculta el detalle del duelo y mano. */
+@media (max-width: 560px) {
+  .wrap {
+    gap: 6px;
+  }
+  .duel {
+    display: none;
+  }
+  .chip:last-child {
+    display: none; /* oculta "Mano:" en pantallas muy chicas para no saturar */
+  }
+}

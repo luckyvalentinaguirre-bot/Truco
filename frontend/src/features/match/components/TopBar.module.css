@@ -9,6 +9,14 @@
   box-shadow: var(--sh-md), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+/* Estado de partida (modalidad/ronda/mano/pico) entre el menú y el marcador. */
+.statusWrap {
+  flex: none;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
 /* Menú desplegable (hamburguesa): contiene sonido y configuración, para
    despejar la barra —sobre todo en celular—. */
 .menuWrap {
@@ -232,6 +240,16 @@
 
 /* Mobile: marcador compacto, sin texto "A 40 puntos" duplicado */
 @media (max-width: 560px) {
+  /* El estado de partida pasa a una segunda fila propia, centrado y compacto. */
+  .bar {
+    flex-wrap: wrap;
+  }
+  .statusWrap {
+    order: 5;
+    flex-basis: 100%;
+    justify-content: center;
+    padding-top: 2px;
+  }
   .sticks {
     display: none;
   }

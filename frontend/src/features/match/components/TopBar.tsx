@@ -4,15 +4,22 @@ import type { MatchState, Seat, TeamId } from '@/game';
 import { Icon } from '@/components/ui';
 import { loadSettings, saveSettings } from '@/services/settings';
 import { Fosforos } from './Fosforos';
+import { GameStatus } from './GameStatus';
+import { ConnectionIndicator, type ConnState } from './ConnectionIndicator';
 import styles from './TopBar.module.css';
 
 interface TopBarProps {
   state: MatchState;
   humanSeat: Seat;
+  /** Estado de conexión (LAN/online). En local no se pasa. */
+  netStatus?: ConnState;
 }
 
-/** Barra superior: menú · marcador (VOS – RIVAL) · sonido/config/abandonar. */
-export function TopBar({ state, humanSeat }: TopBarProps) {
+/**
+ * Barra superior en partida: menú · estado (modalidad/ronda/mano/pico) ·
+ * tanteador (Nosotros/Ellos, malas/buenas) · conexión · abandonar.
+ */
+export function TopBar({ state, humanSeat, netStatus }: TopBarProps) {
   const navigate = useNavigate();
   const [sound, setSound] = useState(() => loadSettings().sound);
   const [confirmExit, setConfirmExit] = useState(false);
@@ -82,6 +89,10 @@ export function TopBar({ state, humanSeat }: TopBarProps) {
         )}
       </div>
 
+      <div className={styles.statusWrap}>
+        <GameStatus state={state} humanSeat={humanSeat} />
+      </div>
+
       <div className={styles.marcador}>
         <div className={styles.side}>
           <span className={[styles.team, styles.vos].join(' ')}>Nosotros</span>
@@ -138,6 +149,7 @@ export function TopBar({ state, humanSeat }: TopBarProps) {
       </div>
 
       <div className={styles.controls}>
+        {netStatus && <ConnectionIndicator state={netStatus} />}
         {confirmExit ? (
           <div className={styles.confirm}>
             <span>¿Abandonar?</span>

@@ -40,6 +40,8 @@ interface MatchBoardProps {
   reveal: RevealHand[];
   dispatch: (action: Action) => void;
   onRestart: () => void;
+  /** Estado de conexión (sólo online/LAN). */
+  netStatus?: import('./ConnectionIndicator').ConnState;
 }
 
 /**
@@ -54,6 +56,7 @@ export function MatchBoard({
   reveal,
   dispatch,
   onRestart,
+  netStatus,
 }: MatchBoardProps) {
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -111,7 +114,7 @@ export function MatchBoard({
 
   return (
     <div className={styles.screen}>
-      <TopBar state={state} humanSeat={humanSeat} />
+      <TopBar state={state} humanSeat={humanSeat} netStatus={netStatus} />
 
       <div
         className={styles.feltFrame}

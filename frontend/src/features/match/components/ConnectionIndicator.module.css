@@ -1,0 +1,42 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  color: var(--c-text-mut, #b8b2a6);
+  white-space: nowrap;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+/* No depender SÓLO del color: el texto siempre acompaña. */
+.connected {
+  color: #7bc47b;
+}
+.connecting,
+.reconnecting {
+  color: #d6b24a;
+}
+.reconnecting .dot {
+  animation: pulse 1s ease-in-out infinite;
+}
+.disconnected {
+  color: #d68a8a;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* Celular: sólo el punto (el texto se oculta), pero el aria-label persiste. */
+@media (max-width: 560px) {
+  .text {
+    display: none;
+  }
+}

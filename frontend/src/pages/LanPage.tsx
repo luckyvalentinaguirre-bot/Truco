@@ -59,6 +59,9 @@ function LanSession({ opts, onExit }: { opts: NetworkMatchOptions; onExit: () =>
   }
 
   const aiSeat = net.state.players.find((p) => p.seat !== net.mySeat)?.seat ?? net.mySeat;
+  // Estado de conexión funcional para la barra superior. (El caso 'error' ya
+  // se manejó y retornó antes; aquí sólo quedan estados conectados.)
+  const conn = net.status === 'connecting' ? 'connecting' : 'connected';
   return (
     <MatchBoard
       state={net.state}
@@ -68,6 +71,7 @@ function LanSession({ opts, onExit }: { opts: NetworkMatchOptions; onExit: () =>
       reveal={net.reveal}
       dispatch={net.dispatch}
       onRestart={net.restart}
+      netStatus={conn}
     />
   );
 }

@@ -11,9 +11,10 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Jugar', icon: 'play', primaryMobile: true },
-  { to: '/amigos', label: 'Amigos', icon: 'friends', primaryMobile: true },
+  { to: '/lan', label: 'Jugar con amigos', icon: 'online' },
   { to: '/ranking', label: 'Ranking', icon: 'ranking', primaryMobile: true },
   { to: '/perfil', label: 'Perfil', icon: 'profile', primaryMobile: true },
+  { to: '/amigos', label: 'Amigos', icon: 'friends', primaryMobile: true },
   { to: '/historial', label: 'Historial', icon: 'history' },
   { to: '/configuracion', label: 'Configuración', icon: 'settings' },
 ];
