@@ -1,0 +1,21 @@
+{
+  "name": "@truco/game-rules",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rules Engine puro del Truco Uruguayo, compartido por frontend y backend.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.9"
+  }
+}

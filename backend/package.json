@@ -17,6 +17,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@truco/game-rules": "file:../packages/game-rules",
     "dotenv": "^16.4.5",
     "pg": "^8.12.0"
   },
