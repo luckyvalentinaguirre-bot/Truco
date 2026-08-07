@@ -26,6 +26,13 @@ export interface Player {
   /** Cartas ya jugadas por este jugador en la mano actual. */
   played: Card[];
   folded: boolean;
+  /**
+   * Cantidad de cartas en mano SIN revelar su contenido. Lo completa la
+   * redacción por asiento (privacy.redactStateFor): el cliente conoce cuántas
+   * cartas tiene un rival, nunca cuáles. Opcional: sólo aparece en estado
+   * redactado para la red.
+   */
+  handCount?: number;
 }
 
 export interface Trick {
@@ -52,6 +59,13 @@ export interface HandState {
   finished: boolean;
   /** Equipo ganador de la mano (cuando finished). */
   winner: TeamId | null;
+  /**
+   * En Pico a Pico, la muestra sólo puede verla quien participa del 1v1 en
+   * curso. Cuando la redacción oculta la muestra a un espectador, `muestra`
+   * queda con un marcador y esta bandera se pone en true. Opcional: sólo en
+   * estado redactado para la red.
+   */
+  muestraHidden?: boolean;
 }
 
 export type GamePhase = 'playing' | 'finished';
