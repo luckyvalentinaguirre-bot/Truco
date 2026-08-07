@@ -329,6 +329,18 @@
   opacity: 0.42;
   filter: grayscale(0.5);
 }
+/* Cartas de un compañero que se pueden ver con tap/click (5 s). */
+.peekable {
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  outline: 1px dashed rgba(212, 175, 55, 0.5);
+  outline-offset: 3px;
+  transition: outline-color var(--dur-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.peekable:hover {
+  outline-color: var(--c-gold, #d4af37);
+}
 .seatInfo {
   display: flex;
   align-items: center;

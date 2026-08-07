@@ -13,6 +13,10 @@ interface TableCenterProps {
   thinking: boolean;
   bubbles?: ActiveBubble[];
   reveal?: RevealHand[];
+  /** Tap/click sobre las cartas de un compañero para verlas (5 s). */
+  onPeekSeat?: (seat: Seat) => void;
+  /** ¿El asiento es un compañero cuyas cartas se pueden ver? */
+  canPeekSeat?: (seat: Seat) => boolean;
 }
 
 /** Mano de un rival revelada boca arriba (al terminar una mano con envido/flor). */
@@ -213,6 +217,8 @@ function OpponentSeat({
   thinking,
   revealCards,
   waiting = false,
+  peekable = false,
+  onPeek,
 }: {
   name: string;
   team: string;
@@ -222,8 +228,12 @@ function OpponentSeat({
   revealCards?: Card[];
   /** En pico a pico: el jugador no está al pico (espera su turno). */
   waiting?: boolean;
+  /** Es un compañero cuyas cartas se pueden ver con tap/click. */
+  peekable?: boolean;
+  onPeek?: () => void;
 }) {
   const vertical = spot === 'left' || spot === 'right';
+  const cardsClickable = peekable && !revealCards && remaining > 0;
   return (
     <div
       className={[styles.seat, styles[`seat_${spot}`], waiting ? styles.waiting : ''].join(' ')}
@@ -236,10 +246,20 @@ function OpponentSeat({
             Equipo {team}
             {thinking && <em className={styles.think}> · pensando…</em>}
             {waiting && <em className={styles.think}> · espera</em>}
+            {cardsClickable && <em className={styles.think}> · ver</em>}
           </span>
         </div>
       </div>
-      <div className={[styles.seatCards, vertical ? styles.seatCardsV : ''].join(' ')}>
+      <div
+        className={[
+          styles.seatCards,
+          vertical ? styles.seatCardsV : '',
+          cardsClickable ? styles.peekable : '',
+        ].join(' ')}
+        onClick={cardsClickable ? onPeek : undefined}
+        role={cardsClickable ? 'button' : undefined}
+        aria-label={cardsClickable ? `Ver cartas de ${name}` : undefined}
+      >
         {revealCards
           ? revealCards.map((card, i) => (
               <PlayingCard key={i} card={card} size="sm" flip />
@@ -252,7 +272,14 @@ function OpponentSeat({
   );
 }
 
-function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
+function TableMulti({
+  state,
+  humanSeat,
+  thinking,
+  reveal,
+  onPeekSeat,
+  canPeekSeat,
+}: TableCenterProps) {
   const trick = displayedTrick(state);
   const views = seatViews(state.players, humanSeat);
   const bySeat = new Map(views.map((v) => [v.seat, v]));
@@ -281,6 +308,8 @@ function TableMulti({ state, humanSeat, thinking, reveal }: TableCenterProps) {
                 thinking={thinking && isActor}
                 revealCards={reveal?.find((r) => r.seat === v.seat)?.cards}
                 waiting={state.picoAPico === true && p.folded && !state.hand.finished}
+                peekable={canPeekSeat?.(v.seat) ?? false}
+                onPeek={() => onPeekSeat?.(v.seat)}
               />
             );
           })}

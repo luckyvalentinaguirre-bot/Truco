@@ -20,12 +20,16 @@ import {
   FLOR_LABEL,
 } from '@/features/match/matchView';
 import type { ActiveBubble, RevealHand } from '@/features/match/useLocalMatch';
+import { useTeammatePeek } from '@/features/match/useTeammatePeek';
 import { TopBar } from './TopBar';
 import { TableCenter } from './TableCenter';
 import { PlayerHand } from './PlayerHand';
 import { ActionBar } from './ActionBar';
+import { TeamActions } from './TeamActions';
 import { GameOverModal } from './EndModals';
 import styles from '@/pages/MatchPage.module.css';
+
+let teamSignalSeq = 0;
 
 interface MatchBoardProps {
   state: MatchState;
@@ -92,6 +96,19 @@ export function MatchBoard({
     setSelected(null);
   };
 
+  // Ver cartas de un compañero (5 s), autorizado por el motor.
+  const { peek, peekReveal, canPeekSeat } = useTeammatePeek(state, humanSeat);
+  // Reveal de fin de mano (envido/flor) + peek temporal de compañero.
+  const reveals = [...reveal, ...peekReveal];
+
+  // Señas de equipo (TOCA / selección de compañero): burbujas efímeras locales.
+  const [signals, setSignals] = useState<ActiveBubble[]>([]);
+  const pushSignal = (seat: Seat, text: string) => {
+    const id = ++teamSignalSeq;
+    setSignals((cur) => [...cur, { id, seat, text, born: Date.now() }]);
+    setTimeout(() => setSignals((cur) => cur.filter((b) => b.id !== id)), 2600);
+  };
+
   return (
     <div className={styles.screen}>
       <TopBar state={state} humanSeat={humanSeat} />
@@ -106,8 +123,17 @@ export function MatchBoard({
             humanSeat={humanSeat}
             aiSeat={aiSeat}
             thinking={thinking}
-            bubbles={bubbles}
-            reveal={reveal}
+            bubbles={[...bubbles, ...signals]}
+            reveal={reveals}
+            onPeekSeat={peek}
+            canPeekSeat={canPeekSeat}
+          />
+
+          <TeamActions
+            state={state}
+            humanSeat={humanSeat}
+            onToca={() => pushSignal(humanSeat, '¡Toca!')}
+            onSelectTeammate={(seat) => pushSignal(seat, 'Elegido')}
           />
 
           <PlayerHand

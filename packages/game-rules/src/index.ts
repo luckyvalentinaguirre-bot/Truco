@@ -24,6 +24,7 @@ export * from './actions.js';
 export * from './events.js';
 export * from './setup.js';
 export * from './pico.js';
+export * from './teamplay.js';
 export * from './engine.js';
 export * from './ai.js';
 
