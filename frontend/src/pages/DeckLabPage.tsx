@@ -1,55 +1,70 @@
 /* =============================================================
- * Herramienta de desarrollo: editor VISUAL de la posición del mazo.
+ * Herramienta de desarrollo: editor VISUAL de la posición del mazo, POR MODO.
  * -------------------------------------------------------------
- * Sólo en dev (import.meta.env.DEV). Arrastrá el mazo (mouse o touch) sobre la
- * mesa de referencia con los asientos marcados; el panel muestra top/left en %
- * y genera el CSS listo para pegar en TableCenter.module.css (.deckMano_*).
- * No toca el juego real: es puramente para calibrar posiciones sin escribir a
- * mano. El mazo real se ancla al repartidor (dealerSeat) — acá sólo calibrás
- * DÓNDE cae cada posición.
+ * Sólo en dev. Elegí el modo (1v1 / 2v2 / 3v3): se muestran esos jugadores en
+ * su lugar. Seleccioná a QUÉ jugador ponerle el mazo (dropdown o click en el
+ * asiento) y arrastrá el 🃏 (mouse o dedo). El panel genera el CSS listo para
+ * pegar en TableCenter.module.css. No toca el juego real: sólo calibra dónde
+ * cae el mazo según el repartidor (dealerSeat).
  * ============================================================= */
 import { useRef, useState, type PointerEvent } from 'react';
 
-/** Los 8 lugares de la mesa (coinciden con .deckMano_* y seat_*). */
-type Spot =
-  | 'bottom' | 'top' | 'left' | 'right'
-  | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+type Mode = '1v1' | '2v2' | '3v3';
+interface SeatDef {
+  cls: string; // clase CSS que se edita
+  label: string; // nombre del jugador/lugar
+  ref: { top: number; left: number }; // dónde se dibuja el asiento (referencia)
+}
 
-/** Valores ACTUALES en TableCenter.module.css (para arrancar desde ahí). */
-const START: Record<Spot, { top: number; left: number }> = {
-  bottom: { top: 84, left: 76 }, // bottom:16% right:24%  → top≈84, left≈76
-  top: { top: 13, left: 50 },
-  topLeft: { top: 15, left: 14 },
-  topRight: { top: 15, left: 86 }, // right:14% → left≈86
-  left: { top: 40, left: 13 },
-  right: { top: 40, left: 87 }, // right:13% → left≈87
-  bottomLeft: { top: 52, left: 14 },
-  bottomRight: { top: 52, left: 86 }, // right:14% → left≈86
+/** Jugadores por modo, en su lugar real, con la clase CSS que le corresponde. */
+const MODES: Record<Mode, SeatDef[]> = {
+  '1v1': [
+    { cls: 'deckRightBottom', label: 'VOS (abajo)', ref: { top: 90, left: 50 } },
+    { cls: 'deckLeftTop', label: 'Rival (arriba)', ref: { top: 6, left: 50 } },
+  ],
+  '2v2': [
+    { cls: 'deckMano_bottom', label: 'VOS (abajo)', ref: { top: 90, left: 50 } },
+    { cls: 'deckMano_right', label: 'Rival derecha', ref: { top: 40, left: 96 } },
+    { cls: 'deckMano_top', label: 'Compañero (arriba)', ref: { top: 6, left: 50 } },
+    { cls: 'deckMano_left', label: 'Rival izquierda', ref: { top: 40, left: 4 } },
+  ],
+  '3v3': [
+    { cls: 'deckMano_bottom', label: 'VOS (abajo)', ref: { top: 90, left: 50 } },
+    { cls: 'deckMano_bottomRight', label: 'abajo-derecha', ref: { top: 60, left: 94 } },
+    { cls: 'deckMano_topRight', label: 'arriba-derecha', ref: { top: 8, left: 92 } },
+    { cls: 'deckMano_top', label: 'arriba', ref: { top: 4, left: 50 } },
+    { cls: 'deckMano_topLeft', label: 'arriba-izquierda', ref: { top: 8, left: 8 } },
+    { cls: 'deckMano_bottomLeft', label: 'abajo-izquierda', ref: { top: 60, left: 6 } },
+  ],
 };
 
-/** Posición de referencia de cada asiento (coincide con .seat_*). */
-const SEATS: { spot: Spot | 'human'; top: number; left: number; label: string }[] = [
-  { spot: 'human', top: 92, left: 50, label: 'VOS (abajo)' },
-  { spot: 'top', top: 3, left: 50, label: 'arriba' },
-  { spot: 'topLeft', top: 6, left: 6, label: 'arriba-izq' },
-  { spot: 'topRight', top: 6, left: 94, label: 'arriba-der' },
-  { spot: 'left', top: 40, left: 3, label: 'izquierda' },
-  { spot: 'right', top: 40, left: 97, label: 'derecha' },
-  { spot: 'bottomLeft', top: 58, left: 5, label: 'abajo-izq' },
-  { spot: 'bottomRight', top: 58, left: 95, label: 'abajo-der' },
-];
-
-const SPOTS: Spot[] = [
-  'bottom', 'top', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight',
-];
+/** Posición inicial del mazo por clase (= valores actuales en el CSS). */
+const START: Record<string, { top: number; left: number }> = {
+  deckRightBottom: { top: 94, left: 97 },
+  deckLeftTop: { top: 4, left: 3 },
+  deckMano_bottom: { top: 84, left: 76 },
+  deckMano_top: { top: 13, left: 50 },
+  deckMano_left: { top: 40, left: 13 },
+  deckMano_right: { top: 40, left: 87 },
+  deckMano_topLeft: { top: 15, left: 14 },
+  deckMano_topRight: { top: 15, left: 86 },
+  deckMano_bottomLeft: { top: 52, left: 14 },
+  deckMano_bottomRight: { top: 52, left: 86 },
+};
 
 const round1 = (x: number) => Math.round(x * 10) / 10;
 
 export function DeckLabPage() {
-  const [pos, setPos] = useState<Record<Spot, { top: number; left: number }>>(START);
-  const [active, setActive] = useState<Spot>('bottom');
+  const [mode, setMode] = useState<Mode>('2v2');
+  const [pos, setPos] = useState<Record<string, { top: number; left: number }>>(START);
+  const seats = MODES[mode];
+  const [activeCls, setActiveCls] = useState<string>(seats[0].cls);
   const boxRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
+
+  // Al cambiar de modo, aseguramos que el lugar activo pertenezca al modo.
+  const seatClasses = seats.map((s) => s.cls);
+  const active = seatClasses.includes(activeCls) ? activeCls : seats[0].cls;
 
   const move = (e: PointerEvent) => {
     if (!dragging.current || !boxRef.current) return;
@@ -61,26 +76,47 @@ export function DeckLabPage() {
 
   const cur = pos[active];
 
-  /** Genera la línea CSS para un lugar (usa right cuando está en la mitad derecha). */
-  const cssLine = (spot: Spot) => {
-    const { top, left } = pos[spot];
+  /** Línea CSS de una clase (right cuando está en la mitad derecha, bottom abajo). */
+  const cssLine = (cls: string) => {
+    const { top, left } = pos[cls];
     const horiz = left > 50 ? `right: ${round1(100 - left)}%;` : `left: ${round1(left)}%;`;
     const vert = top > 50 ? `bottom: ${round1(100 - top)}%;` : `top: ${round1(top)}%;`;
-    return `.deckMano_${spot} { ${vert} ${horiz} }`;
+    const extra = cls === 'deckMano_top' ? ' transform: translateX(-50%);' : '';
+    return `.${cls} { ${vert} ${horiz}${extra} }`;
   };
 
-  const allCss = SPOTS.map(cssLine).join('\n');
+  const modeCss = seats.map((s) => cssLine(s.cls)).join('\n');
 
   return (
     <div style={{ padding: 16, color: '#eee', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
       <div>
-        <h2 style={{ margin: '0 0 8px' }}>Editor del mazo (dev)</h2>
+        <h2 style={{ margin: '0 0 6px' }}>Editor del mazo (dev)</h2>
+
+        {/* Selector de MODO */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+          {(['1v1', '2v2', '3v3'] as Mode[]).map((m) => (
+            <button
+              key={m}
+              onClick={() => {
+                setMode(m);
+                setActiveCls(MODES[m][0].cls);
+              }}
+              style={{
+                padding: '6px 14px', cursor: 'pointer', fontWeight: 700,
+                background: mode === m ? '#c96a2f' : '#2f2316',
+                color: '#fff', border: '1px solid #a54c1a', borderRadius: 6,
+              }}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
         <p style={{ margin: '0 0 10px', maxWidth: 520, color: '#bbb', fontSize: 14 }}>
-          Elegí un lugar, arrastrá el 🃏 con el mouse o el dedo hasta dejarlo al
-          lado del jugador. Los puntos grises son los asientos de referencia.
+          Tocá un asiento (o elegilo en la lista) para activarlo y arrastrá el 🃏
+          hasta dejarlo al lado de ese jugador.
         </p>
 
-        {/* Mesa de referencia (misma proporción que la mesa real ~16:10) */}
+        {/* Mesa de referencia */}
         <div
           ref={boxRef}
           onPointerMove={move}
@@ -97,32 +133,33 @@ export function DeckLabPage() {
             userSelect: 'none',
           }}
         >
-          {/* Asientos de referencia */}
-          {SEATS.map((s) => (
-            <div
-              key={s.spot}
+          {/* Asientos del modo actual (clickeables para activarlos) */}
+          {seats.map((s) => (
+            <button
+              key={s.cls}
+              onClick={() => setActiveCls(s.cls)}
               style={{
                 position: 'absolute',
-                top: `${s.top}%`,
-                left: `${s.left}%`,
+                top: `${s.ref.top}%`,
+                left: `${s.ref.left}%`,
                 transform: 'translate(-50%, -50%)',
-                textAlign: 'center',
-                fontSize: 11,
-                color: '#cbd5c0',
-                pointerEvents: 'none',
+                textAlign: 'center', fontSize: 11, cursor: 'pointer',
+                color: active === s.cls ? '#ffd98a' : '#cbd5c0',
+                background: 'transparent', border: 'none',
               }}
             >
               <div
                 style={{
-                  width: 34, height: 22, margin: '0 auto 2px',
-                  border: '1px dashed #9db', borderRadius: 4, opacity: 0.7,
+                  width: 40, height: 26, margin: '0 auto 2px',
+                  border: `2px ${active === s.cls ? 'solid #ffd98a' : 'dashed #9db'}`,
+                  borderRadius: 4,
                 }}
               />
               {s.label}
-            </div>
+            </button>
           ))}
 
-          {/* Mazo arrastrable (posición del lugar activo) */}
+          {/* Mazo arrastrable */}
           <div
             onPointerDown={(e) => {
               dragging.current = true;
@@ -134,11 +171,8 @@ export function DeckLabPage() {
               left: `${cur.left}%`,
               transform: 'translate(-50%, -50%)',
               width: 40, height: 58,
-              background: '#b03020',
-              border: '2px solid #e8cf7a',
-              borderRadius: 6,
-              display: 'grid', placeItems: 'center',
-              cursor: 'grab', fontSize: 22,
+              background: '#b03020', border: '2px solid #e8cf7a', borderRadius: 6,
+              display: 'grid', placeItems: 'center', cursor: 'grab', fontSize: 22,
               boxShadow: '0 4px 14px rgba(0,0,0,.5)',
             }}
             title="Arrastrame"
@@ -148,46 +182,49 @@ export function DeckLabPage() {
         </div>
       </div>
 
-      {/* Panel de control */}
+      {/* Panel */}
       <div style={{ minWidth: 300, flex: 1 }}>
         <label style={{ display: 'block', marginBottom: 6, fontSize: 14 }}>
-          Lugar a mover:
+          Jugador ({mode}):
         </label>
         <select
           value={active}
-          onChange={(e) => setActive(e.target.value as Spot)}
+          onChange={(e) => setActiveCls(e.target.value)}
           style={{ padding: 6, marginBottom: 12, width: '100%', fontSize: 14 }}
         >
-          {SPOTS.map((s) => (
-            <option key={s} value={s}>{s}</option>
+          {seats.map((s) => (
+            <option key={s.cls} value={s.cls}>{s.label} → .{s.cls}</option>
           ))}
         </select>
 
         <div style={{ marginBottom: 12, fontFamily: 'monospace', fontSize: 14 }}>
-          <div>Lugar activo: <b>{active}</b></div>
+          <div>Activo: <b>{seats.find((s) => s.cls === active)?.label}</b></div>
           <div>top: {cur.top}% · left: {cur.left}%</div>
           <div style={{ color: '#e8cf7a', marginTop: 4 }}>{cssLine(active)}</div>
         </div>
 
         <button
-          onClick={() => navigator.clipboard?.writeText(allCss)}
+          onClick={() => navigator.clipboard?.writeText(modeCss)}
           style={{ padding: '8px 14px', marginBottom: 10, cursor: 'pointer' }}
         >
-          Copiar TODO el CSS
+          Copiar CSS de {mode}
         </button>
 
         <p style={{ fontSize: 13, color: '#bbb', margin: '0 0 6px' }}>
-          Pegá esto en <code>TableCenter.module.css</code> (reemplazá las
-          <code> .deckMano_*</code>):
+          Pegá en <code>TableCenter.module.css</code>:
         </p>
         <textarea
           readOnly
-          value={allCss}
+          value={modeCss}
           style={{
-            width: '100%', height: 200, fontFamily: 'monospace', fontSize: 12,
+            width: '100%', height: 180, fontFamily: 'monospace', fontSize: 12,
             background: '#111', color: '#dfe', padding: 8, borderRadius: 6,
           }}
         />
+        <p style={{ fontSize: 12, color: '#888', marginTop: 8 }}>
+          1v1 usa <code>.deckRightBottom</code> / <code>.deckLeftTop</code>. 2v2 y
+          3v3 usan <code>.deckMano_*</code>. El mazo real se ancla al repartidor.
+        </p>
       </div>
     </div>
   );
