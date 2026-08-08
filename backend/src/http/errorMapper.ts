@@ -6,6 +6,7 @@
  * 500 con mensaje genérico.
  * ============================================================= */
 import {
+  BannedError,
   EmailAlreadyExistsError,
   InvalidCredentialsError,
   InvalidSessionError,
@@ -38,6 +39,9 @@ export function mapError(err: unknown): ErrorResponse {
   }
   if (err instanceof InvalidSessionError) {
     return { status: 401, body: { error: { code: 'invalid_session', message: err.message } } };
+  }
+  if (err instanceof BannedError) {
+    return { status: 403, body: { error: { code: 'banned', message: err.message } } };
   }
   // Inesperado: se registra sólo el tipo (sin secretos) y se responde genérico.
   console.error('[http] error inesperado:', err instanceof Error ? err.name : typeof err);

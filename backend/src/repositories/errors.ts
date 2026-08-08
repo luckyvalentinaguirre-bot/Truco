@@ -87,6 +87,15 @@ export class InvalidSessionError extends RepositoryError {
   }
 }
 
+/** El usuario está baneado (server-side): no puede operar. */
+export class BannedError extends RepositoryError {
+  readonly reason: string | null;
+  constructor(reason: string | null) {
+    super('Cuenta suspendida');
+    this.reason = reason;
+  }
+}
+
 /** Error de validación de datos de entrada (campo + motivo). */
 export class ValidationError extends RepositoryError {
   readonly field: string;

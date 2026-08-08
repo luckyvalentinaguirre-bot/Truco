@@ -15,6 +15,9 @@ import { unauthorized } from './httpError.js';
 export const SESSION_COOKIE = 'session';
 export const SESSION_MAX_AGE_SEC = 7 * 24 * 60 * 60; // 7 días (coherente con la sesión)
 
+export const ADMIN_COOKIE = 'admin_session';
+export const ADMIN_MAX_AGE_SEC = 2 * 60 * 60; // 2 horas (coherente con la sesión admin)
+
 function isProd(): boolean {
   return process.env.NODE_ENV === 'production';
 }
@@ -34,6 +37,14 @@ export function sessionSetCookie(token: string): string {
 /** Set-Cookie para borrar la sesión (mismos atributos, Max-Age=0). */
 export function sessionClearCookie(): string {
   return `${SESSION_COOKIE}=; Max-Age=0${cookieAttributes()}`;
+}
+
+/** Set-Cookie de la sesión admin elevada (2ª credencial). */
+export function adminSetCookie(token: string): string {
+  return `${ADMIN_COOKIE}=${token}; Max-Age=${ADMIN_MAX_AGE_SEC}${cookieAttributes()}`;
+}
+export function adminClearCookie(): string {
+  return `${ADMIN_COOKIE}=; Max-Age=0${cookieAttributes()}`;
 }
 
 /** Parsea el header Cookie en un mapa nombre→valor. */

@@ -115,6 +115,14 @@ export async function getSessionUser(token: string): Promise<AuthenticatedUser> 
     throw new InvalidSessionError();
   }
 
+  // Baneo server-side: un usuario baneado no puede operar aunque tenga sesión
+  // (ni creando una nueva). Se chequea en CADA request autenticado.
+  const { isBanned } = await import('../repositories/admin.repository.js');
+  if (await isBanned(userId)) {
+    const { BannedError } = await import('../repositories/errors.js');
+    throw new BannedError(null);
+  }
+
   return {
     user: { id: user.id, email: user.email },
     profile: {
