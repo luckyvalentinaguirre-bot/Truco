@@ -11,6 +11,7 @@ import { registerProfileRoutes } from '../http/profile.routes.js';
 import { registerMatchRoutes } from '../http/match.routes.js';
 import { registerCompetitiveRoutes } from '../http/competitive.routes.js';
 import { registerMatchmakingRoutes } from '../http/matchmaking.routes.js';
+import { registerFriendsRoutes } from '../http/friends.routes.js';
 import { applyCors } from '../http/cors.js';
 import { sendJson } from '../http/respond.js';
 
@@ -25,6 +26,7 @@ function buildRouter(): Router {
   registerMatchRoutes(router);
   registerCompetitiveRoutes(router);
   registerMatchmakingRoutes(router);
+  registerFriendsRoutes(router);
   return router;
 }
 

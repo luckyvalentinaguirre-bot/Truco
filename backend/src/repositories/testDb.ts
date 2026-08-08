@@ -15,7 +15,8 @@ export async function prepareSchema(): Promise<void> {
   await runMigrations();
 }
 
-/** Deja las tablas vacías entre tests (cascada a profiles/sessions). */
+/** Deja las tablas vacías entre tests. `users` cascada a profiles/sessions/
+ * subscriptions/ratings/match_players/friendships; `seasons` a ratings/matches. */
 export async function truncateAll(): Promise<void> {
-  await query('TRUNCATE users RESTART IDENTITY CASCADE');
+  await query('TRUNCATE users, seasons RESTART IDENTITY CASCADE');
 }

@@ -31,6 +31,10 @@ export interface CompetitiveStatus {
   rank: { id: string; name: string };
   wins: number;
   losses: number;
+  bestRating: number;
+  streak: number;
+  games: number;
+  winrate: number; // 0..1
   access: string;
   subscription: {
     status: string;
@@ -52,14 +56,20 @@ export async function getCompetitiveStatus(
   let rating = DEFAULT_RATING;
   let wins = 0;
   let losses = 0;
+  let bestRating = DEFAULT_RATING;
+  let streak = 0;
   if (season) {
     const r = await getRating(userId, season.id);
     if (r) {
       rating = r.rating;
       wins = r.wins;
       losses = r.losses;
+      bestRating = r.bestRating;
+      streak = r.streak;
     }
   }
+  const games = wins + losses;
+  const winrate = games > 0 ? wins / games : 0;
 
   const access = deriveAccess(record);
   const eligibility = canPlayCompetitive({ authenticated: true, banned, subscription: record });
@@ -71,6 +81,10 @@ export async function getCompetitiveStatus(
     rank: { id: tier.id, name: tier.name },
     wins,
     losses,
+    bestRating,
+    streak,
+    games,
+    winrate,
     access,
     subscription: sub
       ? {
