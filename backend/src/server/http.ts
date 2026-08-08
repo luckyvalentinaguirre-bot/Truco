@@ -10,6 +10,7 @@ import { registerAuthRoutes } from '../http/auth.routes.js';
 import { registerProfileRoutes } from '../http/profile.routes.js';
 import { registerMatchRoutes } from '../http/match.routes.js';
 import { registerCompetitiveRoutes } from '../http/competitive.routes.js';
+import { registerMatchmakingRoutes } from '../http/matchmaking.routes.js';
 import { applyCors } from '../http/cors.js';
 import { sendJson } from '../http/respond.js';
 
@@ -23,6 +24,7 @@ function buildRouter(): Router {
   registerProfileRoutes(router);
   registerMatchRoutes(router);
   registerCompetitiveRoutes(router);
+  registerMatchmakingRoutes(router);
   return router;
 }
 
