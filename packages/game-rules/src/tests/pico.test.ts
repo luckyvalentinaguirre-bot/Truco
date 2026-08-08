@@ -111,6 +111,24 @@ describe('pico a pico · viaje del mazo (dealerSeat)', () => {
   });
 });
 
+describe('pico a pico · el mano del duelo está a la derecha del mazo', () => {
+  it('en cada duelo, la mano es el duelista más cercano a la derecha del repartidor', () => {
+    let s = createMatch({ mode: '3v3', seed: 7, picoAPico: true, ruleset: SHORT_30 });
+    s = playCurrentHand(s);
+    s = startNextHand(s); // pico
+    for (let duel = 0; duel < 3; duel++) {
+      const dealer = s.dealerSeat;
+      const start = (dealer + 1) % 6;
+      const duelists = s.players.filter((p) => !p.folded).map((p) => p.seat);
+      const dist = (seat: number) => (seat - start + 6) % 6;
+      const expectedMano = duelists.reduce((a, b) => (dist(a) <= dist(b) ? a : b));
+      expect(s.hand.manoSeat).toBe(expectedMano);
+      s = playCurrentHand(s);
+      s = startNextHand(s);
+    }
+  });
+});
+
 describe('pico a pico · partida completa', () => {
   it('juega alternando 3v3 y pico, y termina con un ganador', () => {
     for (const seed of [1, 7, 11, 23, 42]) {

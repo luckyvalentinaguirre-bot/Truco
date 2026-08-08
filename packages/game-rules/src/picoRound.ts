@@ -144,11 +144,20 @@ export function buildDuelState(
   duelIndex: number,
   ruleset: Ruleset,
   seed: number,
+  dealerSeat?: Seat,
 ): MatchState {
   const { seatA, seatB } = pairSeats(duelIndex);
-  // Mano del duelo: alterna por duelo (A en pares, B en impares) para no dar
-  // siempre la mano al mismo bando. Ambos duelistas son los únicos activos.
-  const manoSeat: Seat = duelIndex % 2 === 0 ? seatA : seatB;
+  // Mano del duelo = el duelista que está a la DERECHA del mazo (repartidor):
+  // el primero que se alcanza yendo a la derecha desde `dealerSeat + 1`. Si no
+  // se pasa el repartidor, se alterna (compat) A en pares, B en impares.
+  let manoSeat: Seat;
+  if (dealerSeat !== undefined) {
+    const start = (dealerSeat + 1) % 6;
+    const dist = (s: Seat) => (s - start + 6) % 6;
+    manoSeat = dist(seatA) <= dist(seatB) ? seatA : seatB;
+  } else {
+    manoSeat = duelIndex % 2 === 0 ? seatA : seatB;
+  }
   const pieSeat: Seat = manoSeat === seatA ? seatB : seatA;
 
   const players: Player[] = Array.from({ length: 6 }, (_, seat) => {

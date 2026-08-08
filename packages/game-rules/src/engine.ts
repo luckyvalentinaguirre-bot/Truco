@@ -864,7 +864,8 @@ function picoPublicScore(state: MatchState): Score {
 
 /** Injerta el duelo `duelIndex` de `round` sobre el estado (mazo congelado). */
 function graftDuel(state: MatchState, round: PicoRound, duelIndex: number): MatchState {
-  const duel = buildDuelState(round, duelIndex, state.ruleset, state.seed);
+  // El mano del duelo sale de quién está a la DERECHA del mazo (repartidor).
+  const duel = buildDuelState(round, duelIndex, state.ruleset, state.seed, state.dealerSeat);
   return {
     ...state,
     players: duel.players,
