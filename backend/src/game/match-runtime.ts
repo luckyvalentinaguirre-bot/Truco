@@ -323,6 +323,27 @@ export class MatchRuntime {
     return this.timeouts.get(seat) ?? 0;
   }
 
+  /** Resumen para el panel admin (sin cartas privadas). */
+  summary(): {
+    matchId: string;
+    mode: GameMode;
+    ranked: boolean;
+    phase: 'playing' | 'finished';
+    runtimePhase: RuntimePhase;
+    score: { A: number; B: number };
+    players: { seat: Seat; userId: string; team: TeamId; status: ConnectionStatus }[];
+  } {
+    return {
+      matchId: this.matchId,
+      mode: this.mode,
+      ranked: this.ranked,
+      phase: this.state.phase,
+      runtimePhase: this.runtimePhase,
+      score: this.publicScore,
+      players: this.seats.map((s) => ({ seat: s.seat, userId: s.userId, team: s.team, status: s.status })),
+    };
+  }
+
   /** Escribe el nuevo estado del motor y avanza el flujo (manos / pico). */
   private commit(next: MatchState): void {
     if (this.runtimePhase === 'pico') {

@@ -65,6 +65,25 @@ interface Row extends QueryResultRow {
   created_at: Date;
 }
 
+/** Todos los pagos recientes (panel admin, §16). */
+export async function listAllPayments(limit = 100): Promise<(PaymentRow & { userId: string })[]> {
+  const res = await query<Row & { user_id: string }>(
+    `SELECT user_id, provider, amount_cents, currency, status, period_start, period_end, created_at
+       FROM payments ORDER BY created_at DESC LIMIT $1`,
+    [limit],
+  );
+  return res.rows.map((r) => ({
+    userId: r.user_id,
+    provider: r.provider,
+    amountCents: r.amount_cents,
+    currency: r.currency,
+    status: r.status,
+    periodStart: r.period_start,
+    periodEnd: r.period_end,
+    createdAt: r.created_at,
+  }));
+}
+
 /** Historial de pagos de un usuario (para mostrar fecha/importe/estado, §7). */
 export async function listUserPayments(userId: string, limit = 30): Promise<PaymentRow[]> {
   const res = await query<Row>(

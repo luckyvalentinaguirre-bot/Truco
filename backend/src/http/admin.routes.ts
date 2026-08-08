@@ -22,6 +22,12 @@ import {
   platformStats,
 } from '../repositories/admin.repository.js';
 import { upsertSubscription } from '../repositories/subscriptions.repository.js';
+import { matchManager } from '../game/match-manager.js';
+import { matchmaking } from '../game/matchmaking.js';
+import { listAllPayments } from '../repositories/payments.repository.js';
+import { listRecentMatches } from '../repositories/matches.repository.js';
+import { listSeasons, createSeason } from '../repositories/seasons.repository.js';
+import { listReports, resolveReport } from '../repositories/reports.repository.js';
 
 function reqString(body: unknown, key: string): string {
   const v = (body as Record<string, unknown>)?.[key];
@@ -182,6 +188,130 @@ export function registerAdminRoutes(router: Router): void {
           date: r.createdAt.toISOString(),
         })),
       });
+    }),
+  );
+
+  // ---- Partidas (§10) ----
+  router.add(
+    'GET',
+    '/admin/matches/active',
+    requireAdmin((_req, res) => sendJson(res, 200, { matches: matchManager.all().map((m) => m.summary()) })),
+  );
+  router.add(
+    'GET',
+    '/admin/matches/finished',
+    requireAdmin(async (_req, res) => sendJson(res, 200, { matches: await listRecentMatches(50) })),
+  );
+  router.add(
+    'POST',
+    '/admin/matches/cancel',
+    requireAdmin(async (req, res, auth) => {
+      const matchId = reqString(await readJsonBody(req), 'matchId');
+      const removed = matchManager.removeMatch(matchId);
+      await insertAudit({ adminId: auth.user.id, action: 'MATCH_CANCEL', reason: matchId, result: removed ? 'ok' : 'not_found' });
+      sendJson(res, 200, { cancelled: removed });
+    }),
+  );
+
+  // ---- Matchmaking (§11) ----
+  router.add(
+    'GET',
+    '/admin/matchmaking',
+    requireAdmin((_req, res) => sendJson(res, 200, { queues: matchmaking.snapshot() })),
+  );
+  router.add(
+    'POST',
+    '/admin/matchmaking/remove',
+    requireAdmin(async (req, res, auth) => {
+      const userId = reqString(await readJsonBody(req), 'userId');
+      matchmaking.adminRemove(userId);
+      await insertAudit({ adminId: auth.user.id, action: 'MATCHMAKING_REMOVE', targetUserId: userId });
+      sendJson(res, 200, { ok: true });
+    }),
+  );
+
+  // ---- Pagos / Mercado Pago (§16) ----
+  router.add(
+    'GET',
+    '/admin/payments',
+    requireAdmin(async (_req, res) => {
+      const rows = await listAllPayments(100);
+      sendJson(res, 200, {
+        payments: rows.map((p) => ({
+          userId: p.userId,
+          amount: p.amountCents / 100,
+          currency: p.currency,
+          status: p.status,
+          provider: p.provider,
+          date: p.createdAt.toISOString(),
+        })),
+      });
+    }),
+  );
+
+  // ---- Temporadas (§12/§13) ----
+  router.add(
+    'GET',
+    '/admin/seasons',
+    requireAdmin(async (_req, res) => {
+      const rows = await listSeasons();
+      sendJson(res, 200, {
+        seasons: rows.map((s) => ({
+          id: s.id,
+          name: s.name,
+          startsAt: s.startsAt.toISOString(),
+          endsAt: s.endsAt.toISOString(),
+        })),
+      });
+    }),
+  );
+  router.add(
+    'POST',
+    '/admin/seasons',
+    requireAdmin(async (req, res, auth) => {
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const name = reqString(body, 'name');
+      const startsAt = new Date(reqString(body, 'startsAt'));
+      const endsAt = new Date(reqString(body, 'endsAt'));
+      if (isNaN(startsAt.getTime()) || isNaN(endsAt.getTime()) || endsAt <= startsAt) {
+        throw badRequest('Fechas de temporada inválidas');
+      }
+      const season = await createSeason({ name, startsAt, endsAt });
+      await insertAudit({ adminId: auth.user.id, action: 'SEASON_UPDATE', reason: name, meta: { id: season.id } });
+      sendJson(res, 201, { season: { id: season.id, name: season.name } });
+    }),
+  );
+
+  // ---- Reportes / Moderación (§15) ----
+  router.add(
+    'GET',
+    '/admin/reports',
+    requireAdmin(async (req, res) => {
+      const status = new URL(req.url ?? '/', 'http://local').searchParams.get('status') ?? 'open';
+      const rows = await listReports(status, 100);
+      sendJson(res, 200, {
+        reports: rows.map((r) => ({
+          id: r.id,
+          reporterId: r.reporterId,
+          targetId: r.targetId,
+          targetUsername: r.targetUsername,
+          reason: r.reason,
+          status: r.status,
+          date: r.createdAt.toISOString(),
+        })),
+      });
+    }),
+  );
+  router.add(
+    'POST',
+    '/admin/reports/resolve',
+    requireAdmin(async (req, res, auth) => {
+      const body = (await readJsonBody(req)) as Record<string, unknown>;
+      const reportId = reqString(body, 'reportId');
+      const status = body.status === 'dismissed' ? 'dismissed' : 'resolved';
+      const ok = await resolveReport(reportId, auth.user.id, status);
+      await insertAudit({ adminId: auth.user.id, action: 'REPORT_RESOLVE', reason: reportId, result: ok ? status : 'not_found' });
+      sendJson(res, 200, { resolved: ok });
     }),
   );
 }

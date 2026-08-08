@@ -166,6 +166,26 @@ export class Matchmaking {
   clearAssignment(userId: string): void {
     this.assignments.delete(userId);
   }
+
+  /** Foto de las colas para el panel admin (§11). */
+  snapshot(): { mode: string; waiting: { userId: string; rating: number; waitMs: number }[] }[] {
+    const now = this.now();
+    const out: { mode: string; waiting: { userId: string; rating: number; waitMs: number }[] }[] = [];
+    for (const [mode, q] of this.queues) {
+      if (q.length === 0) continue;
+      out.push({
+        mode,
+        waiting: q.map((w) => ({ userId: w.userId, rating: w.rating, waitMs: now - w.joinedAt })),
+      });
+    }
+    return out;
+  }
+
+  /** Saca a un usuario de la cola por decisión administrativa (§11). */
+  adminRemove(userId: string): void {
+    this.leave(userId);
+    this.assignments.delete(userId);
+  }
 }
 
 /** Instancia compartida: crea partidas RANKED reales vía el MatchManager. */

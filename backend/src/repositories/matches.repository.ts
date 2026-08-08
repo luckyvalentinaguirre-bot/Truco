@@ -86,6 +86,25 @@ export interface HistoryEntry {
   resolvedAt: Date;
 }
 
+/** Partidas competitivas recientes (panel admin, §10). */
+export async function listRecentMatches(limit = 50): Promise<
+  { matchId: string; mode: Mode; winnerTeam: number | null; status: string; resolvedAt: Date | null; createdAt: Date }[]
+> {
+  const res = await query<QueryResultRow>(
+    `SELECT id, mode, winner_team, status, resolved_at, created_at
+       FROM competitive_matches ORDER BY created_at DESC LIMIT $1`,
+    [limit],
+  );
+  return res.rows.map((r) => ({
+    matchId: r.id as string,
+    mode: r.mode as Mode,
+    winnerTeam: r.winner_team as number | null,
+    status: r.status as string,
+    resolvedAt: r.resolved_at as Date | null,
+    createdAt: r.created_at as Date,
+  }));
+}
+
 export async function getUserHistory(userId: string, limit = 30): Promise<HistoryEntry[]> {
   const res = await query<QueryResultRow>(
     `SELECT m.id AS match_id, m.mode, m.winner_team, m.resolved_at,

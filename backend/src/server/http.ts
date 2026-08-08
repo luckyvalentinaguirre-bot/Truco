@@ -15,6 +15,7 @@ import { registerFriendsRoutes } from '../http/friends.routes.js';
 import { registerSubscriptionRoutes } from '../http/subscription.routes.js';
 import { registerWebhookRoutes } from '../http/webhooks.routes.js';
 import { registerAdminRoutes } from '../http/admin.routes.js';
+import { registerReportRoutes } from '../http/reports.routes.js';
 import { applyCors } from '../http/cors.js';
 import { sendJson } from '../http/respond.js';
 
@@ -33,6 +34,7 @@ function buildRouter(): Router {
   registerSubscriptionRoutes(router);
   registerWebhookRoutes(router);
   registerAdminRoutes(router);
+  registerReportRoutes(router);
   return router;
 }
 
