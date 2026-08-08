@@ -590,6 +590,8 @@ function florLevelPoints(
     }
     return faltaEnvidoPoints(state.score.A, state.score.B, state.ruleset.targetPoints);
   }
+  // Flor base: 3 por CADA flor del equipo ganador (varias del mismo equipo suman).
+  if (level === 'flor' && winner) return florBasePoints(state, winner);
   return FLOR_LEVEL_VALUE[level];
 }
 
@@ -610,19 +612,31 @@ function resolveFlorDuel(
   return maybeGameOver({ ...state, score, hand: { ...hand, flor } }, events);
 }
 
+/** Jugadores activos que TIENEN flor esta mano. */
+function florHolders(state: MatchState): Player[] {
+  const muestra = state.hand.muestra;
+  return state.players.filter((p) => !p.folded && calcFlor(p.hand, muestra).hasFlor);
+}
+
 /**
- * Showdown de Flor: gana el bando con la flor más alta (empate ⇒ mano).
- * Una sola flor vale la base (3); si ambos bandos tienen flor, el ganador
- * se lleva 3 por la propia + 3 por la contra (6 en 1v1).
+ * Puntos de la FLOR base para un equipo GANADOR: 3 por CADA flor de ESE equipo.
+ * Las flores del mismo equipo suman entre sí (no se cuentan las del rival):
+ *   1 flor = 3 · 2 flores = 6 · 3 flores = 9.
+ * En 1v1 disputado, el ganador tiene 1 flor ⇒ 3 (no se suma la del rival).
+ */
+function florBasePoints(state: MatchState, winner: TeamId): number {
+  const own = florHolders(state).filter((p) => p.team === winner).length;
+  return FLOR_BASE_POINTS * Math.max(1, own);
+}
+
+/**
+ * Showdown de Flor: gana el bando con la flor más alta (empate ⇒ mano) y se
+ * lleva 3 por CADA flor de SU equipo (ver florBasePoints).
  */
 function resolveFlorShowdown(state: MatchState): { winner: TeamId; points: number } {
   const muestra = state.hand.muestra;
   const n = state.players.length;
-  const holders = state.players.filter(
-    (p) => !p.folded && calcFlor(p.hand, muestra).hasFlor,
-  );
-  const teams = new Set(holders.map((p) => p.team));
-  const points = FLOR_BASE_POINTS * teams.size; // 3 una flor, 6 si hay dos
+  const holders = florHolders(state);
 
   // Gana la flor más alta; en empate, prioridad INDIVIDUAL de mano (el más
   // mano), igual que el envido. Reutiliza el mismo criterio determinista.
@@ -632,7 +646,7 @@ function resolveFlorShowdown(state: MatchState): { winner: TeamId; points: numbe
     value: calcFlor(p.hand, muestra).value,
   }));
   const winner = envidoWinnerFrom(entries, state.hand.manoSeat, n);
-  return { winner, points };
+  return { winner, points: florBasePoints(state, winner) };
 }
 
 // -------------------------------------------------------------
@@ -699,7 +713,7 @@ function doDecline(state: MatchState, seat: Seat): Applied<MatchState> {
       throw new Error('No podés rechazar la Flor: aceptá o subí la apuesta');
     }
     const winner = hand.flor.callerTeam!;
-    const points = florLevelPoints(state, hand.flor.call);
+    const points = florLevelPoints(state, hand.flor.call, winner);
     const flor = { ...hand.flor, pendingCall: null, resolved: true };
     const score = addPoints(state.score, winner, points, state.ruleset);
     const events: GameEvent[] = [

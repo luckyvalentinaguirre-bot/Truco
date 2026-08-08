@@ -283,7 +283,11 @@ function TableMulti({
   const trick = displayedTrick(state);
   const views = seatViews(state.players, humanSeat);
   const bySeat = new Map(views.map((v) => [v.seat, v]));
-  const manoSpot = bySeat.get(state.hand.manoSeat)?.spot ?? 'bottom';
+  // El mazo/muestra se ancla al mano. En una ronda de Pico a Pico el mazo
+  // queda FIJO todo el tiempo (reparto único): se ancla al repartidor de la
+  // ronda, no al mano de cada duelo, para que NO viaje entre los tres duelos.
+  const deckAnchorSeat = state.picoRound ? state.dealerSeat : state.hand.manoSeat;
+  const manoSpot = bySeat.get(deckAnchorSeat)?.spot ?? 'bottom';
   // Pico a pico: si el humano NO está en el duelo actual (espera su turno),
   // no puede ver las cartas jugadas hasta que termine la vuelta.
   const humanSpectating =

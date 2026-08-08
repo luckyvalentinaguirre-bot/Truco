@@ -352,3 +352,48 @@ describe('Puntaje de la Flor (motor)', () => {
     expect(() => applyAction(s, { type: 'CALL_FLOR', seat: 0 })).toThrow();
   });
 });
+
+describe('flor · puntaje por CADA flor del equipo (1→3, 2→6, 3→9)', () => {
+  const florBasto = [c(4, 'basto'), c(5, 'basto'), c(6, 'basto')];
+  const florOro = [c(4, 'oro'), c(5, 'oro'), c(6, 'oro')];
+  const florCopa = [c(4, 'copa'), c(5, 'copa'), c(6, 'copa')];
+  const noFlor = [c(1, 'espada'), c(2, 'basto'), c(3, 'oro')];
+  const muestra = c(7, 'espada'); // piezas de espada; ninguna mano de flor es espada
+
+  /** Estado con manos forzadas, mano=0, ventana de flor abierta. */
+  function forcedTeam(mode: 'll2v2' | '3v3', hands: Card[][]): MatchState {
+    const m = mode === '3v3' ? '3v3' : '2v2';
+    const base = createMatch({ mode: m, seed: 1 });
+    return {
+      ...base,
+      players: base.players.map((p, i) => ({
+        ...p,
+        hand: hands[i],
+        played: [],
+        folded: false,
+      })),
+      hand: { ...base.hand, muestra, manoSeat: 0, manoTeam: 'A', turnSeat: 0, envidoWindowOpen: true },
+    };
+  }
+
+  it('1 flor (sólo asiento 0) ⇒ 3', () => {
+    const s = forcedTeam('ll2v2', [florBasto, noFlor, noFlor, noFlor]);
+    const r = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    expect(r.score.A).toBe(3);
+    expect(r.score.B).toBe(0);
+  });
+
+  it('2 flores del mismo equipo (asientos 0 y 2) ⇒ 6', () => {
+    const s = forcedTeam('ll2v2', [florBasto, noFlor, florOro, noFlor]);
+    const r = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    expect(r.score.A).toBe(6);
+    expect(r.score.B).toBe(0);
+  });
+
+  it('3 flores del mismo equipo (asientos 0, 2 y 4) ⇒ 9', () => {
+    const s = forcedTeam('3v3', [florBasto, noFlor, florOro, noFlor, florCopa, noFlor]);
+    const r = applyAction(s, { type: 'CALL_FLOR', seat: 0 }).state;
+    expect(r.score.A).toBe(9);
+    expect(r.score.B).toBe(0);
+  });
+});
