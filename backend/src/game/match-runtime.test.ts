@@ -118,6 +118,42 @@ describe('MatchRuntime · Pico a Pico E2E (§34)', () => {
   });
 });
 
+describe('MatchRuntime · bots server-side (§24/§28)', () => {
+  it('autoRunBots juega los turnos de los asientos bot hasta que le toca al humano', () => {
+    // Asiento 0 = humano, asiento 1 = bot.
+    const rt = new MatchRuntime({
+      matchId: 'bots1',
+      mode: '1v1',
+      seed: 4,
+      seatUsers: ['u0', 'bot:1'],
+    });
+    // Corremos bots: si el bot es mano, juega; se detiene en el turno del humano
+    // o si la partida termina.
+    rt.autoRunBots(rng);
+    const actor = rt.currentActorSeat;
+    // Tras autoRunBots, o le toca al humano (0), o la partida terminó.
+    expect(actor === 0 || rt.isFinished).toBe(true);
+  });
+
+  it('una partida vs bot progresa cuando el humano juega y luego corren los bots', () => {
+    const rt = new MatchRuntime({
+      matchId: 'bots2',
+      mode: '1v1',
+      seed: 9,
+      seatUsers: ['u0', 'bot:1'],
+    });
+    let guard = 0;
+    while (!rt.isFinished && guard < 2000) {
+      guard++;
+      rt.autoRunBots(rng); // bots juegan lo suyo
+      if (rt.isFinished) break;
+      // Turno del humano: lo resolvemos con la IA server-side (stepBot) para el test.
+      if (rt.currentActorSeat === 0) rt.stepBot(rng);
+    }
+    expect(rt.isFinished).toBe(true);
+  });
+});
+
 describe('MatchRuntime · reconexión (§22)', () => {
   it('reconectar devuelve un snapshot autorizado sin reiniciar la partida', () => {
     const rt = new MatchRuntime({ matchId: 'rc1', mode: '1v1', seed: 5, seatUsers: users2 });

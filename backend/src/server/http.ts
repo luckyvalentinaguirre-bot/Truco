@@ -8,6 +8,7 @@ import { createServer, type Server } from 'node:http';
 import { Router } from '../http/router.js';
 import { registerAuthRoutes } from '../http/auth.routes.js';
 import { registerProfileRoutes } from '../http/profile.routes.js';
+import { registerMatchRoutes } from '../http/match.routes.js';
 import { applyCors } from '../http/cors.js';
 import { sendJson } from '../http/respond.js';
 
@@ -19,6 +20,7 @@ function buildRouter(): Router {
   });
   registerAuthRoutes(router);
   registerProfileRoutes(router);
+  registerMatchRoutes(router);
   return router;
 }
 

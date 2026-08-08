@@ -230,6 +230,29 @@ export class MatchRuntime {
     return true;
   }
 
+  /** Convención: un asiento es bot si su userId arranca con "bot:". */
+  private isBotUser(userId: string | null): boolean {
+    return !!userId && userId.startsWith('bot:');
+  }
+
+  /** ¿El asiento que debe actuar ahora es un bot? */
+  get currentActorIsBot(): boolean {
+    return this.isBotUser(this.currentActorUser);
+  }
+
+  /**
+   * Auto-juega los turnos de los asientos bot con la IA (server-side) hasta que
+   * le toque a un humano o termine la partida. Devuelve cuántas jugadas hizo.
+   */
+  autoRunBots(rng: () => number = Math.random, max = 1000): number {
+    let n = 0;
+    while (!this.isFinished && this.currentActorIsBot && n < max) {
+      if (!this.stepBot(rng)) break;
+      n++;
+    }
+    return n;
+  }
+
   /** Escribe el nuevo estado del motor y avanza el flujo (manos / pico). */
   private commit(next: MatchState): void {
     if (this.runtimePhase === 'pico') {
