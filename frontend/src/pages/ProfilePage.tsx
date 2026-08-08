@@ -4,6 +4,8 @@ import { PageHeader, Panel, Button, Badge, StatTile, Icon } from '@/components/u
 import { Avatar } from '@/components/ui/Avatar';
 import { MatchRow } from '@/components/game/MatchRow';
 import { api } from '@/services/api';
+import { getCompetitiveMe, type CompetitiveMe } from '@/api/competitive';
+import { SubscriptionCard } from '@/features/competitive/SubscriptionCard';
 import { useAuth } from '@/features/auth/AuthContext';
 import { ProfileIdentity } from '@/features/auth/ProfileIdentity';
 import { getRank } from '@/data/ranks';
@@ -15,17 +17,20 @@ export function ProfilePage() {
   const { profile: authProfile } = useAuth();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [matches, setMatches] = useState<MatchRecord[]>([]);
+  const [me, setMe] = useState<CompetitiveMe | null>(null);
 
   useEffect(() => {
     api.getCurrentUser().then(setUser);
     api.getRecentMatches().then(setMatches);
+    getCompetitiveMe().then(setMe).catch(() => setMe(null));
   }, []);
 
   if (!user) {
     return <Panel className={styles.loading}>Cargando perfil…</Panel>;
   }
 
-  const rank = getRank(user.rankId);
+  // ELO/rango/stats REALES del backend competitivo (con fallback al placeholder).
+  const rank = getRank(me?.rank.id ?? user.rankId);
   const xpPct = Math.min(100, Math.round((user.xp / user.xpToNext) * 100));
   // Identidad REAL del backend (auth); las estadísticas/rango siguen siendo
   // placeholders hasta que exista su backend (§9: no inventar datos).
@@ -66,18 +71,21 @@ export function ProfilePage() {
         </div>
       </Panel>
 
-      {/* Estadísticas */}
+      {/* Suscripción competitiva (US$3/mes) */}
+      <SubscriptionCard />
+
+      {/* Estadísticas competitivas (reales del backend cuando hay temporada) */}
       <section>
-        <h3 className={styles.sectionTitle}>Estadísticas</h3>
+        <h3 className={styles.sectionTitle}>Estadísticas competitivas</h3>
         <div className={styles.statGrid}>
-          <StatTile label="Victorias" value={user.stats.wins} accent />
-          <StatTile label="Derrotas" value={user.stats.losses} />
-          <StatTile label="Winrate" value={formatPercent(user.stats.winrate)} />
-          <StatTile label="Jugadas" value={user.stats.played} />
-          <StatTile label="Trucos ganados" value={user.stats.trucosWon} />
-          <StatTile label="Envidos ganados" value={user.stats.envidosWon} />
-          <StatTile label="Flores ganadas" value={user.stats.floresWon} />
-          <StatTile label="Mejor racha" value={`${user.stats.bestStreak} 🔥`} />
+          <StatTile label="ELO" value={me?.rating ?? '—'} accent />
+          <StatTile label="Rango" value={me?.rank.name ?? rank.name} />
+          <StatTile label="Victorias" value={me?.wins ?? user.stats.wins} />
+          <StatTile label="Derrotas" value={me?.losses ?? user.stats.losses} />
+          <StatTile label="Winrate" value={formatPercent(me?.winrate ?? user.stats.winrate)} />
+          <StatTile label="Partidas" value={me?.games ?? user.stats.played} />
+          <StatTile label="Mejor ELO" value={me?.bestRating ?? '—'} />
+          <StatTile label="Racha" value={me ? `${me.streak}` : `${user.stats.bestStreak} 🔥`} />
         </div>
       </section>
 
