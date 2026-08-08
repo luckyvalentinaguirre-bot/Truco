@@ -94,13 +94,24 @@ export interface CreateRuntimeOptions {
   ruleset?: Ruleset;
   seed?: number;
   picoAPico?: boolean;
+  /** Partida clasificatoria (afecta ELO al terminar). */
+  ranked?: boolean;
   /** userIds por asiento (índice = asiento). Longitud = jugadores del modo. */
   seatUsers: string[];
+}
+
+/** Resultado final de una partida terminada (para persistir/puntuar). */
+export interface FinalResult {
+  mode: GameMode;
+  /** Equipo ganador: 0 = A, 1 = B. */
+  winnerTeam: 0 | 1;
+  players: { userId: string; team: 0 | 1; abandoned: boolean }[];
 }
 
 export class MatchRuntime {
   readonly matchId: string;
   readonly mode: GameMode;
+  readonly ranked: boolean;
   private readonly ruleset: Ruleset;
   private readonly seed: number;
   private readonly picoEnabled: boolean;
@@ -120,6 +131,7 @@ export class MatchRuntime {
   constructor(opts: CreateRuntimeOptions, now: () => number = Date.now) {
     this.matchId = opts.matchId;
     this.mode = opts.mode;
+    this.ranked = opts.ranked === true;
     this.ruleset = opts.ruleset ?? OFFICIAL_40;
     this.seed = opts.seed ?? Math.floor(Math.random() * 0xffffffff);
     // El Pico a Pico lo administra el runtime (fase interna); el motor arranca
@@ -413,6 +425,21 @@ export class MatchRuntime {
   }
   get isFinished(): boolean {
     return this.state.phase === 'finished';
+  }
+
+  /** Resultado final (sólo cuando terminó): equipos, ganador y jugadores. */
+  finalResult(): FinalResult | null {
+    if (this.state.phase !== 'finished' || !this.state.winner) return null;
+    const winnerTeam: 0 | 1 = this.state.winner === 'A' ? 0 : 1;
+    return {
+      mode: this.mode,
+      winnerTeam,
+      players: this.seats.map((s) => ({
+        userId: s.userId,
+        team: (s.team === 'A' ? 0 : 1) as 0 | 1,
+        abandoned: s.status === 'DISCONNECTED',
+      })),
+    };
   }
   get phaseName(): RuntimePhase {
     return this.runtimePhase;

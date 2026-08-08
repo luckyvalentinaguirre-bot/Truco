@@ -13,6 +13,25 @@ import { validateSession } from '../services/session.service.js';
 import { matchManager } from './match-manager.js';
 import type { MatchRuntime } from './match-runtime.js';
 import type { ClientAction, ServerMessage } from './protocol.js';
+import { recordCompetitiveResult } from '../services/matchResult.service.js';
+
+/** Partidas ranked ya persistidas (idempotencia: no puntuar dos veces). */
+const recordedMatches = new Set<string>();
+
+/** Si la partida terminó y es ranked, persiste el resultado y actualiza ELO. */
+function recordIfFinished(rt: MatchRuntime): void {
+  if (!rt.ranked || !rt.isFinished || recordedMatches.has(rt.matchId)) return;
+  const result = rt.finalResult();
+  if (!result) return;
+  // Sólo 1v1/2v2/3v3 puntúan; otros modos no son clasificatorios.
+  if (result.mode !== '1v1' && result.mode !== '2v2' && result.mode !== '3v3') return;
+  const mode = result.mode;
+  recordedMatches.add(rt.matchId); // marca antes de await: evita doble registro
+  void recordCompetitiveResult({ ...result, mode }).catch((err) => {
+    recordedMatches.delete(rt.matchId); // si falló, permitir reintento
+    console.error('[ws] error registrando resultado ranked:', err instanceof Error ? err.name : err);
+  });
+}
 
 const SESSION_COOKIE = 'session';
 const TEAMMATE_PEEK_TTL_MS = 5000;
@@ -122,6 +141,8 @@ function handleMessage(ws: WsClient, action: ClientAction, clients: Set<WsClient
   }
   // Acción aceptada → nuevo estado redactado a cada jugador.
   broadcast(rt, clients);
+  // Si la partida terminó y es clasificatoria, se persiste el resultado + ELO.
+  recordIfFinished(rt);
 }
 
 /** Resuelve el userId desde la cookie de sesión (o null si no autenticado). */

@@ -8,6 +8,7 @@ import { requireAuth } from './requireAuth.js';
 import type { Router } from './router.js';
 import { getCompetitiveStatus, getRanking } from '../services/competitive.service.js';
 import { getActiveSeason } from '../repositories/seasons.repository.js';
+import { getUserHistory } from '../repositories/matches.repository.js';
 
 export function registerCompetitiveRoutes(router: Router): void {
   // GET /competitive/me → estado competitivo del usuario autenticado.
@@ -28,6 +29,26 @@ export function registerCompetitiveRoutes(router: Router): void {
       ranking: rows,
     });
   });
+
+  // GET /competitive/history → historial competitivo del usuario autenticado.
+  router.add(
+    'GET',
+    '/competitive/history',
+    requireAuth(async (_req, res, auth) => {
+      const rows = await getUserHistory(auth.user.id, 30);
+      sendJson(res, 200, {
+        history: rows.map((h) => ({
+          matchId: h.matchId,
+          mode: h.mode,
+          won: h.won,
+          ratingBefore: h.ratingBefore,
+          ratingAfter: h.ratingAfter,
+          ratingDelta: h.ratingDelta,
+          resolvedAt: h.resolvedAt.toISOString(),
+        })),
+      });
+    }),
+  );
 
   // GET /competitive/season → temporada activa (o null).
   router.add('GET', '/competitive/season', async (_req, res) => {
