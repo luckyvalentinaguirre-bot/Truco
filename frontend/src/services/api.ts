@@ -1,36 +1,86 @@
 /* =============================================================
- * Capa de servicios (fachada).
+ * Capa de servicios (fachada) — AHORA contra el backend real.
  * -------------------------------------------------------------
- * Hoy devuelve datos simulados. Mañana, la MISMA firma llamará
- * a la API REST y a los WebSockets del backend. La UI depende
- * de estas funciones, no de la fuente de datos concreta.
+ * Ranking, amigos e historial salen de la API REST. La UI depende de estas
+ * funciones, no de la fuente concreta. Si una llamada falla (p. ej. sin
+ * sesión), se devuelve un valor vacío para que la página no rompa.
  * ============================================================= */
-import type { Friend, MatchRecord, UserProfile } from '@/types/domain';
-import {
-  currentUser,
-  friends,
-  leaderboard,
-  recentMatches,
-  type LeaderboardEntry,
-} from './mockData';
+import type { Friend, MatchRecord, UserProfile, GameMode } from '@/types/domain';
+import { apiFetch } from '@/api/client';
+import { currentUser, type LeaderboardEntry } from './mockData';
 
-/** Simula latencia de red para que la UI contemple estados de carga. */
-function delay<T>(value: T, ms = 220): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(value), ms));
+async function safe<T>(p: Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await p;
+  } catch {
+    return fallback;
+  }
+}
+
+interface RankingResp {
+  ranking: {
+    position: number;
+    username: string;
+    rating: number;
+    rank: { id: string; name: string };
+    wins: number;
+    losses: number;
+  }[];
+}
+interface FriendsResp {
+  friends: { userId: string; username: string }[];
+}
+interface HistoryResp {
+  history: {
+    matchId: string;
+    mode: string;
+    won: boolean;
+    ratingDelta: number | null;
+    resolvedAt: string;
+  }[];
 }
 
 export const api = {
+  /** Identidad + stats. La identidad real la da useAuth; se conserva el perfil
+   *  base que la UI espera (se puede enriquecer con /competitive/me). */
   getCurrentUser(): Promise<UserProfile> {
-    return delay(currentUser);
+    return Promise.resolve(currentUser);
   },
-  getRecentMatches(): Promise<MatchRecord[]> {
-    return delay(recentMatches);
+
+  async getRecentMatches(): Promise<MatchRecord[]> {
+    const r = await safe(apiFetch<HistoryResp>('/competitive/history'), { history: [] });
+    return r.history.map((h) => ({
+      id: h.matchId,
+      mode: (h.mode as GameMode) ?? '1v1',
+      result: h.won ? 'win' : 'loss',
+      scoreSelf: 0,
+      scoreRival: 0,
+      opponent: '—',
+      durationSec: 0,
+      playedAt: h.resolvedAt,
+    }));
   },
-  getFriends(): Promise<Friend[]> {
-    return delay(friends);
+
+  async getFriends(): Promise<Friend[]> {
+    const r = await safe(apiFetch<FriendsResp>('/friends'), { friends: [] });
+    return r.friends.map((f) => ({
+      id: f.userId,
+      username: f.username,
+      avatarUrl: null,
+      online: false, // el estado en tiempo real es una etapa aparte
+      inGame: false,
+    }));
   },
-  getLeaderboard(): Promise<LeaderboardEntry[]> {
-    return delay(leaderboard);
+
+  async getLeaderboard(): Promise<LeaderboardEntry[]> {
+    const r = await safe(apiFetch<RankingResp>('/competitive/ranking'), { ranking: [] });
+    return r.ranking.map((e) => ({
+      position: e.position,
+      username: e.username,
+      rankId: e.rank.id,
+      mmr: e.rating,
+      winrate: e.wins + e.losses > 0 ? e.wins / (e.wins + e.losses) : 0,
+    }));
   },
 };
 

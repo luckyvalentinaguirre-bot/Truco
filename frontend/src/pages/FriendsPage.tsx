@@ -2,16 +2,38 @@ import { useEffect, useState } from 'react';
 import { PageHeader, Panel, Button, Badge, Icon } from '@/components/ui';
 import { Avatar } from '@/components/ui/Avatar';
 import { api } from '@/services/api';
+import * as friendsApi from '@/api/friends';
 import type { Friend } from '@/types/domain';
 import styles from './FriendsPage.module.css';
 
 export function FriendsPage() {
   const [friends, setFriends] = useState<Friend[] | null>(null);
+  const [requests, setRequests] = useState<{ userId: string; username: string }[]>([]);
   const [query, setQuery] = useState('');
+  const [msg, setMsg] = useState('');
 
-  useEffect(() => {
+  const reload = () => {
     api.getFriends().then(setFriends);
-  }, []);
+    friendsApi.incomingRequests().then((r) => setRequests(r.requests)).catch(() => setRequests([]));
+  };
+  useEffect(reload, []);
+
+  const add = async () => {
+    if (!query.trim()) return;
+    setMsg('');
+    try {
+      const r = await friendsApi.requestFriend(query.trim());
+      setMsg(r.status === 'accepted' ? '¡Ahora son amigos!' : r.status === 'already_friends' ? 'Ya son amigos.' : 'Solicitud enviada.');
+      setQuery('');
+      reload();
+    } catch {
+      setMsg('No se pudo enviar la solicitud.');
+    }
+  };
+  const accept = async (userId: string) => {
+    await friendsApi.acceptFriend(userId).catch(() => undefined);
+    reload();
+  };
 
   const filtered = (friends ?? []).filter((f) =>
     f.username.toLowerCase().includes(query.toLowerCase()),
@@ -34,15 +56,38 @@ export function FriendsPage() {
         <Icon name="search" size={20} />
         <input
           className={styles.input}
-          placeholder="Buscar amigo por usuario…"
+          placeholder="Usuario a buscar o agregar…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          aria-label="Buscar amigo"
+          onKeyDown={(e) => e.key === 'Enter' && add()}
+          aria-label="Buscar o agregar amigo"
         />
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" onClick={add}>
           Agregar
         </Button>
       </Panel>
+      {msg && <Panel className={styles.empty} padding="sm">{msg}</Panel>}
+
+      {requests.length > 0 && (
+        <section>
+          <h3 className={styles.groupTitle}>
+            Solicitudes <span className={styles.count}>{requests.length}</span>
+          </h3>
+          <div className={styles.list}>
+            {requests.map((r) => (
+              <Panel key={r.userId} className={styles.row} padding="sm">
+                <Avatar name={r.username} size={44} />
+                <div className={styles.rowMeta}>
+                  <span className={styles.username}>{r.username}</span>
+                </div>
+                <Button size="sm" variant="primary" onClick={() => accept(r.userId)}>
+                  Aceptar
+                </Button>
+              </Panel>
+            ))}
+          </div>
+        </section>
+      )}
 
       {friends === null ? (
         <Panel className={styles.empty}>Cargando amigos…</Panel>
