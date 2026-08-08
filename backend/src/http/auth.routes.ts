@@ -7,6 +7,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { badRequest } from './httpError.js';
 import { readJsonBody } from './request.js';
+import { rateLimit } from './rateLimit.js';
 import { sendJson, sendNoContent } from './respond.js';
 import {
   getSessionToken,
@@ -39,6 +40,8 @@ function asObject(body: unknown): Record<string, unknown> {
 
 /** POST /auth/register → 201 con datos públicos (sin crear sesión). */
 async function register(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  // Anti-abuso: como máximo 10 registros por IP cada 10 minutos.
+  rateLimit(req, 'register', { max: 10, windowMs: 10 * 60_000 });
   const body = asObject(await readJsonBody(req));
   const account = await createAccount({
     email: requireString(body, 'email'),
@@ -58,6 +61,8 @@ async function register(req: IncomingMessage, res: ServerResponse): Promise<void
 
 /** POST /auth/login → 200 con token de sesión + identidad mínima. */
 async function login(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  // Anti-fuerza-bruta: como máximo 15 intentos de login por IP cada 5 minutos.
+  rateLimit(req, 'login', { max: 15, windowMs: 5 * 60_000 });
   const body = asObject(await readJsonBody(req));
   const identity = await verifyCredentials(
     requireString(body, 'email'),

@@ -7,6 +7,7 @@ import { createHttpServer } from '../server/http.js';
 import { createAccount } from '../services/account.service.js';
 import { createSession } from '../services/session.service.js';
 import { SESSION_COOKIE, sessionSetCookie } from './cookies.js';
+import { __resetRateLimit } from './rateLimit.js';
 
 const d = hasDatabase ? describe : describe.skip;
 
@@ -72,6 +73,7 @@ d('HTTP · /auth/* (cookie de sesión)', () => {
   });
   beforeEach(async () => {
     await truncateAll();
+    __resetRateLimit(); // cada test parte con los contadores de rate-limit en cero
   });
 
   // ---- REGISTER ----

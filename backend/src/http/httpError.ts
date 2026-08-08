@@ -23,3 +23,5 @@ export const unsupportedMediaType = (msg = 'Content-Type debe ser application/js
   new HttpError(415, 'unsupported_media_type', msg);
 export const payloadTooLarge = (msg = 'Cuerpo demasiado grande') =>
   new HttpError(413, 'payload_too_large', msg);
+export const tooManyRequests = (msg = 'Demasiados intentos. Probá de nuevo en un momento.') =>
+  new HttpError(429, 'too_many_requests', msg);
