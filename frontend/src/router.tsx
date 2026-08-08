@@ -13,6 +13,7 @@ import { SettingsPage } from '@/pages/SettingsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { CardsDevPage } from '@/pages/CardsDevPage';
 import { DeckLabPage } from '@/pages/DeckLabPage';
+import { AdminPage } from '@/pages/admin/AdminPage';
 
 /**
  * Rutas de la plataforma. Preparado para agregar rutas de
@@ -29,6 +30,8 @@ export const router = createBrowserRouter([
   // Mesa a pantalla completa (fuera del shell de navegación).
   { path: '/mesa', element: <MatchPage /> },
   { path: '/lan', element: <LanPage /> },
+  // Panel administrativo a pantalla completa (autorización server-side).
+  { path: '/admin', element: <AdminPage /> },
   ...devRoutes,
   {
     path: '/',
