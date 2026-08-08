@@ -209,14 +209,14 @@
 /* Cada posición queda pegada a SU asiento (alineada con .seat_*) pero corrida
    hacia el centro para no pisar las cartas. Así el mazo viaja claramente de un
    asiento al otro (siempre a la derecha del mano = junto al repartidor). */
-.deckMano_bottom { bottom: 21.6%; right: 24.5%; }
-.deckMano_top { top: 7.9%; left: 30%; transform: translateX(-50%); }
-.deckMano_topLeft { top: 30.4%; left: 12%; }
-.deckMano_topRight { top: 8.1%; right: 24.9%; }
-.deckMano_left { bottom: 14.4%; left: 24.5%; }
-.deckMano_right { top: 10.6%; right: 10.4%; }
-.deckMano_bottomLeft { bottom: 23.1%; left: 25.3%; }
-.deckMano_bottomRight { top: 35%; right: 11.4%; }
+.deckMano_bottom { bottom: 13.6%; right: 20.1%; }
+.deckMano_top { top: 8.1%; left: 30.1%; transform: translateX(-50%); }
+.deckMano_topLeft { top: 31.7%; left: 11.7%; }
+.deckMano_topRight { top: 7.5%; right: 25.4%; }
+.deckMano_left { bottom: 17.2%; left: 16.4%; }
+.deckMano_right { top: 10.8%; right: 13.2%; }
+.deckMano_bottomLeft { bottom: 12.5%; left: 24.7%; }
+.deckMano_bottomRight { top: 34.2%; right: 19.2%; }
 
 /* (legacy) Columna derecha del mazo — ya no se usa en multi. */
 .rightStack {
@@ -610,8 +610,8 @@
 }
 /* El mazo va SIEMPRE a la derecha del mano: si el mano sos vos (abajo), a la
    derecha de pantalla; si es el rival (arriba), a su derecha (izq. de pantalla). */
-.deckRightBottom { bottom: 48.8%; right: 15.9%; }
-.deckLeftTop { top: 45.3%; left: 16.2%; }
+.deckRightBottom { top: 45.3%; right: 21.4%; }
+.deckLeftTop { top: 43.5%; left: 23.4%; }
 
 @media (max-width: 720px) {
   .oppInfo { padding: 3px 10px 3px 5px; }
