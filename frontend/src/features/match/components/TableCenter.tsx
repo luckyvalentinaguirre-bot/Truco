@@ -310,7 +310,7 @@ function TableMulti({
                 key={v.seat}
                 name={`Jugador ${v.seat + 1}`}
                 team={v.team}
-                remaining={p.hand.length}
+                remaining={p.handCount ?? p.hand.length}
                 spot={v.spot}
                 thinking={thinking && isActor}
                 revealCards={reveal?.find((r) => r.seat === v.seat)?.cards}

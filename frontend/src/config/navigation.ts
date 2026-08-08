@@ -11,6 +11,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Jugar', icon: 'play', primaryMobile: true },
+  { to: '/online', label: 'Jugar online', icon: 'online' },
   { to: '/lan', label: 'Jugar con amigos', icon: 'online' },
   { to: '/ranking', label: 'Ranking', icon: 'ranking', primaryMobile: true },
   { to: '/perfil', label: 'Perfil', icon: 'profile', primaryMobile: true },
