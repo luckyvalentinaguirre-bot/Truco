@@ -206,16 +206,17 @@
   z-index: 6;
   transform-origin: center;
 }
-/* Posiciones corridas hacia el centro (sin llegar tan adentro como las cartas
-   jugadas) para que el mazo no pise las cartas de las manos, que van al borde. */
-.deckMano_bottom { bottom: 14%; left: clamp(12px, 12%, 150px); }
-.deckMano_top { top: 13%; left: 33%; transform: translateX(-100%); }
-.deckMano_topLeft { top: 26%; left: 13%; }
-.deckMano_topRight { top: 14%; right: 26%; }
-.deckMano_left { top: 58%; left: 13%; }
-.deckMano_right { top: 20%; right: 13%; }
-.deckMano_bottomLeft { top: 34%; left: 13%; }
-.deckMano_bottomRight { bottom: 16%; right: 26%; }
+/* Cada posición queda pegada a SU asiento (alineada con .seat_*) pero corrida
+   hacia el centro para no pisar las cartas. Así el mazo viaja claramente de un
+   asiento al otro (siempre a la derecha del mano = junto al repartidor). */
+.deckMano_bottom { bottom: 16%; right: 24%; }
+.deckMano_top { top: 13%; left: 50%; transform: translateX(-50%); }
+.deckMano_topLeft { top: 15%; left: 14%; }
+.deckMano_topRight { top: 15%; right: 14%; }
+.deckMano_left { top: 40%; left: 13%; }
+.deckMano_right { top: 40%; right: 13%; }
+.deckMano_bottomLeft { top: 52%; left: 14%; }
+.deckMano_bottomRight { top: 52%; right: 14%; }
 
 /* (legacy) Columna derecha del mazo — ya no se usa en multi. */
 .rightStack {
