@@ -8,6 +8,7 @@
 import { loadEnv, safeDbSummary } from './config/env.js';
 import { query, closePool } from './db/pool.js';
 import { startHttpServer } from './server/http.js';
+import { attachGameWebSocket } from './game/ws-server.js';
 
 async function bootstrap(): Promise<void> {
   const env = loadEnv();
@@ -18,6 +19,10 @@ async function bootstrap(): Promise<void> {
   // peticiones (Render lo requiere) y no depende de que la base esté lista.
   const server = await startHttpServer(env.port);
   console.log(`[backend] ✅ HTTP escuchando en 0.0.0.0:${env.port} (GET /healthz)`);
+
+  // Servidor WebSocket autoritativo de partidas (autenticado por la sesión).
+  attachGameWebSocket(server);
+  console.log('[backend] ✅ WebSocket de partidas montado en /ws');
 
   // Verificación de salud de la base (no fatal: un problema puntual con la
   // base no debe tumbar el servidor HTTP). No expone credenciales.

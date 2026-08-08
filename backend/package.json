@@ -19,11 +19,13 @@
   "dependencies": {
     "@truco/game-rules": "file:../packages/game-rules",
     "dotenv": "^16.4.5",
-    "pg": "^8.12.0"
+    "pg": "^8.12.0",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",
     "@types/pg": "^8.20.3",
+    "@types/ws": "^8.18.1",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4",
     "vitest": "^4.1.10"
