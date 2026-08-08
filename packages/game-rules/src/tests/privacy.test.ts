@@ -6,6 +6,8 @@
 import { describe, it, expect } from 'vitest';
 import { createMatch } from '../setup.js';
 import { redactStateFor } from '../privacy.js';
+import { applyAction, actorNow, startNextHand } from '../engine.js';
+import { chooseAiAction } from '../ai.js';
 import type { Card } from '../types.js';
 
 const key = (c: Card) => `${c.rank}-${c.suit}`;
@@ -58,7 +60,15 @@ describe('privacy · redactStateFor (§20, §21, §49)', () => {
   });
 
   it('Pico a Pico: un ESPECTADOR no recibe la muestra del 1v1 ajeno', () => {
-    const s = createMatch({ mode: '3v3', seed: 3, picoAPico: true });
+    // La partida arranca 3v3 normal: jugamos esa mano y entramos a la ronda de pico.
+    let s = createMatch({ mode: '3v3', seed: 3, picoAPico: true });
+    let guard = 0;
+    while (!s.hand.finished && s.phase !== 'finished') {
+      if (++guard > 500) throw new Error('bucle');
+      const actor = actorNow(s)!;
+      s = applyAction(s, chooseAiAction(s, actor, () => 0.5, { difficulty: 'normal' })!).state;
+    }
+    s = startNextHand(s); // entra a la ronda de pico (duelo 1: 2 activos, 4 al mazo)
     const spectator = s.players.find((p) => p.folded)!.seat;
     const duelist = s.players.find((p) => !p.folded)!.seat;
     const specView = redactStateFor(s, spectator);

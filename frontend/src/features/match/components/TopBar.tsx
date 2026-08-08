@@ -26,6 +26,9 @@ export function TopBar({ state, humanSeat, netStatus }: TopBarProps) {
 
   const humanTeam: TeamId = state.players[humanSeat].team;
   const rivalTeam: TeamId = humanTeam === 'A' ? 'B' : 'A';
+  // Durante una ronda de Pico a Pico, `state.score` es el marcador AISLADO del
+  // duelo (los tantos van ocultos): el tanteador muestra el marcador público real.
+  const score = state.picoPublic ?? state.score;
   const malas = state.ruleset.malas;
   const malasBoxes = Math.ceil(malas / 5);
   const buenasBoxes = Math.ceil((state.ruleset.targetPoints - malas) / 5);
@@ -98,10 +101,10 @@ export function TopBar({ state, humanSeat, netStatus }: TopBarProps) {
           <span className={[styles.team, styles.vos].join(' ')}>Nosotros</span>
           <span className={styles.sticks}>
             <span
-              className={[styles.zoneBox, enBuenas(state.score[humanTeam]) ? styles.done : ''].join(' ')}
+              className={[styles.zoneBox, enBuenas(score[humanTeam]) ? styles.done : ''].join(' ')}
             >
               <Fosforos
-                points={malasPts(state.score[humanTeam])}
+                points={malasPts(score[humanTeam])}
                 boxes={malasBoxes}
                 color="var(--c-noquiero)"
               />
@@ -109,14 +112,14 @@ export function TopBar({ state, humanSeat, netStatus }: TopBarProps) {
             </span>
             <span className={[styles.zoneBox, styles.buenasBox].join(' ')}>
               <Fosforos
-                points={buenasPts(state.score[humanTeam])}
+                points={buenasPts(score[humanTeam])}
                 boxes={buenasBoxes}
                 color="var(--c-gold-soft)"
               />
               <span className={styles.zoneLbl}>Buenas</span>
             </span>
           </span>
-          <span className={styles.num}>{state.score[humanTeam]}</span>
+          <span className={styles.num}>{score[humanTeam]}</span>
         </div>
         <div className={styles.mid}>
           <span className={styles.dash}>—</span>
@@ -126,10 +129,10 @@ export function TopBar({ state, humanSeat, netStatus }: TopBarProps) {
           <span className={[styles.team, styles.rival].join(' ')}>Ellos</span>
           <span className={styles.sticks}>
             <span
-              className={[styles.zoneBox, enBuenas(state.score[rivalTeam]) ? styles.done : ''].join(' ')}
+              className={[styles.zoneBox, enBuenas(score[rivalTeam]) ? styles.done : ''].join(' ')}
             >
               <Fosforos
-                points={malasPts(state.score[rivalTeam])}
+                points={malasPts(score[rivalTeam])}
                 boxes={malasBoxes}
                 color="var(--c-noquiero)"
               />
@@ -137,14 +140,14 @@ export function TopBar({ state, humanSeat, netStatus }: TopBarProps) {
             </span>
             <span className={[styles.zoneBox, styles.buenasBox].join(' ')}>
               <Fosforos
-                points={buenasPts(state.score[rivalTeam])}
+                points={buenasPts(score[rivalTeam])}
                 boxes={buenasBoxes}
                 color="var(--c-cream)"
               />
               <span className={styles.zoneLbl}>Buenas</span>
             </span>
           </span>
-          <span className={styles.num}>{state.score[rivalTeam]}</span>
+          <span className={styles.num}>{score[rivalTeam]}</span>
         </div>
       </div>
 

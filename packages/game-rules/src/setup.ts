@@ -9,7 +9,6 @@ import { initTrucoState } from './trucoBetting.js';
 import { initEnvidoState } from './envidoBetting.js';
 import { initFlorState } from './florBetting.js';
 import { initScore } from './scoring.js';
-import { initPicoActive, picoPhaseActive } from './pico.js';
 import type { HandState, MatchState, Player } from './state.js';
 
 /** Cantidad de jugadores por modo. */
@@ -72,9 +71,10 @@ export function createMatch(opts: CreateMatchOptions = {}): MatchState {
     winner: null,
     handNumber: 0,
     seed,
-    ...(picoAPico
-      ? { picoAPico: true, picoActive: initPicoActive(), picoManoTeam: 'A' as TeamId }
-      : {}),
+    // Pico a Pico: la partida ARRANCA en 3v3 NORMAL. La fase interna de duelos
+    // (reparto único, mazo congelado, tantos ocultos) la administra startNextHand
+    // cuando termina una mano normal y ambos equipos siguen en malas.
+    ...(picoAPico ? { picoAPico: true, picoRoundNumber: 0 } : {}),
   };
 
   return dealHand(base);
@@ -136,31 +136,14 @@ export function dealHand(state: MatchState): MatchState {
   }));
 
   let cursor = 0;
-  let manoSeat: Seat;
-
-  // ---- Reparto "pico a pico" (3v3, ambos en malas): sólo juegan los 2 al pico.
-  if (picoPhaseActive(state) && state.picoActive) {
-    const manoTeam = state.picoManoTeam ?? 'A';
-    const pieTeam: TeamId = manoTeam === 'A' ? 'B' : 'A';
-    manoSeat = state.picoActive[manoTeam];
-    const pieSeat = state.picoActive[pieTeam];
-    // Los otros cuatro quedan fuera del duelo (se los trata como "al mazo").
-    players.forEach((p) => {
-      if (p.seat !== manoSeat && p.seat !== pieSeat) p.folded = true;
-    });
-    // 3 cartas a cada duelista (mano primero, luego el pie).
-    for (let round = 0; round < 3; round++) {
-      players[manoSeat].hand.push(deck[cursor++] as Card);
-      players[pieSeat].hand.push(deck[cursor++] as Card);
-    }
-  } else {
-    // ---- Reparto normal: 3 cartas por jugador (comenzando por el mano).
-    manoSeat = nextSeat(state.dealerSeat, n);
-    for (let round = 0; round < 3; round++) {
-      for (let i = 0; i < n; i++) {
-        const seat = nextSeat(manoSeat + i - 1, n);
-        players[seat].hand.push(deck[cursor++] as Card);
-      }
+  // ---- Reparto normal: 3 cartas por jugador (comenzando por el mano). ----
+  // El reparto especial del Pico a Pico (único, mazo congelado) lo maneja
+  // startNextHand vía picoRound; dealHand siempre reparte una mano normal.
+  const manoSeat: Seat = nextSeat(state.dealerSeat, n);
+  for (let round = 0; round < 3; round++) {
+    for (let i = 0; i < n; i++) {
+      const seat = nextSeat(manoSeat + i - 1, n);
+      players[seat].hand.push(deck[cursor++] as Card);
     }
   }
   // La muestra es la siguiente carta del pozo.

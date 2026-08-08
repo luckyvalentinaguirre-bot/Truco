@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
-import { createMatch, type MatchState } from '@/game';
+import { createMatch, startPicoRound, type MatchState } from '@/game';
 import { GameStatus } from './GameStatus';
 import { ConnectionIndicator } from './ConnectionIndicator';
 
@@ -23,7 +23,10 @@ describe('GameStatus', () => {
   });
 
   it('en Pico a Pico muestra el enfrentamiento X/3', () => {
-    const s = createMatch({ mode: '3v3', seed: 3, picoAPico: true });
+    // La partida arranca 3v3 normal; simulamos una ronda de pico en curso.
+    const base = createMatch({ mode: '3v3', seed: 3, picoAPico: true });
+    const round = startPicoRound(base.seed, 1001);
+    const s: MatchState = { ...base, picoRound: round, picoPublic: base.score };
     render(<GameStatus state={s} humanSeat={0} />);
     expect(screen.getByText(/Pico a Pico · 1\/3/)).toBeTruthy();
   });

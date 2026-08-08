@@ -11,7 +11,6 @@
  * ============================================================= */
 import type { Card, Seat } from './types.js';
 import type { MatchState, Player } from './state.js';
-import { picoPhaseActive } from './pico.js';
 
 /** Marcador de muestra oculta (acompañado de hand.muestraHidden = true). */
 const HIDDEN_MUESTRA: Card = { rank: 1, suit: 'oro' };
@@ -32,9 +31,10 @@ export function redactStateFor(state: MatchState, viewer: Seat): MatchState {
     return { ...p, hand: [], handCount: p.hand.length };
   });
 
-  // Muestra oculta a los espectadores de un 1v1 de Pico a Pico.
+  // Muestra oculta a los espectadores de un 1v1 de Pico a Pico: durante una
+  // ronda de pico, quien NO es duelista (está al mazo) no ve la muestra ajena.
   const me = state.players.find((p) => p.seat === viewer);
-  const picoSpectator = picoPhaseActive(state) && !!me?.folded;
+  const picoSpectator = !!state.picoRound && !!me?.folded;
 
   const hand = picoSpectator
     ? { ...state.hand, muestra: { ...HIDDEN_MUESTRA }, muestraHidden: true }

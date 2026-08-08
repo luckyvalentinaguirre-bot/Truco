@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createMatch } from '../setup.js';
+import { applyAction, actorNow, startNextHand } from '../engine.js';
+import { chooseAiAction } from '../ai.js';
 import {
   canToca,
   teammatesOf,
@@ -133,7 +135,15 @@ describe('teamplay · peek (privacidad)', () => {
   });
 
   it('pico a pico: no se pueden ver las cartas de un compañero que NO está al pico', () => {
-    const s = createMatch({ mode: '3v3', seed: 3, picoAPico: true });
+    // Arranca 3v3 normal: jugamos esa mano y entramos a la ronda de pico.
+    let s = createMatch({ mode: '3v3', seed: 3, picoAPico: true });
+    let guard = 0;
+    while (!s.hand.finished && s.phase !== 'finished') {
+      if (++guard > 500) throw new Error('bucle');
+      const actor = actorNow(s)!;
+      s = applyAction(s, chooseAiAction(s, actor, () => 0.5, { difficulty: 'normal' })!).state;
+    }
+    s = startNextHand(s); // ronda de pico: 2 duelistas activos, el resto al mazo
     // En pico, sólo 2 duelistas activos; el resto folded (sin cartas).
     const active = s.players.filter((p) => !p.folded).map((p) => p.seat);
     expect(active.length).toBe(2);

@@ -38,9 +38,17 @@ import {
 } from './florBetting.js';
 import { calcEnvido, faltaEnvidoPoints } from './envido.js';
 import { calcFlor, FLOR_BASE_POINTS } from './flor.js';
-import { addPoints, gameWinner } from './scoring.js';
+import { addPoints, gameWinner, initScore, type Score } from './scoring.js';
 import { dealHand, nextSeat, manoRank } from './setup.js';
-import { picoPhaseActive, picoNextPair } from './pico.js';
+import {
+  startPicoRound,
+  buildDuelState,
+  finishDuel,
+  revealTotals,
+  picoCycleContinues,
+  type PicoRound,
+} from './picoRound.js';
+import type { PicoRoundData } from './state.js';
 
 function otherTeam(t: TeamId): TeamId {
   return t === 'A' ? 'B' : 'A';
@@ -184,6 +192,30 @@ export function applyAction(state: MatchState, action: Action): Applied<MatchSta
     throw new Error('La mano ya terminó');
   }
 
+  const applied = dispatchAction(state, action);
+  // Dentro de un duelo de Pico a Pico, los puntos van a un marcador AISLADO y la
+  // partida NO puede terminar por ese marcador: si el motor marcó fin de partida,
+  // lo convertimos en fin de DUELO (se resolverá recién en la revelación).
+  if (state.picoRound && applied.state.phase === 'finished') {
+    const patched: MatchState = {
+      ...applied.state,
+      phase: 'playing',
+      winner: null,
+      hand: {
+        ...applied.state.hand,
+        finished: true,
+        winner: applied.state.hand.winner ?? applied.state.winner,
+      },
+    };
+    return {
+      state: patched,
+      events: applied.events.filter((e) => e.type !== 'GAME_OVER'),
+    };
+  }
+  return applied;
+}
+
+function dispatchAction(state: MatchState, action: Action): Applied<MatchState> {
   switch (action.type) {
     case 'PLAY_CARD':
       return playCard(state, action.seat, action.card);
@@ -790,17 +822,100 @@ export function startNextHand(state: MatchState): MatchState {
   if (!state.hand.finished) {
     throw new Error('La mano actual todavía no terminó');
   }
-  const n = state.players.length;
-  let rotated: MatchState = { ...state, dealerSeat: nextSeat(state.dealerSeat, n) };
 
-  // Pico a pico: si seguimos en fase de duelos, entra el siguiente par
-  // ENFRENTADO (ronda por medio) y el mano alterna de equipo. Si un equipo
-  // entró a buenas, picoPhaseActive() será false y dealHand reparte 3v3 normal.
-  if (rotated.picoAPico && picoPhaseActive(rotated) && rotated.picoActive) {
-    const active = picoNextPair(rotated.picoActive);
-    const manoTeam: TeamId = (rotated.picoManoTeam ?? 'A') === 'A' ? 'B' : 'A';
-    rotated = { ...rotated, picoActive: active, picoManoTeam: manoTeam };
+  // ---- Estamos DENTRO de una ronda de Pico a Pico: terminó un duelo. ----
+  if (state.picoRound) {
+    return advancePicoRound(state);
   }
 
-  return dealHand(rotated);
+  // ---- Modo NORMAL. En 3v3 con Pico a Pico y ambos en malas, tras la mano
+  // normal se rota el mazo y COMIENZA la ronda de duelos (reparto único).
+  const publicScore = picoPublicScore(state);
+  if (
+    state.picoAPico &&
+    state.mode === '3v3' &&
+    picoCycleContinues(publicScore, state.ruleset)
+  ) {
+    return enterPicoRound(state);
+  }
+
+  const n = state.players.length;
+  return dealHand({ ...state, dealerSeat: nextSeat(state.dealerSeat, n) });
+}
+
+/** Marcador público real (durante una ronda de pico vive en picoPublic). */
+function picoPublicScore(state: MatchState): Score {
+  return state.picoPublic ?? state.score;
+}
+
+/** Injerta el duelo `duelIndex` de `round` sobre el estado (mazo congelado). */
+function graftDuel(state: MatchState, round: PicoRound, duelIndex: number): MatchState {
+  const duel = buildDuelState(round, duelIndex, state.ruleset, state.seed);
+  return {
+    ...state,
+    players: duel.players,
+    hand: duel.hand,
+    score: initScore(), // marcador AISLADO del duelo (los tantos van ocultos)
+    picoRound: round as unknown as PicoRoundData,
+  };
+}
+
+/** Comienza una ronda de Pico a Pico: reparto único, mazo congelado, duelo 0. */
+function enterPicoRound(state: MatchState): MatchState {
+  const roundNumber = (state.picoRoundNumber ?? 0) + 1;
+  const round = startPicoRound(state.seed, 1000 + roundNumber);
+  const base: MatchState = {
+    ...state,
+    picoPublic: picoPublicScore(state),
+    picoRoundNumber: roundNumber,
+  };
+  return graftDuel(base, round, 0);
+}
+
+/** Terminó un duelo: registra su resultado OCULTO y avanza (o revela). */
+function advancePicoRound(state: MatchState): MatchState {
+  const round = state.picoRound as unknown as PicoRound;
+  // finishDuel lee el marcador AISLADO del duelo (state.score) como deltas ocultos.
+  const events: GameEvent[] = [];
+  if (state.score.A > 0) {
+    events.push({ type: 'POINTS_AWARDED', team: 'A', points: state.score.A, reason: 'pico_duel' });
+  }
+  if (state.score.B > 0) {
+    events.push({ type: 'POINTS_AWARDED', team: 'B', points: state.score.B, reason: 'pico_duel' });
+  }
+  const advanced = finishDuel(round, state, events);
+
+  if (advanced.phase === 'PICO_REVELACION') {
+    return revealAndReturnToNormal(state, advanced);
+  }
+  // Siguiente duelo con las MISMAS cartas repartidas (el mazo NO se mueve).
+  return graftDuel(state, advanced, advanced.currentDuel);
+}
+
+/** Revela los tantos ocultos, los suma al marcador público y vuelve a 3v3. */
+function revealAndReturnToNormal(state: MatchState, round: PicoRound): MatchState {
+  const totals = revealTotals(round);
+  let publicScore = picoPublicScore(state);
+  if (totals.A > 0) publicScore = addPoints(publicScore, 'A', totals.A, state.ruleset);
+  if (totals.B > 0) publicScore = addPoints(publicScore, 'B', totals.B, state.ruleset);
+
+  const winner = gameWinner(publicScore, state.ruleset);
+  const cleared: MatchState = {
+    ...state,
+    score: publicScore,
+    picoPublic: undefined,
+    picoRound: undefined,
+  };
+
+  if (winner) {
+    return {
+      ...cleared,
+      phase: 'finished',
+      winner,
+      hand: { ...state.hand, finished: true, winner },
+    };
+  }
+  // La partida sigue: se reparte una mano NORMAL de 3v3 (rota el mazo).
+  const n = state.players.length;
+  return dealHand({ ...cleared, dealerSeat: nextSeat(state.dealerSeat, n) });
 }

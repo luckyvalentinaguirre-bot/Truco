@@ -85,12 +85,36 @@ export interface MatchState {
   handNumber: number;
   /** Semilla del PRNG: hace la partida determinista y serializable. */
   seed: number;
-  /** Modalidad "pico a pico" (sólo 3v3): duelos 1v1 mientras haya malas. */
+  /** Modalidad "pico a pico" (sólo 3v3): fase interna de duelos 1v1 en malas. */
   picoAPico?: boolean;
-  /** Duelistas actualmente "al pico" (uno por equipo), si la modalidad está on. */
-  picoActive?: { A: Seat; B: Seat };
-  /** Equipo cuyo duelista es mano en la mano pico actual (alterna cada mano). */
-  picoManoTeam?: TeamId;
+  /**
+   * Ronda de Pico a Pico en curso (reparto único + mazo congelado + tantos
+   * ocultos). Cuando está presente, `hand`/`players` representan el DUELO actual
+   * y `score` es el marcador AISLADO del duelo (0-0). El marcador público real
+   * de la partida vive en `picoPublic` mientras dura la ronda.
+   */
+  picoRound?: PicoRoundData;
+  /** Marcador público real durante una ronda de pico (los tantos del duelo van ocultos). */
+  picoPublic?: Score;
+  /** Contador de rondas de pico jugadas (reparto determinista). */
+  picoRoundNumber?: number;
+}
+
+/** Datos de una ronda de Pico a Pico embebidos en el estado (ver picoRound.ts). */
+export interface PicoRoundData {
+  muestra: Card;
+  hands: Card[][];
+  deckPosition: number;
+  currentDuel: number;
+  phase: string;
+  hiddenResults: {
+    pairIndex: number;
+    seatA: Seat;
+    seatB: Seat;
+    deltas: Score;
+    entries: { reason: string; winner: TeamId; points: number }[];
+  }[];
+  revealed: boolean;
 }
 
 /** Ayuda: obtener un jugador por asiento. */
