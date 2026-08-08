@@ -114,9 +114,16 @@ export function useLocalMatch(
           const s = soundFor(e, prev.players[HUMAN_SEAT].team);
           if (s) playSound(s);
         }
+        // En Pico a Pico, si el humano NO juega este duelo, no ve las flores ni
+        // el envido de los duelistas (sólo los que juegan en contra), hasta que
+        // se jueguen todos los duelos: se filtran esos cantos/narración.
+        const spectatingPico = !!next.picoRound && next.players[HUMAN_SEAT].folded;
+        const eventsForBubbles = spectatingPico
+          ? events.filter((e) => !e.type.startsWith('FLOR') && !e.type.startsWith('ENVIDO'))
+          : events;
         // Los cantos ("Truco", "Envido", "Quiero", …) van como burbujas
         // pequeñas junto al asiento que los dijo.
-        const newBubbles = bubblesFromEvents(events);
+        const newBubbles = bubblesFromEvents(eventsForBubbles);
         if (newBubbles.length > 0) {
           const now = Date.now();
           setBubbles((prev) => [
@@ -126,7 +133,7 @@ export function useLocalMatch(
         }
         // Resultado del Envido: se narra con burbujas en orden de mano
         // (tantos / "son buenas"). Sin cartel central: sólo globos + marcador.
-        if (events.some((e) => e.type === 'ENVIDO_RESOLVED')) {
+        if (!spectatingPico && events.some((e) => e.type === 'ENVIDO_RESOLVED')) {
           setPendingEnvido(envidoNarration(next, next.hand.manoSeat));
         }
         return next;
@@ -214,7 +221,11 @@ export function useLocalMatch(
       );
     }
 
-    const showReveal = winner !== null && winner.seat !== humanSeat;
+    // En Pico a Pico, si el humano NO juega este duelo (espera su turno), NO ve
+    // las flores/envido de los duelistas: sólo las ven los que juegan en contra,
+    // hasta que se jueguen todos los duelos.
+    const humanSpectatingPico = !!state.picoRound && state.players[humanSeat].folded;
+    const showReveal = winner !== null && winner.seat !== humanSeat && !humanSpectatingPico;
     if (showReveal) {
       setReveal([{ seat: winner!.seat, cards: full(winner!) }]);
     }

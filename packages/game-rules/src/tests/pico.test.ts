@@ -103,17 +103,10 @@ describe('pico a pico · viaje del mazo (dealerSeat)', () => {
       s = playCurrentHand(s);
       s = startNextHand(s);
     }
-    // Terminados los tres duelos, vuelve a 3v3 con el MISMO mazo (no avanza).
+    // Al TERMINAR las tres manos del pico, el mazo ROTA un asiento.
     if (s.phase !== 'finished') {
       expect(s.picoRound).toBeUndefined();
-      expect(s.dealerSeat).toBe(dealerPico);
-      // Recién cuando ESA mano normal termina, el mazo avanza uno.
-      s = playCurrentHand(s);
-      const beforeAdvance = s.dealerSeat;
-      s = startNextHand(s);
-      if (s.phase !== 'finished') {
-        expect(s.dealerSeat).toBe((beforeAdvance + 1) % n);
-      }
+      expect(s.dealerSeat).toBe((dealerPico + 1) % n);
     }
   });
 });

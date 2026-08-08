@@ -937,7 +937,8 @@ function revealAndReturnToNormal(state: MatchState, round: PicoRound): MatchStat
       hand: { ...state.hand, finished: true, winner },
     };
   }
-  // La partida sigue: la PRIMERA mano normal tras el pico usa el MISMO mazo
-  // (no avanza al volver del pico; recién avanzará cuando ESA mano termine).
-  return dealHand(cleared);
+  // La partida sigue: al TERMINAR las tres manos del pico, el mazo ROTA un
+  // asiento y se reparte la siguiente mano normal de 3v3.
+  const n = state.players.length;
+  return dealHand({ ...cleared, dealerSeat: nextSeat(state.dealerSeat, n) });
 }
