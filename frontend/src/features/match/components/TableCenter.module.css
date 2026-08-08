@@ -209,14 +209,14 @@
 /* Cada posición queda pegada a SU asiento (alineada con .seat_*) pero corrida
    hacia el centro para no pisar las cartas. Así el mazo viaja claramente de un
    asiento al otro (siempre a la derecha del mano = junto al repartidor). */
-.deckMano_bottom { bottom: 16%; right: 24%; }
-.deckMano_top { top: 13%; left: 50%; transform: translateX(-50%); }
-.deckMano_topLeft { top: 15%; left: 14%; }
-.deckMano_topRight { top: 15%; right: 14%; }
-.deckMano_left { top: 40%; left: 13%; }
-.deckMano_right { top: 40%; right: 13%; }
-.deckMano_bottomLeft { top: 52%; left: 14%; }
-.deckMano_bottomRight { top: 52%; right: 14%; }
+.deckMano_bottom { bottom: 21.6%; right: 24.5%; }
+.deckMano_top { top: 7.9%; left: 30%; transform: translateX(-50%); }
+.deckMano_topLeft { top: 30.4%; left: 12%; }
+.deckMano_topRight { top: 8.1%; right: 24.9%; }
+.deckMano_left { bottom: 14.4%; left: 24.5%; }
+.deckMano_right { top: 10.6%; right: 10.4%; }
+.deckMano_bottomLeft { bottom: 23.1%; left: 25.3%; }
+.deckMano_bottomRight { top: 35%; right: 11.4%; }
 
 /* (legacy) Columna derecha del mazo — ya no se usa en multi. */
 .rightStack {
@@ -610,16 +610,17 @@
 }
 /* El mazo va SIEMPRE a la derecha del mano: si el mano sos vos (abajo), a la
    derecha de pantalla; si es el rival (arriba), a su derecha (izq. de pantalla). */
-.deckRightBottom { bottom: 6%; right: clamp(4px, 3%, 40px); }
-.deckLeftTop { top: 4%; left: clamp(4px, 3%, 40px); }
+.deckRightBottom { bottom: 48.8%; right: 15.9%; }
+.deckLeftTop { top: 45.3%; left: 16.2%; }
 
 @media (max-width: 720px) {
   .oppInfo { padding: 3px 10px 3px 5px; }
   .deckArea {
     transform: scale(0.8);
   }
-  .deckRightBottom { right: 2px; transform-origin: right bottom; }
-  .deckLeftTop { left: 2px; transform-origin: left top; }
+  /* Mantiene las posiciones (%) calibradas; sólo ajusta el origen del escalado. */
+  .deckRightBottom { transform-origin: right bottom; }
+  .deckLeftTop { transform-origin: left top; }
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
   .slotTop { top: 26%; }
