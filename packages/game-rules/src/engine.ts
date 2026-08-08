@@ -837,24 +837,27 @@ export function startNextHand(state: MatchState): MatchState {
     throw new Error('La mano actual todavía no terminó');
   }
 
-  // ---- Estamos DENTRO de una ronda de Pico a Pico: terminó un duelo. ----
+  // ---- Estamos DENTRO de una ronda de Pico a Pico: terminó un duelo. El mazo
+  // NO avanza entre los tres duelos (queda congelado). ----
   if (state.picoRound) {
     return advancePicoRound(state);
   }
 
-  // ---- Modo NORMAL. En 3v3 con Pico a Pico y ambos en malas, tras la mano
-  // normal se rota el mazo y COMIENZA la ronda de duelos (reparto único).
-  const publicScore = picoPublicScore(state);
-  if (
-    state.picoAPico &&
-    state.mode === '3v3' &&
-    picoCycleContinues(publicScore, state.ruleset)
-  ) {
-    return enterPicoRound(state);
-  }
-
+  // ---- Mano NORMAL terminada: el mazo AVANZA UN asiento (una sola vez). ----
+  // Esa rotación vale tanto si sigue una mano normal como si arranca el pico:
+  // el pico usa este mazo ya avanzado y NO lo vuelve a mover.
   const n = state.players.length;
-  return dealHand({ ...state, dealerSeat: nextSeat(state.dealerSeat, n) });
+  const advanced: MatchState = { ...state, dealerSeat: nextSeat(state.dealerSeat, n) };
+
+  // 3v3 con Pico a Pico y ambos en malas ⇒ comienza la ronda de duelos.
+  if (
+    advanced.picoAPico &&
+    advanced.mode === '3v3' &&
+    picoCycleContinues(advanced.score, advanced.ruleset)
+  ) {
+    return enterPicoRound(advanced);
+  }
+  return dealHand(advanced);
 }
 
 /** Marcador público real (durante una ronda de pico vive en picoPublic). */
@@ -875,16 +878,16 @@ function graftDuel(state: MatchState, round: PicoRound, duelIndex: number): Matc
   };
 }
 
-/** Comienza una ronda de Pico a Pico: reparto único, mazo congelado, duelo 0. */
+/**
+ * Comienza una ronda de Pico a Pico: reparto único, mazo congelado, duelo 0.
+ * El mazo NO se toca acá: ya viajó una vez al terminar la mano normal
+ * (startNextHand) y queda CONGELADO durante los tres duelos.
+ */
 function enterPicoRound(state: MatchState): MatchState {
-  const n = state.players.length;
   const roundNumber = (state.picoRoundNumber ?? 0) + 1;
   const round = startPicoRound(state.seed, 1000 + roundNumber);
   const base: MatchState = {
     ...state,
-    // El mazo VIAJA una vez tras la mano normal (rotación previa al pico); luego
-    // queda CONGELADO durante los tres duelos.
-    dealerSeat: nextSeat(state.dealerSeat, n),
     picoPublic: picoPublicScore(state),
     picoRoundNumber: roundNumber,
   };
@@ -934,7 +937,7 @@ function revealAndReturnToNormal(state: MatchState, round: PicoRound): MatchStat
       hand: { ...state.hand, finished: true, winner },
     };
   }
-  // La partida sigue: se reparte una mano NORMAL de 3v3 (rota el mazo).
-  const n = state.players.length;
-  return dealHand({ ...cleared, dealerSeat: nextSeat(state.dealerSeat, n) });
+  // La partida sigue: la PRIMERA mano normal tras el pico usa el MISMO mazo
+  // (no avanza al volver del pico; recién avanzará cuando ESA mano termine).
+  return dealHand(cleared);
 }

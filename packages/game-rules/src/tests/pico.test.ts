@@ -87,12 +87,12 @@ describe('pico a pico · ronda con reparto único y mazo congelado', () => {
 });
 
 describe('pico a pico · viaje del mazo (dealerSeat)', () => {
-  it('rota al entrar al pico, queda FIJO en los 3 duelos y rota una vez al terminar', () => {
+  it('avanza 1 al entrar al pico, FIJO en los 3 duelos, y NO avanza al volver a 3v3', () => {
     const n = 6;
     let s = createMatch({ mode: '3v3', seed: 7, picoAPico: true, ruleset: SHORT_30 });
     s = playCurrentHand(s); // mano normal 3v3
     const dealerNormal = s.dealerSeat;
-    s = startNextHand(s); // entra al pico: el mazo VIAJA una vez
+    s = startNextHand(s); // termina la mano normal: el mazo AVANZA una vez y entra al pico
     expect(s.picoRound).toBeDefined();
     const dealerPico = s.dealerSeat;
     expect(dealerPico).toBe((dealerNormal + 1) % n);
@@ -103,11 +103,55 @@ describe('pico a pico · viaje del mazo (dealerSeat)', () => {
       s = playCurrentHand(s);
       s = startNextHand(s);
     }
-    // Terminados los tres duelos, volvió a 3v3 y el mazo viajó UN lugar más.
+    // Terminados los tres duelos, vuelve a 3v3 con el MISMO mazo (no avanza).
     if (s.phase !== 'finished') {
       expect(s.picoRound).toBeUndefined();
-      expect(s.dealerSeat).toBe((dealerPico + 1) % n);
+      expect(s.dealerSeat).toBe(dealerPico);
+      // Recién cuando ESA mano normal termina, el mazo avanza uno.
+      s = playCurrentHand(s);
+      const beforeAdvance = s.dealerSeat;
+      s = startNextHand(s);
+      if (s.phase !== 'finished') {
+        expect(s.dealerSeat).toBe((beforeAdvance + 1) % n);
+      }
     }
+  });
+});
+
+describe('mazo · rotación por asiento (§2/§3/§4/§20)', () => {
+  /** Secuencia de dealerSeat en las primeras `count` manos NORMALES. */
+  function dealerSeq(mode: 'll1v1' | 'll2v2' | 'll3v3', count: number): number[] {
+    const m = mode === 'll1v1' ? '1v1' : mode === 'll2v2' ? '2v2' : '3v3';
+    let s = createMatch({ mode: m, seed: 4 });
+    const seq: number[] = [];
+    let guard = 0;
+    while (seq.length < count && s.phase !== 'finished') {
+      if (++guard > 20000) break;
+      seq.push(s.dealerSeat);
+      s = playCurrentHand(s);
+      if (s.phase === 'finished') break;
+      s = startNextHand(s);
+    }
+    return seq;
+  }
+
+  it('1v1: el mazo alterna entre los dos asientos', () => {
+    const seq = dealerSeq('ll1v1', 4);
+    expect(seq[1]).toBe((seq[0] + 1) % 2);
+    expect(seq[2]).toBe(seq[0]);
+    expect(seq[3]).toBe(seq[1]);
+  });
+
+  it('2v2: el mazo rota por ASIENTO (+1), no por equipo', () => {
+    const seq = dealerSeq('ll2v2', 5);
+    for (let i = 1; i < seq.length; i++) expect(seq[i]).toBe((seq[i - 1] + 1) % 4);
+    expect(seq[4]).toBe(seq[0]); // vuelve al inicio tras 4
+  });
+
+  it('3v3: el mazo rota por ASIENTO (+1) y vuelve tras 6', () => {
+    const seq = dealerSeq('ll3v3', 7);
+    for (let i = 1; i < seq.length; i++) expect(seq[i]).toBe((seq[i - 1] + 1) % 6);
+    expect(seq[6]).toBe(seq[0]);
   });
 });
 
