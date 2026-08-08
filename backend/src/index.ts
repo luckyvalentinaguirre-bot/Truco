@@ -29,6 +29,14 @@ async function bootstrap(): Promise<void> {
   try {
     await query('SELECT 1');
     console.log('[backend] ✅ base de datos accesible');
+    // Garantiza una temporada competitiva vigente (crea una si no hay).
+    try {
+      const { ensureActiveSeason } = await import('./services/season.service.js');
+      const s = await ensureActiveSeason();
+      console.log(`[backend] ✅ temporada activa: ${s.name}`);
+    } catch (e) {
+      console.error('[backend] ⚠️ no se pudo asegurar temporada:', e instanceof Error ? e.name : e);
+    }
   } catch (err) {
     console.error(
       '[backend] ⚠️ base de datos no accesible por ahora:',
