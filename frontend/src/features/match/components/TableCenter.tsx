@@ -285,11 +285,11 @@ function TableMulti({
   const trick = displayedTrick(state);
   const views = seatViews(state.players, humanSeat);
   const bySeat = new Map(views.map((v) => [v.seat, v]));
-  // El mazo/muestra se ancla al mano. En una ronda de Pico a Pico el mazo
-  // queda FIJO todo el tiempo (reparto único): se ancla al repartidor de la
-  // ronda, no al mano de cada duelo, para que NO viaje entre los tres duelos.
-  const deckAnchorSeat = state.picoRound ? state.dealerSeat : state.hand.manoSeat;
-  const manoSpot = bySeat.get(deckAnchorSeat)?.spot ?? 'bottom';
+  // El mazo lo tiene el REPARTIDOR, que se sienta a la DERECHA del mano
+  // (mano = repartidor + 1). Por eso se ancla siempre a dealerSeat: queda a la
+  // derecha del mano, y en el Pico a Pico permanece FIJO durante los tres
+  // duelos (el repartidor de la ronda no cambia).
+  const manoSpot = bySeat.get(state.dealerSeat)?.spot ?? 'bottom';
   // Pico a pico: si el humano NO está en el duelo actual, las cartas JUGADAS
   // sí se ven (todos las ven); lo único que NO puede ver hasta terminar la
   // vuelta es la MUESTRA del duelo ajeno.
