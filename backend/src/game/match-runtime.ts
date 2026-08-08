@@ -52,6 +52,9 @@ export type RuntimePhase = 'normal' | 'pico';
 /** Duración objetivo de un turno (autoridad del tiempo = servidor). */
 export const TURN_MS = 30_000;
 
+/** Faltas (timeouts) seguidas de un humano antes de marcarlo como abandono. */
+export const MAX_TIMEOUTS = 3;
+
 export interface SeatBinding {
   seat: Seat;
   team: TeamId;
@@ -127,6 +130,10 @@ export class MatchRuntime {
   private turnStartedAt: number;
   private turnDeadline: number;
   private now: () => number;
+  /** Faltas (timeouts) consecutivas por asiento (para detectar abandono). */
+  private timeouts = new Map<Seat, number>();
+  /** Asientos que abandonaron (para penalizar el ELO al registrar). */
+  private abandonedSeats = new Set<Seat>();
 
   constructor(opts: CreateRuntimeOptions, now: () => number = Date.now) {
     this.matchId = opts.matchId;
@@ -221,6 +228,7 @@ export class MatchRuntime {
     const applied = applyAction(gs, engineAction);
     this.commit(applied.state);
     this.resetTurnClock();
+    this.timeouts.set(seat, 0); // actuó a tiempo: reinicia sus faltas
     return { ok: true, events: applied.events };
   }
 
@@ -263,6 +271,56 @@ export class MatchRuntime {
       n++;
     }
     return n;
+  }
+
+  /**
+   * Chequeo de tiempo (lo llama el scheduler). Si venció el turno del actor
+   * humano, cuenta una FALTA (no juega ningún bot). A las MAX_TIMEOUTS faltas
+   * seguidas se da la partida por perdida (forfeit): el abandono penaliza con
+   * ELO (el abandonador pierde; en equipo, los compañeros pierden poco).
+   * Devuelve si cambió algo (para difundir) y si terminó la partida.
+   */
+  tickTimeout(now: number = this.now()): { changed: boolean; ended: boolean; forfeitSeat?: Seat } {
+    if (this.state.phase === 'finished') return { changed: false, ended: false };
+    const seat = this.currentActorSeat;
+    if (seat === null) return { changed: false, ended: false };
+    if (now < this.turnDeadline) return { changed: false, ended: false };
+
+    const binding = this.seats.find((s) => s.seat === seat);
+    const isBot = binding ? this.isBotUser(binding.userId) : false;
+
+    // Un bot nunca debería estar "colgado"; por las dudas, que juegue y siga.
+    if (isBot) {
+      this.stepBot();
+      this.autoRunBots();
+      return { changed: true, ended: this.isFinished };
+    }
+
+    // Humano que no jugó: cuenta la falta y reinicia el reloj del turno.
+    const faltas = (this.timeouts.get(seat) ?? 0) + 1;
+    this.timeouts.set(seat, faltas);
+    this.resetTurnClock();
+
+    if (faltas >= MAX_TIMEOUTS) {
+      this.forfeit(seat);
+      return { changed: true, ended: true, forfeitSeat: seat };
+    }
+    return { changed: true, ended: false };
+  }
+
+  /** Da la partida por perdida para el equipo del asiento (abandono). */
+  private forfeit(seat: Seat): void {
+    const team = playerAt(this.state, seat).team;
+    const winner: TeamId = team === 'A' ? 'B' : 'A';
+    const b = this.seats.find((s) => s.seat === seat);
+    if (b) b.status = 'DISCONNECTED';
+    this.abandonedSeats.add(seat);
+    this.state = { ...this.state, phase: 'finished', winner };
+  }
+
+  /** Faltas consecutivas de un asiento (para tests / auditoría). */
+  timeoutsOf(seat: Seat): number {
+    return this.timeouts.get(seat) ?? 0;
   }
 
   /** Escribe el nuevo estado del motor y avanza el flujo (manos / pico). */
@@ -437,7 +495,7 @@ export class MatchRuntime {
       players: this.seats.map((s) => ({
         userId: s.userId,
         team: (s.team === 'A' ? 0 : 1) as 0 | 1,
-        abandoned: s.status === 'DISCONNECTED',
+        abandoned: this.abandonedSeats.has(s.seat),
       })),
     };
   }

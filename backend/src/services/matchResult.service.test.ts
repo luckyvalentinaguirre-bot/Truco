@@ -75,6 +75,29 @@ d('matchResult · registro competitivo', () => {
     expect(out.reason).toBe('no_ranked_players');
   });
 
+  it('abandono en equipo: el que abandona pierde más; el compañero pierde poco', async () => {
+    await activeSeason();
+    const [a, b, c, e] = [await makeUser(1), await makeUser(2), await makeUser(3), await makeUser(4)];
+    // Gana el equipo 0 (a,c). Pierde el equipo 1 (b,e); b ABANDONA.
+    const out = await recordCompetitiveResult({
+      mode: '2v2',
+      winnerTeam: 0,
+      players: [
+        { userId: a, team: 0 },
+        { userId: b, team: 1, abandoned: true },
+        { userId: c, team: 0 },
+        { userId: e, team: 1 },
+      ],
+    });
+    const deltas = new Map(out.results!.map((r) => [r.userId, r.delta]));
+    // El abandonador pierde MÁS que su compañero.
+    expect(deltas.get(b)!).toBeLessThan(deltas.get(e)!);
+    // El compañero pierde poco (pérdida fija chica).
+    expect(deltas.get(e)).toBe(-5);
+    // Los ganadores suman.
+    expect(deltas.get(a)!).toBeGreaterThan(0);
+  });
+
   it('2v2: reparte el mismo delta a cada integrante del equipo', async () => {
     await activeSeason();
     const [a, b, c, e] = [await makeUser(1), await makeUser(2), await makeUser(3), await makeUser(4)];

@@ -51,6 +51,11 @@ export class MatchManager {
   get size(): number {
     return this.matches.size;
   }
+
+  /** Todas las partidas activas (para el scheduler de timeouts). */
+  all(): MatchRuntime[] {
+    return [...this.matches.values()];
+  }
 }
 
 /** Instancia compartida del proceso. */

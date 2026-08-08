@@ -109,6 +109,18 @@ export function attachGameWebSocket(httpServer: HttpServer): WebSocketServer {
     });
   });
 
+  // Scheduler de timeouts: cada pocos segundos revisa las partidas activas. Si
+  // un jugador dejó vencer su turno, cuenta la falta; a las 3 seguidas la
+  // partida se da por perdida (penalización de ELO por abandono).
+  const timer = setInterval(() => {
+    for (const rt of matchManager.all()) {
+      const r = rt.tickTimeout();
+      if (r.changed) broadcast(rt, clients);
+      if (r.ended) recordIfFinished(rt);
+    }
+  }, 5000);
+  if (typeof timer.unref === 'function') timer.unref();
+
   return wss;
 }
 

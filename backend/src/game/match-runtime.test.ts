@@ -154,6 +154,42 @@ describe('MatchRuntime · bots server-side (§24/§28)', () => {
   });
 });
 
+describe('MatchRuntime · timeout → forfeit (sin bot, penaliza)', () => {
+  it('3 turnos vencidos seguidos dan la partida por perdida y marcan abandono', () => {
+    let clock = 0;
+    const rt = new MatchRuntime(
+      { matchId: 't1', mode: '1v1', seed: 5, ranked: true, seatUsers: ['u0', 'u1'] },
+      () => clock,
+    );
+    const victim = rt.currentActorSeat!; // el que tiene que jugar
+    // Vencen tres turnos seguidos sin que el humano juegue.
+    for (let i = 0; i < 3; i++) {
+      clock += 30_001; // pasa el turno (TURN_MS = 30s)
+      rt.tickTimeout();
+    }
+    expect(rt.isFinished).toBe(true);
+    const fr = rt.finalResult()!;
+    // El equipo del que abandonó pierde; su asiento queda marcado como abandono.
+    const abandoner = fr.players.find((p) => p.abandoned);
+    expect(abandoner).toBeTruthy();
+    const victimTeam = victim % 2 === 0 ? 0 : 1;
+    expect(fr.winnerTeam).not.toBe(victimTeam);
+  });
+
+  it('si el humano juega a tiempo, no se cuenta falta', () => {
+    let clock = 0;
+    const rt = new MatchRuntime(
+      { matchId: 't2', mode: '1v1', seed: 5, seatUsers: ['u0', 'u1'] },
+      () => clock,
+    );
+    const seat = rt.currentActorSeat!;
+    rt.stepBot(); // "actúa" a tiempo (dentro del turno)
+    clock += 1000;
+    rt.tickTimeout();
+    expect(rt.timeoutsOf(seat)).toBe(0);
+  });
+});
+
 describe('MatchRuntime · reconexión (§22)', () => {
   it('reconectar devuelve un snapshot autorizado sin reiniciar la partida', () => {
     const rt = new MatchRuntime({ matchId: 'rc1', mode: '1v1', seed: 5, seatUsers: users2 });

@@ -13,7 +13,12 @@ import {
   type Mode,
   type PlayerResult,
 } from '../repositories/matches.repository.js';
-import { resolveMatchRatings, DEFAULT_RATING, type Side } from '../competitive/elo.js';
+import { resolveMatchRatings, DEFAULT_RATING, RATING_FLOOR, type Side } from '../competitive/elo.js';
+
+/** Penalización extra de ELO para quien ABANDONA (además de perder la partida). */
+export const ABANDON_EXTRA_PENALTY = 15;
+/** Pérdida (chica y fija) para los COMPAÑEROS de quien abandonó, en modo equipo. */
+export const TEAMMATE_ABANDON_LOSS = 5;
 
 export interface FinishedPlayer {
   userId: string;
@@ -65,13 +70,24 @@ export async function recordCompetitiveResult(match: FinishedMatch): Promise<Rec
   for (const w of res.winners) byUser.set(w.userId, w);
   for (const l of res.losers) byUser.set(l.userId, l);
 
+  // Penalización por abandono: el que abandona pierde EXTRA; en modo equipo, sus
+  // compañeros pierden poco (pérdida fija chica). Los ganadores no se tocan.
+  const losersAbandoned = losers.some((p) => p.abandoned);
   const players: PlayerResult[] = humans.map((p) => {
     const c = byUser.get(p.userId)!;
+    const isLoser = p.team !== match.winnerTeam;
+    let after = c.after;
+    if (isLoser && p.abandoned) {
+      after = c.after - ABANDON_EXTRA_PENALTY; // abandonador: pierde de más
+    } else if (isLoser && losersAbandoned) {
+      after = c.before - TEAMMATE_ABANDON_LOSS; // compañero del abandonador: pierde poco
+    }
+    after = Math.max(RATING_FLOOR, after);
     return {
       userId: p.userId,
       team: p.team,
       ratingBefore: c.before,
-      ratingAfter: c.after,
+      ratingAfter: after,
       abandoned: p.abandoned,
     };
   });
