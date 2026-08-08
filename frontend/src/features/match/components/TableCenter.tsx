@@ -1,4 +1,5 @@
 import type { MatchState, Seat } from '@/game';
+import { isPieza } from '@/game';
 import { Avatar } from '@/components/ui/Avatar';
 import { PlayingCard } from '@/components/game/PlayingCard';
 import type { Card } from '@/game';
@@ -107,6 +108,7 @@ function DeckPile({ state }: { state: MatchState }) {
     <div className={styles.pile}>
       <div className={styles.pileStack} aria-label="Mazo y muestra">
         <span className={styles.pileMuestra}>
+          {/* La muestra (vira) siempre visible, en su lugar. */}
           <PlayingCard card={muestra} size="sm" />
         </span>
         <span className={styles.pileMazo}>
@@ -288,10 +290,11 @@ function TableMulti({
   // ronda, no al mano de cada duelo, para que NO viaje entre los tres duelos.
   const deckAnchorSeat = state.picoRound ? state.dealerSeat : state.hand.manoSeat;
   const manoSpot = bySeat.get(deckAnchorSeat)?.spot ?? 'bottom';
-  // Pico a pico: si el humano NO está en el duelo actual (espera su turno),
-  // no puede ver las cartas jugadas hasta que termine la vuelta.
+  // Pico a pico: si el humano NO está en el duelo actual, las cartas JUGADAS
+  // sí se ven (todos las ven); lo único que NO puede ver hasta terminar la
+  // vuelta es la MUESTRA del duelo ajeno.
   const humanSpectating =
-    state.picoAPico === true && state.players[humanSeat].folded && !state.hand.finished;
+    !!state.picoRound && state.players[humanSeat].folded && !state.hand.finished;
 
   return (
     <>
@@ -317,7 +320,7 @@ function TableMulti({
               />
             );
           })}
-        {/* Mazo + muestra: viaja a la izquierda del mano (como en 1v1). */}
+        {/* Mazo + muestra (fijo en pico). La vira siempre visible. */}
         <ManoDeck state={state} manoSpot={manoSpot} />
       </div>
 
@@ -332,7 +335,10 @@ function TableMulti({
               key={play.seat}
               className={[styles.playedCardMulti, styles[`playedAt_${spot}`]].join(' ')}
             >
-              {humanSpectating ? (
+              {/* Se ven todas las cartas jugadas, MENOS las piezas de la muestra
+                  (2/4/5/11/10 del palo, o el 12 que las reemplaza): a quien no
+                  está en el duelo se le ocultan hasta terminar la vuelta. */}
+              {humanSpectating && isPieza(play.card, state.hand.muestra) ? (
                 <PlayingCard faceDown size="md" />
               ) : (
                 <PlayingCard card={play.card} size="md" flip={!v?.isHuman} />
