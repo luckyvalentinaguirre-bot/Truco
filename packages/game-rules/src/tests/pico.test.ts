@@ -86,6 +86,31 @@ describe('pico a pico · ronda con reparto único y mazo congelado', () => {
   });
 });
 
+describe('pico a pico · viaje del mazo (dealerSeat)', () => {
+  it('rota al entrar al pico, queda FIJO en los 3 duelos y rota una vez al terminar', () => {
+    const n = 6;
+    let s = createMatch({ mode: '3v3', seed: 7, picoAPico: true, ruleset: SHORT_30 });
+    s = playCurrentHand(s); // mano normal 3v3
+    const dealerNormal = s.dealerSeat;
+    s = startNextHand(s); // entra al pico: el mazo VIAJA una vez
+    expect(s.picoRound).toBeDefined();
+    const dealerPico = s.dealerSeat;
+    expect(dealerPico).toBe((dealerNormal + 1) % n);
+
+    // Durante los tres duelos el mazo NO se mueve.
+    for (let duel = 0; duel < 3; duel++) {
+      expect(s.dealerSeat).toBe(dealerPico);
+      s = playCurrentHand(s);
+      s = startNextHand(s);
+    }
+    // Terminados los tres duelos, volvió a 3v3 y el mazo viajó UN lugar más.
+    if (s.phase !== 'finished') {
+      expect(s.picoRound).toBeUndefined();
+      expect(s.dealerSeat).toBe((dealerPico + 1) % n);
+    }
+  });
+});
+
 describe('pico a pico · partida completa', () => {
   it('juega alternando 3v3 y pico, y termina con un ganador', () => {
     for (const seed of [1, 7, 11, 23, 42]) {

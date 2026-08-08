@@ -605,20 +605,20 @@
 /* Mazo + muestra a la IZQUIERDA del mano (sin recuadro). */
 .deckArea {
   position: absolute;
-  left: clamp(4px, 3%, 40px);
   z-index: 4;
 }
-.deckLeftBottom { bottom: 6%; }
-.deckLeftTop { top: 4%; }
+/* El mazo va SIEMPRE a la derecha del mano: si el mano sos vos (abajo), a la
+   derecha de pantalla; si es el rival (arriba), a su derecha (izq. de pantalla). */
+.deckRightBottom { bottom: 6%; right: clamp(4px, 3%, 40px); }
+.deckLeftTop { top: 4%; left: clamp(4px, 3%, 40px); }
 
 @media (max-width: 720px) {
   .oppInfo { padding: 3px 10px 3px 5px; }
   .deckArea {
-    left: 2px;
     transform: scale(0.8);
   }
-  .deckLeftBottom { transform-origin: left bottom; }
-  .deckLeftTop { transform-origin: left top; }
+  .deckRightBottom { right: 2px; transform-origin: right bottom; }
+  .deckLeftTop { left: 2px; transform-origin: left top; }
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
   .slotTop { top: 26%; }

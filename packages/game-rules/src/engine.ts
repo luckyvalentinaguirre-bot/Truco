@@ -876,10 +876,14 @@ function graftDuel(state: MatchState, round: PicoRound, duelIndex: number): Matc
 
 /** Comienza una ronda de Pico a Pico: reparto único, mazo congelado, duelo 0. */
 function enterPicoRound(state: MatchState): MatchState {
+  const n = state.players.length;
   const roundNumber = (state.picoRoundNumber ?? 0) + 1;
   const round = startPicoRound(state.seed, 1000 + roundNumber);
   const base: MatchState = {
     ...state,
+    // El mazo VIAJA una vez tras la mano normal (rotación previa al pico); luego
+    // queda CONGELADO durante los tres duelos.
+    dealerSeat: nextSeat(state.dealerSeat, n),
     picoPublic: picoPublicScore(state),
     picoRoundNumber: roundNumber,
   };

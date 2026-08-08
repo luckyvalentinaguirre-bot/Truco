@@ -198,7 +198,7 @@ function Table1v1({ state, humanSeat, aiSeat, thinking, reveal }: TableCenterPro
         <div
           className={[
             styles.deckArea,
-            manoIsHuman ? styles.deckLeftBottom : styles.deckLeftTop,
+            manoIsHuman ? styles.deckRightBottom : styles.deckLeftTop,
           ].join(' ')}
         >
           <DeckPile state={state} />
