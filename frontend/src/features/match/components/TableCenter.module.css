@@ -206,14 +206,16 @@
   z-index: 6;
   transform-origin: center;
 }
-.deckMano_bottom { bottom: 3%; left: clamp(6px, 4%, 90px); }
-.deckMano_top { top: 3%; left: 33%; transform: translateX(-100%); }
-.deckMano_topLeft { top: 24%; left: 2%; }
-.deckMano_topRight { top: 4%; right: 22%; }
-.deckMano_left { top: 60%; left: 2%; }
-.deckMano_right { top: 12%; right: 2%; }
-.deckMano_bottomLeft { top: 30%; left: 2%; }
-.deckMano_bottomRight { bottom: 6%; right: 22%; }
+/* Posiciones corridas hacia el centro (sin llegar tan adentro como las cartas
+   jugadas) para que el mazo no pise las cartas de las manos, que van al borde. */
+.deckMano_bottom { bottom: 14%; left: clamp(12px, 12%, 150px); }
+.deckMano_top { top: 13%; left: 33%; transform: translateX(-100%); }
+.deckMano_topLeft { top: 26%; left: 13%; }
+.deckMano_topRight { top: 14%; right: 26%; }
+.deckMano_left { top: 58%; left: 13%; }
+.deckMano_right { top: 20%; right: 13%; }
+.deckMano_bottomLeft { top: 34%; left: 13%; }
+.deckMano_bottomRight { bottom: 16%; right: 26%; }
 
 /* (legacy) Columna derecha del mazo — ya no se usa en multi. */
 .rightStack {
