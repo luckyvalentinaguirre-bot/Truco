@@ -12,6 +12,8 @@ import { registerMatchRoutes } from '../http/match.routes.js';
 import { registerCompetitiveRoutes } from '../http/competitive.routes.js';
 import { registerMatchmakingRoutes } from '../http/matchmaking.routes.js';
 import { registerFriendsRoutes } from '../http/friends.routes.js';
+import { registerSubscriptionRoutes } from '../http/subscription.routes.js';
+import { registerWebhookRoutes } from '../http/webhooks.routes.js';
 import { applyCors } from '../http/cors.js';
 import { sendJson } from '../http/respond.js';
 
@@ -27,6 +29,8 @@ function buildRouter(): Router {
   registerCompetitiveRoutes(router);
   registerMatchmakingRoutes(router);
   registerFriendsRoutes(router);
+  registerSubscriptionRoutes(router);
+  registerWebhookRoutes(router);
   return router;
 }
 

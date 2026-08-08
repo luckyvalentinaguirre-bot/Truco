@@ -85,13 +85,34 @@ preparado para un proveedor tipo Stripe:
 Webhooks a procesar cuando se integre el proveedor: `payment_succeeded`,
 `payment_failed`, `subscription_created/renewed/canceled/expired`, `refund`.
 
-### Variables de entorno (sólo nombres — nunca en Git)
+### Proveedor: Mercado Pago (implementado, config-gated)
+
+La integración está **completa** vía la API REST de MP con `fetch` (sin
+dependencias). Si no hay credenciales, `isConfigured()` es false y
+`/subscription/checkout` responde `503 payments_unconfigured` — el resto sigue
+funcionando. Cuando cargues las variables, funciona sin tocar código.
+
+Flujo: `POST /subscription/checkout` crea una *preapproval* (suscripción
+US$3/mes) y devuelve la URL de checkout de MP → el usuario paga → **MP notifica
+por webhook** `POST /webhooks/mercadopago` (firma verificada) → el backend
+consulta el recurso real en MP y activa la suscripción (nunca por la vuelta del
+navegador). `POST /subscription/cancel` cancela la renovación (sigue vigente
+hasta vencer). Idempotente: pagos por `provider_event_id UNIQUE`; estados de
+suscripción por upsert.
+
+Variables de entorno (sólo nombres — **nunca en Git**, sólo en el panel):
 ```
-PAYMENT_PROVIDER          # p. ej. "stripe"
-PAYMENT_SECRET_KEY        # clave secreta del proveedor
-PAYMENT_WEBHOOK_SECRET    # secreto para verificar la firma del webhook
-PAYMENT_PRICE_ID          # id del precio US$3/mes en el proveedor
+MP_ACCESS_TOKEN         # Access Token de la cuenta MP (secreto)
+MP_WEBHOOK_SECRET       # clave para verificar la firma del webhook
+MP_PREAPPROVAL_PLAN_ID  # (opcional) id del plan US$3/mes
+MP_PRICE_AMOUNT         # (opcional) monto si no usás plan (default 3)
+MP_CURRENCY             # (opcional) moneda (default UYU)
+MP_BACK_URL             # URL de retorno tras el checkout
 ```
+
+Pendiente antes de cobrar de verdad: solicitar/crear las credenciales en MP,
+configurar la `notification_url` al endpoint del webhook y verificar requisitos
+legales (§48).
 
 ## Legal (§48)
 
