@@ -114,16 +114,10 @@ export function useLocalMatch(
           const s = soundFor(e, prev.players[HUMAN_SEAT].team);
           if (s) playSound(s);
         }
-        // En Pico a Pico, si el humano NO juega este duelo, no ve las flores ni
-        // el envido de los duelistas (sólo los que juegan en contra), hasta que
-        // se jueguen todos los duelos: se filtran esos cantos/narración.
-        const spectatingPico = !!next.picoRound && next.players[HUMAN_SEAT].folded;
-        const eventsForBubbles = spectatingPico
-          ? events.filter((e) => !e.type.startsWith('FLOR') && !e.type.startsWith('ENVIDO'))
-          : events;
-        // Los cantos ("Truco", "Envido", "Quiero", …) van como burbujas
-        // pequeñas junto al asiento que los dijo.
-        const newBubbles = bubblesFromEvents(eventsForBubbles);
+        // Los cantos ("Truco", "Envido", "Flor", "Quiero", …) van como burbujas
+        // pequeñas junto al asiento que los dijo. En Pico a Pico SÍ se cantan y
+        // se ven; lo único que no se revela son las CARTAS (más abajo).
+        const newBubbles = bubblesFromEvents(events);
         if (newBubbles.length > 0) {
           const now = Date.now();
           setBubbles((prev) => [
@@ -133,7 +127,7 @@ export function useLocalMatch(
         }
         // Resultado del Envido: se narra con burbujas en orden de mano
         // (tantos / "son buenas"). Sin cartel central: sólo globos + marcador.
-        if (!spectatingPico && events.some((e) => e.type === 'ENVIDO_RESOLVED')) {
+        if (events.some((e) => e.type === 'ENVIDO_RESOLVED')) {
           setPendingEnvido(envidoNarration(next, next.hand.manoSeat));
         }
         return next;
@@ -221,11 +215,11 @@ export function useLocalMatch(
       );
     }
 
-    // En Pico a Pico, si el humano NO juega este duelo (espera su turno), NO ve
-    // las flores/envido de los duelistas: sólo las ven los que juegan en contra,
-    // hasta que se jueguen todos los duelos.
-    const humanSpectatingPico = !!state.picoRound && state.players[humanSeat].folded;
-    const showReveal = winner !== null && winner.seat !== humanSeat && !humanSpectatingPico;
+    // En Pico a Pico las cartas NO se dan vuelta (no se revelan) durante los
+    // duelos: recién se pueden mostrar cuando se jugaron los tres. Los cantos sí
+    // se ven; sólo se suprime el revelado de cartas mientras haya ronda de pico.
+    const inPico = !!state.picoRound;
+    const showReveal = winner !== null && winner.seat !== humanSeat && !inPico;
     if (showReveal) {
       setReveal([{ seat: winner!.seat, cards: full(winner!) }]);
     }
