@@ -12,13 +12,17 @@ import { HistoryPage } from '@/pages/HistoryPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { CardsDevPage } from '@/pages/CardsDevPage';
+import { DeckLabPage } from '@/pages/DeckLabPage';
 
 /**
  * Rutas de la plataforma. Preparado para agregar rutas de
  * partida (/mesa/:id), autenticación y protección más adelante.
  */
 const devRoutes = import.meta.env.DEV
-  ? [{ path: '/dev/cartas', element: <CardsDevPage /> }]
+  ? [
+      { path: '/dev/cartas', element: <CardsDevPage /> },
+      { path: '/dev/mazo', element: <DeckLabPage /> },
+    ]
   : [];
 
 export const router = createBrowserRouter([
