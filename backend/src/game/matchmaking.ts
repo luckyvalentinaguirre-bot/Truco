@@ -12,6 +12,24 @@ import { matchManager } from './match-manager.js';
 
 const CAPACITY: Record<string, number> = { '1v1': 2, '2v2': 4, '3v3': 6 };
 
+/**
+ * Tolerancia de rating (rango de búsqueda) según el tiempo de espera: arranca
+ * angosta y se ENSANCHA con el tiempo, para emparejar primero con ELO cercano
+ * y, si tarda, ampliar el rango. El emparejamiento NO afecta cuántos puntos se
+ * ganan/pierden: eso lo decide el ELO según el rating del rival.
+ */
+const TOLERANCE_TIERS: { untilMs: number; tol: number }[] = [
+  { untilMs: 5 * 60_000, tol: 150 }, // < 5 min: rango cercano ±150
+  { untilMs: 10 * 60_000, tol: 400 }, // 5–10 min: ±400
+  { untilMs: 15 * 60_000, tol: 900 }, // 10–15 min: ±900
+  { untilMs: Infinity, tol: Infinity }, // > 15 min: cualquiera
+];
+
+export function toleranceFor(waitMs: number): number {
+  for (const t of TOLERANCE_TIERS) if (waitMs < t.untilMs) return t.tol;
+  return Infinity;
+}
+
 interface Waiting {
   userId: string;
   rating: number;
@@ -66,19 +84,46 @@ export class Matchmaking {
       q.push({ userId, rating, joinedAt: this.now() });
     }
 
-    if (q.length < cap) {
-      return { status: 'queued', mode, inQueue: q.length, need: cap };
-    }
+    this.tryMatchAll(mode);
 
-    // Cupo completo: tomar los primeros `cap`, equilibrar y crear la partida.
-    const group = q.splice(0, cap);
-    const seatUsers = this.assignSeats(group);
-    const matchId = this.createMatch(mode, seatUsers);
-    seatUsers.forEach((uid, seat) => {
-      this.assignments.set(uid, { matchId, seat, mode });
-    });
-    const mine = this.assignments.get(userId)!;
-    return { status: 'matched', ...mine };
+    const mine = this.assignments.get(userId);
+    if (mine) return { status: 'matched', ...mine };
+    return { status: 'queued', mode, inQueue: this.queue(mode).length, need: cap };
+  }
+
+  /**
+   * Forma tantas partidas como se pueda en el modo. Para el jugador que MÁS
+   * esperó, la tolerancia (rango de rating) se ensancha con el tiempo; se
+   * agrupan los `cap` jugadores de rating más cercano dentro de ese rango.
+   */
+  private tryMatchAll(mode: GameMode): void {
+    const cap = CAPACITY[mode];
+    // Mientras se pueda formar un grupo, formarlo.
+    for (;;) {
+      const q = this.queue(mode);
+      if (q.length < cap) return;
+
+      // El que más esperó define el rango (le corresponde el más amplio).
+      const oldest = [...q].sort((a, b) => a.joinedAt - b.joinedAt)[0]!;
+      const tol = toleranceFor(this.now() - oldest.joinedAt);
+      const inRange = q
+        .filter((w) => Math.abs(w.rating - oldest.rating) <= tol)
+        .sort((a, b) => Math.abs(a.rating - oldest.rating) - Math.abs(b.rating - oldest.rating));
+
+      if (inRange.length < cap) return; // aún no hay suficientes en el rango
+      const group = inRange.slice(0, cap); // los `cap` más cercanos (incluye al más viejo)
+
+      // Sacar al grupo de la cola.
+      const ids = new Set(group.map((g) => g.userId));
+      this.queues.set(
+        mode,
+        q.filter((w) => !ids.has(w.userId)),
+      );
+
+      const seatUsers = this.assignSeats(group);
+      const matchId = this.createMatch(mode, seatUsers);
+      seatUsers.forEach((uid, seat) => this.assignments.set(uid, { matchId, seat, mode }));
+    }
   }
 
   /**
@@ -97,10 +142,15 @@ export class Matchmaking {
   }
 
   status(userId: string): StatusResult {
+    // Al consultar, se reintenta emparejar: así el paso del tiempo ensancha el
+    // rango aunque no entren nuevos jugadores (el cliente hace polling).
+    const mode = this.modeOf(userId);
+    if (mode) this.tryMatchAll(mode);
+
     const asg = this.assignments.get(userId);
     if (asg) return { status: 'matched', ...asg };
-    const mode = this.modeOf(userId);
-    if (mode) return { status: 'queued', mode };
+    const stillQueued = this.modeOf(userId);
+    if (stillQueued) return { status: 'queued', mode: stillQueued };
     return { status: 'idle' };
   }
 
