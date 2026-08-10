@@ -632,19 +632,19 @@
   /* Mantiene las posiciones (%) calibradas; sólo ajusta el origen del escalado. */
   .deckRightBottom { transform-origin: right bottom; }
   .deckLeftTop { transform-origin: left top; }
-  /* Mazo + muestra de 2v2/3v3: en móvil va SIEMPRE al CENTRO de la mesa (queda
-     "en el medio", despejado). Todas las variantes por mano se colapsan a la
-     misma posición central; el anillo de cartas jugadas la rodea sin pisarla. */
-  .deckMulti,
-  .deckMano_bottom, .deckMano_bottomRight, .deckMano_right, .deckMano_topRight,
-  .deckMano_top, .deckMano_topLeft, .deckMano_left, .deckMano_bottomLeft {
-    top: 34%;
-    left: 50%;
-    right: auto;
-    bottom: auto;
-    transform: translate(-50%, -50%) scale(0.62);
-    transform-origin: center;
-  }
+  /* Mazo + muestra de 2v2/3v3: viaja SIEMPRE junto al mano (queda a su lado) y
+     por eso cada posición es distinta según dónde esté el mano. En móvil se
+     corren hacia adentro (lejos de los bordes) y a una banda despejada para no
+     pisar ni los asientos ni el anillo de cartas jugadas. */
+  .deckMulti { transform: scale(0.58); transform-origin: center; }
+  .deckMano_top         { top: 16%; left: 50%; right: auto; bottom: auto; transform: translateX(-50%) scale(0.58); }
+  .deckMano_topLeft     { top: 18%; left: 20%; right: auto; bottom: auto; }
+  .deckMano_topRight    { top: 18%; right: 20%; left: auto; bottom: auto; }
+  .deckMano_left        { top: 38%; left: 16%; right: auto; bottom: auto; }
+  .deckMano_right       { top: 38%; right: 16%; left: auto; bottom: auto; }
+  .deckMano_bottomLeft  { top: 52%; left: 20%; right: auto; bottom: auto; }
+  .deckMano_bottomRight { top: 52%; right: 20%; left: auto; bottom: auto; }
+  .deckMano_bottom      { top: 54%; left: 50%; right: auto; bottom: auto; transform: translateX(-50%) scale(0.58); }
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
   .slotTop { top: 26%; }
