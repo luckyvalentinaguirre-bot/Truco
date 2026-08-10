@@ -461,8 +461,8 @@
   /* 2v2: compañero ENFRENTE arriba del todo (otra punta) y rivales a los
      COSTADOS CENTRADOS verticalmente (justo en la mitad de la pantalla). */
   .count4 .seat_top { top: 6%; }
-  .seat_left { top: 50%; left: 0; transform: translateY(-50%); }
-  .seat_right { top: 50%; right: 0; transform: translateY(-50%); }
+  .seat_left { top: 34%; left: 0; transform: translateY(-50%); }
+  .seat_right { top: 34%; right: 0; transform: translateY(-50%); }
 
   /* Cartas jugadas: anillo COMPACTO en el centro (la muestra va al borde).
      Los rivales (costados) juegan bien al MEDIO; nosotros, justo enfrente. */
