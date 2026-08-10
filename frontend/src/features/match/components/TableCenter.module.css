@@ -642,13 +642,16 @@
   /* 2v2: los asientos ocupan top-centro (compañero) y los costados a media
      altura (rivales) y abajo-centro (yo). Por eso el mazo viaja por las CUATRO
      ESQUINAS libres (rota con el mano), sin pisar a nadie. */
-  /* La muestra vive en las franjas LATERALES a media altura: nunca arriba del
-     todo (compañero) ni abajo (mi mano). Viaja entre los dos costados según el
-     mano, siempre en zona libre. */
-  .count4 .deckMano_top    { top: 54%; bottom: auto; left: 4%;  right: auto; transform: translateY(-50%) scale(0.5); }
-  .count4 .deckMano_left   { top: 46%; bottom: auto; left: 4%;  right: auto; transform: translateY(-50%) scale(0.5); }
-  .count4 .deckMano_right  { top: 46%; bottom: auto; right: 4%; left: auto;  transform: translateY(-50%) scale(0.5); }
-  .count4 .deckMano_bottom { top: 54%; bottom: auto; right: 4%; left: auto;  transform: translateY(-50%) scale(0.5); }
+  /* La muestra va AL LADO del mano (el jugador que abre) y viaja con él. Cada
+     posición queda junto a su asiento, corrida a una zona libre para NO pisar
+     ni el asiento, ni sus cartas, ni la carta jugada.
+       top = compañero (arriba)     → justo debajo, corrida a la izquierda
+       left/right = rivales (costados) → hacia adentro, arriba de su carta
+       bottom = yo (abajo)          → abajo a la derecha, al lado de mi mano */
+  .count4 .deckMano_top    { top: 14%; bottom: auto; left: 30%; right: auto; transform: translateX(-50%) scale(0.48); }
+  .count4 .deckMano_left   { top: 32%; bottom: auto; left: 24%; right: auto; transform: scale(0.48); }
+  .count4 .deckMano_right  { top: 32%; bottom: auto; right: 24%; left: auto; transform: scale(0.48); }
+  .count4 .deckMano_bottom { bottom: 26%; top: auto; right: 12%; left: auto; transform: scale(0.48); }
 
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */

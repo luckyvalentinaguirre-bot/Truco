@@ -287,11 +287,9 @@ function TableMulti({
   const trick = displayedTrick(state);
   const views = seatViews(state.players, humanSeat);
   const bySeat = new Map(views.map((v) => [v.seat, v]));
-  // El mazo lo tiene el REPARTIDOR, que se sienta a la DERECHA del mano
-  // (mano = repartidor + 1). Por eso se ancla siempre a dealerSeat: queda a la
-  // derecha del mano, y en el Pico a Pico permanece FIJO durante los tres
-  // duelos (el repartidor de la ronda no cambia).
-  const manoSpot = bySeat.get(state.dealerSeat)?.spot ?? 'bottom';
+  // La muestra/mazo se muestra AL LADO DEL MANO (el jugador que abre la ronda)
+  // y viaja con él cuando el mano rota.
+  const manoSpot = bySeat.get(state.hand.manoSeat)?.spot ?? 'bottom';
   // Pico a pico: si el humano NO está en el duelo actual, las cartas JUGADAS
   // sí se ven (todos las ven); lo único que NO puede ver hasta terminar la
   // vuelta es la MUESTRA del duelo ajeno.
