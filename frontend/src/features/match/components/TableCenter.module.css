@@ -638,7 +638,7 @@
   .deckMulti,
   .deckMano_bottom, .deckMano_bottomRight, .deckMano_right, .deckMano_topRight,
   .deckMano_top, .deckMano_topLeft, .deckMano_left, .deckMano_bottomLeft {
-    top: 43%;
+    top: 34%;
     left: 50%;
     right: auto;
     bottom: auto;
