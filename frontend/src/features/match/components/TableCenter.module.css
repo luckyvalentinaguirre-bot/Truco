@@ -464,16 +464,15 @@
   .seat_left { top: 34%; left: 0; transform: translateY(-50%); }
   .seat_right { top: 34%; right: 0; transform: translateY(-50%); }
 
-  /* Cartas jugadas: anillo COMPACTO en el centro (la muestra va al borde).
-     Los rivales (costados) juegan bien al MEDIO; nosotros, justo enfrente. */
-  .playedAt_top        { left: 50%; top: 40%; }
-  .playedAt_topLeft    { left: 42%; top: 43%; }
-  .playedAt_topRight   { left: 58%; top: 43%; }
-  .playedAt_left       { left: 38%; top: 50%; }
-  .playedAt_right      { left: 62%; top: 50%; }
-  .playedAt_bottomLeft { left: 42%; top: 57%; }
-  .playedAt_bottomRight{ left: 58%; top: 57%; }
-  .playedAt_bottom     { left: 50%; top: 60%; }
+  /* Cartas jugadas: cada una BIEN ENFRENTE de su jugador, un poco más abajo. */
+  .playedAt_top        { left: 50%; top: 32%; }
+  .playedAt_topLeft    { left: 38%; top: 40%; }
+  .playedAt_topRight   { left: 62%; top: 40%; }
+  .playedAt_left       { left: 30%; top: 46%; }
+  .playedAt_right      { left: 70%; top: 46%; }
+  .playedAt_bottomLeft { left: 40%; top: 62%; }
+  .playedAt_bottomRight{ left: 60%; top: 62%; }
+  .playedAt_bottom     { left: 50%; top: 66%; }
 }
 
 /* ---- Pila mazo + muestra: la MUESTRA va arriba y COMPLETA a la vista
@@ -631,22 +630,22 @@
      corren hacia adentro (lejos de los bordes) y a una banda despejada para no
      pisar ni los asientos ni el anillo de cartas jugadas. */
   .deckMulti { transform: scale(0.55); transform-origin: center; }
-  .deckMano_top         { top: 2%;  left: 50%; right: auto; bottom: auto; transform: translateX(-50%) scale(0.55); }
-  .deckMano_topLeft     { top: 3%;  left: 1%;  right: auto; bottom: auto; }
-  .deckMano_topRight    { top: 3%;  right: 1%; left: auto;  bottom: auto; }
-  .deckMano_left        { top: 26%; left: 0;   right: auto; bottom: auto; }
-  .deckMano_right       { top: 26%; right: 0;  left: auto;  bottom: auto; }
-  .deckMano_bottomLeft  { bottom: 22%; top: auto; left: 1%;  right: auto; }
-  .deckMano_bottomRight { bottom: 22%; top: auto; right: 1%; left: auto; }
+  .deckMano_top         { top: 9%;  left: 50%; right: auto; bottom: auto; transform: translateX(-50%) scale(0.55); }
+  .deckMano_topLeft     { top: 11%; left: 6%;  right: auto; bottom: auto; }
+  .deckMano_topRight    { top: 11%; right: 6%; left: auto;  bottom: auto; }
+  .deckMano_left        { top: 26%; left: 3%;  right: auto; bottom: auto; }
+  .deckMano_right       { top: 26%; right: 3%; left: auto;  bottom: auto; }
+  .deckMano_bottomLeft  { bottom: 22%; top: auto; left: 4%;  right: auto; }
+  .deckMano_bottomRight { bottom: 22%; top: auto; right: 4%; left: auto; }
   .deckMano_bottom      { bottom: 22%; top: auto; left: 50%; right: auto; transform: translateX(-50%) scale(0.55); }
 
   /* 2v2: los asientos ocupan top-centro (compañero) y los costados a media
      altura (rivales) y abajo-centro (yo). Por eso el mazo viaja por las CUATRO
      ESQUINAS libres (rota con el mano), sin pisar a nadie. */
-  .count4 .deckMano_bottom { bottom: 20%; top: auto; left: auto; right: 2%; transform: scale(0.55); }
-  .count4 .deckMano_right  { top: 3%;  bottom: auto; left: auto; right: 2%; transform: scale(0.55); }
-  .count4 .deckMano_top    { top: 3%;  bottom: auto; right: auto; left: 2%; transform: scale(0.55); }
-  .count4 .deckMano_left   { bottom: 20%; top: auto; right: auto; left: 2%; transform: scale(0.55); }
+  .count4 .deckMano_bottom { bottom: 22%; top: auto; left: auto; right: 8%; transform: scale(0.55); }
+  .count4 .deckMano_right  { top: 12%; bottom: auto; left: auto; right: 7%; transform: scale(0.55); }
+  .count4 .deckMano_top    { top: 12%; bottom: auto; right: auto; left: 7%; transform: scale(0.55); }
+  .count4 .deckMano_left   { bottom: 22%; top: auto; right: auto; left: 8%; transform: scale(0.55); }
 
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */

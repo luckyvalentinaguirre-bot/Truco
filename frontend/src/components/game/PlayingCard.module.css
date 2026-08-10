@@ -121,12 +121,12 @@
    y no ocupa todo el ancho; las cartas jugadas (md) también se achican. */
 @media (max-width: 560px) {
   .lg { --w: 92px; }
-  .md { --w: 58px; }
+  .md { --w: 51px; }
   .sm { --w: 48px; }
 }
 @media (max-width: 380px) {
   .lg { --w: 82px; }
-  .md { --w: 54px; }
+  .md { --w: 48px; }
   .sm { --w: 44px; }
 }
 
