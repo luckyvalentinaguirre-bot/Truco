@@ -459,24 +459,21 @@
   .seat_bottomLeft { top: 58%; left: 0; }
   .seat_bottomRight { top: 58%; right: 0; }
   /* 2v2: compañero ENFRENTE arriba del todo (otra punta) y rivales a los
-     COSTADOS a media altura. */
+     COSTADOS CENTRADOS verticalmente (justo en la mitad de la pantalla). */
   .count4 .seat_top { top: 6%; }
-  .seat_left { top: 46%; left: 0; }
-  .seat_right { top: 46%; right: 0; }
-  .seat_left .seatCards,
-  .seat_right .seatCards,
-  .seat_bottomLeft .seatCards,
-  .seat_bottomRight .seatCards { flex-direction: row; }
+  .seat_left { top: 50%; left: 0; transform: translateY(-50%); }
+  .seat_right { top: 50%; right: 0; transform: translateY(-50%); }
 
-  /* Cartas jugadas: anillo COMPACTO en el centro (la muestra va al borde). */
-  .playedAt_top        { left: 50%; top: 44%; }
-  .playedAt_topLeft    { left: 42%; top: 47%; }
-  .playedAt_topRight   { left: 58%; top: 47%; }
-  .playedAt_left       { left: 40%; top: 51%; }
-  .playedAt_right      { left: 60%; top: 51%; }
-  .playedAt_bottomLeft { left: 42%; top: 55%; }
-  .playedAt_bottomRight{ left: 58%; top: 55%; }
-  .playedAt_bottom     { left: 50%; top: 57%; }
+  /* Cartas jugadas: anillo COMPACTO en el centro (la muestra va al borde).
+     Los rivales (costados) juegan bien al MEDIO; nosotros, justo enfrente. */
+  .playedAt_top        { left: 50%; top: 40%; }
+  .playedAt_topLeft    { left: 42%; top: 43%; }
+  .playedAt_topRight   { left: 58%; top: 43%; }
+  .playedAt_left       { left: 38%; top: 50%; }
+  .playedAt_right      { left: 62%; top: 50%; }
+  .playedAt_bottomLeft { left: 42%; top: 57%; }
+  .playedAt_bottomRight{ left: 58%; top: 57%; }
+  .playedAt_bottom     { left: 50%; top: 60%; }
 }
 
 /* ---- Pila mazo + muestra: la MUESTRA va arriba y COMPLETA a la vista

@@ -234,7 +234,9 @@ function OpponentSeat({
   peekable?: boolean;
   onPeek?: () => void;
 }) {
-  const vertical = spot === 'left' || spot === 'right';
+  // Todas las manos rivales/compañeras se muestran en ABANICO horizontal (igual
+  // que el compañero de enfrente), incluidas las de los costados en 2v2.
+  const vertical = false;
   const cardsClickable = peekable && !revealCards && remaining > 0;
   return (
     <div
