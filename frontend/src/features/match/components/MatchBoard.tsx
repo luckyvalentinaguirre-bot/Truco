@@ -9,8 +9,6 @@ import {
   type TrucoCall,
 } from '@/game';
 import { Icon } from '@/components/ui';
-import { loadSettings, type Settings } from '@/services/settings';
-import { getMesaAsset } from '@/features/match/mesaAssets';
 import {
   humanOptions,
   humanHasFlor,
@@ -60,16 +58,6 @@ export function MatchBoard({
 }: MatchBoardProps) {
   const [selected, setSelected] = useState<number | null>(null);
 
-  const [mesaTheme, setMesaTheme] = useState(() => loadSettings().mesaTheme);
-  useEffect(() => {
-    const onSettings = (e: Event) => {
-      const s = (e as CustomEvent<Settings>).detail;
-      if (s?.mesaTheme) setMesaTheme(s.mesaTheme);
-    };
-    window.addEventListener('truco:settings', onSettings as EventListener);
-    return () => window.removeEventListener('truco:settings', onSettings as EventListener);
-  }, []);
-
   useEffect(() => {
     setSelected(null);
   }, [state.hand.tricks.length, state.handNumber]);
@@ -114,10 +102,7 @@ export function MatchBoard({
 
   return (
     <div className={styles.screen}>
-      <div
-        className={styles.feltFrame}
-        style={{ backgroundImage: `url("${getMesaAsset(mesaTheme)}")` }}
-      >
+      <div className={styles.feltFrame}>
         {/* HUD mínimo superpuesto (menú + tantos): la mesa ocupa todo el alto. */}
         <MatchHud state={state} humanSeat={humanSeat} netStatus={netStatus} />
         <div className={styles.felt}>

@@ -209,14 +209,14 @@
 /* Cada posición queda pegada a SU asiento (alineada con .seat_*) pero corrida
    hacia el centro para no pisar las cartas. Así el mazo viaja claramente de un
    asiento al otro (siempre a la derecha del mano = junto al repartidor). */
-.deckMano_bottom { bottom: 13.6%; right: 20.1%; }
-.deckMano_top { top: 8.1%; left: 30.1%; transform: translateX(-50%); }
-.deckMano_topLeft { top: 31.7%; left: 11.7%; }
-.deckMano_topRight { top: 7.5%; right: 25.4%; }
-.deckMano_left { bottom: 17.2%; left: 16.4%; }
-.deckMano_right { top: 10.8%; right: 13.2%; }
-.deckMano_bottomLeft { bottom: 12.5%; left: 24.7%; }
-.deckMano_bottomRight { top: 34.2%; right: 19.2%; }
+.deckMano_bottom { bottom: 17%; right: 24.5%; }
+.deckMano_top { top: 13%; left: 30.1%; transform: translateX(-50%); }
+.deckMano_topLeft { top: 31.7%; left: 15.5%; }
+.deckMano_topRight { top: 12%; right: 29%; }
+.deckMano_left { bottom: 20%; left: 20%; }
+.deckMano_right { top: 14%; right: 17%; }
+.deckMano_bottomLeft { bottom: 16%; left: 28.5%; }
+.deckMano_bottomRight { top: 34.2%; right: 23%; }
 
 /* (legacy) Columna derecha del mazo — ya no se usa en multi. */
 .rightStack {
@@ -401,9 +401,9 @@
 }
 
 /* Posiciones de los asientos (escritorio) */
-.seat_top { top: 1%; left: 50%; transform: translateX(-50%); }
-.seat_topLeft { top: 4%; left: 3%; }
-.seat_topRight { top: 4%; right: 3%; }
+.seat_top { top: 5%; left: 50%; transform: translateX(-50%); }
+.seat_topLeft { top: 9%; left: 3%; }
+.seat_topRight { top: 9%; right: 3%; }
 .seat_left { top: 38%; left: 0.5%; }
 .seat_right { top: 38%; right: 0.5%; }
 .seat_bottomLeft { top: 56%; left: 2%; }
