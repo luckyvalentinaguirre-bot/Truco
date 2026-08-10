@@ -440,35 +440,46 @@
 .playedAt_bottomLeft { left: 36%; top: 65%; }
 .playedAt_bottomRight { left: 64%; top: 65%; }
 
-/* ---- Móvil: comprimir los asientos arriba/costados, cartas más juntas ---- */
+/* =====================================================================
+ * MÓVIL — rediseño de la mesa (portrait). Objetivo: nada se pisa.
+ * Bandas verticales bien separadas:
+ *   0–20%  rivales de arriba (topLeft / top / topRight), separados a lo ancho
+ *   ~26%   sus cartas jugadas
+ *   ~34%   compañeros/laterales (left/right, bottomLeft/bottomRight) en los
+ *          bordes, a media altura
+ *   ~48%   MUESTRA en el CENTRO (queda en el medio, despejada)
+ *   ~58%   carta jugada por el humano
+ *   abajo  la mano propia (la baja PlayerHand)
+ * ===================================================================== */
 @media (max-width: 720px) {
-  .seatInfo { padding: 2px 6px; max-width: 120px; }
-  .seatCards :global(*) { --w: 30px !important; }
-  /* Todos los rivales/compañeros en la mitad superior (abajo están las
-     cartas propias y las acciones). */
-  .seat_top { top: 0; }
-  .seat_topLeft { top: 8%; left: 1%; }
-  .seat_topRight { top: 8%; right: 1%; }
-  .seat_left { top: 22%; left: 0; }
-  .seat_right { top: 22%; right: 0; }
-  .seat_bottomLeft { top: 22%; left: 0; }
-  .seat_bottomRight { top: 22%; right: 0; }
+  .seatInfo { padding: 2px 6px; max-width: 108px; }
+  .seatCards :global(*) { --w: 28px !important; }
+
+  /* Fila superior de rivales: bien separada a lo ancho y arriba de todo. */
+  .seat_top { top: 1%; left: 50%; transform: translateX(-50%); }
+  .seat_topLeft { top: 3%; left: 1%; transform: none; }
+  .seat_topRight { top: 3%; right: 1%; transform: none; }
+  /* Laterales/compañeros: pegados a los bordes, a media altura (entre la fila
+     de arriba y la muestra central). Sin solaparse con el centro. */
+  .seat_left { top: 33%; left: 0; }
+  .seat_right { top: 33%; right: 0; }
+  .seat_bottomLeft { top: 40%; left: 0; }
+  .seat_bottomRight { top: 40%; right: 0; }
   .seat_left .seatCards,
   .seat_right .seatCards,
   .seat_bottomLeft .seatCards,
   .seat_bottomRight .seatCards { flex-direction: row; }
 
-  /* Anillo de cartas jugadas más compacto y hacia arriba (los asientos van
-     en la mitad superior; abajo quedan la mano y las acciones). La carta del
-     humano queda hacia el centro, nunca sobre su mano. */
-  .playedAt_bottom { top: 46%; }
-  .playedAt_top { top: 30%; }
-  .playedAt_left { left: 30%; top: 44%; }
-  .playedAt_right { left: 70%; top: 44%; }
-  .playedAt_topLeft { left: 34%; top: 34%; }
-  .playedAt_topRight { left: 66%; top: 34%; }
-  .playedAt_bottomLeft { left: 34%; top: 52%; }
-  .playedAt_bottomRight { left: 66%; top: 52%; }
+  /* Cartas jugadas: cada una junto a SU jugador, en un anillo amplio que deja
+     el centro libre para la muestra. */
+  .playedAt_top { left: 50%; top: 23%; }
+  .playedAt_topLeft { left: 26%; top: 24%; }
+  .playedAt_topRight { left: 74%; top: 24%; }
+  .playedAt_left { left: 20%; top: 46%; }
+  .playedAt_right { left: 80%; top: 46%; }
+  .playedAt_bottomLeft { left: 26%; top: 60%; }
+  .playedAt_bottomRight { left: 74%; top: 60%; }
+  .playedAt_bottom { left: 50%; top: 62%; }
 }
 
 /* ---- Pila mazo + muestra: la MUESTRA va arriba y COMPLETA a la vista
@@ -621,21 +632,19 @@
   /* Mantiene las posiciones (%) calibradas; sólo ajusta el origen del escalado. */
   .deckRightBottom { transform-origin: right bottom; }
   .deckLeftTop { transform-origin: left top; }
-  /* Mazo + muestra de 2v2/3v3: más chico en el celu para que no se pise ni se
-     corte, y anclado desde su lado para no desbordar. */
-  .deckMulti { transform: scale(0.6); transform-origin: top center; }
-  /* En celular los asientos se compactan arriba (0–30%) y la mano/acciones van
-     abajo. El mazo se ancla al borde lateral del MANO en la franja media libre
-     (~40–46%), así no pisa ni las cartas de arriba ni la mano propia. Se
-     resetean las propiedades verticales/horizontales opuestas de escritorio. */
-  .deckMano_bottom      { top: 44%; bottom: auto; right: 2%; left: auto; }
-  .deckMano_bottomRight { top: 44%; bottom: auto; right: 2%; left: auto; }
-  .deckMano_right       { top: 40%; bottom: auto; right: 2%; left: auto; }
-  .deckMano_topRight    { top: 36%; bottom: auto; right: 2%; left: auto; }
-  .deckMano_top         { top: 36%; bottom: auto; left: 2%; right: auto; transform: none; }
-  .deckMano_topLeft     { top: 36%; bottom: auto; left: 2%; right: auto; }
-  .deckMano_left        { top: 40%; bottom: auto; left: 2%; right: auto; }
-  .deckMano_bottomLeft  { top: 44%; bottom: auto; left: 2%; right: auto; }
+  /* Mazo + muestra de 2v2/3v3: en móvil va SIEMPRE al CENTRO de la mesa (queda
+     "en el medio", despejado). Todas las variantes por mano se colapsan a la
+     misma posición central; el anillo de cartas jugadas la rodea sin pisarla. */
+  .deckMulti,
+  .deckMano_bottom, .deckMano_bottomRight, .deckMano_right, .deckMano_topRight,
+  .deckMano_top, .deckMano_topLeft, .deckMano_left, .deckMano_bottomLeft {
+    top: 43%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%) scale(0.62);
+    transform-origin: center;
+  }
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
   .slotTop { top: 26%; }
