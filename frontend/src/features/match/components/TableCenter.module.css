@@ -642,10 +642,13 @@
   /* 2v2: los asientos ocupan top-centro (compañero) y los costados a media
      altura (rivales) y abajo-centro (yo). Por eso el mazo viaja por las CUATRO
      ESQUINAS libres (rota con el mano), sin pisar a nadie. */
-  .count4 .deckMano_bottom { bottom: 22%; top: auto; left: auto; right: 8%; transform: scale(0.55); }
-  .count4 .deckMano_right  { top: 12%; bottom: auto; left: auto; right: 7%; transform: scale(0.55); }
-  .count4 .deckMano_top    { top: 12%; bottom: auto; right: auto; left: 7%; transform: scale(0.55); }
-  .count4 .deckMano_left   { bottom: 22%; top: auto; right: auto; left: 8%; transform: scale(0.55); }
+  /* La muestra vive en las franjas LATERALES a media altura: nunca arriba del
+     todo (compañero) ni abajo (mi mano). Viaja entre los dos costados según el
+     mano, siempre en zona libre. */
+  .count4 .deckMano_top    { top: 54%; bottom: auto; left: 4%;  right: auto; transform: translateY(-50%) scale(0.5); }
+  .count4 .deckMano_left   { top: 46%; bottom: auto; left: 4%;  right: auto; transform: translateY(-50%) scale(0.5); }
+  .count4 .deckMano_right  { top: 46%; bottom: auto; right: 4%; left: auto;  transform: translateY(-50%) scale(0.5); }
+  .count4 .deckMano_bottom { top: 54%; bottom: auto; right: 4%; left: auto;  transform: translateY(-50%) scale(0.5); }
 
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
