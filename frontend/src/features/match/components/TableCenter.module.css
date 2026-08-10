@@ -401,9 +401,9 @@
 }
 
 /* Posiciones de los asientos (escritorio) */
-.seat_top { top: 5%; left: 50%; transform: translateX(-50%); }
-.seat_topLeft { top: 9%; left: 3%; }
-.seat_topRight { top: 9%; right: 3%; }
+.seat_top { top: 10%; left: 50%; transform: translateX(-50%); }
+.seat_topLeft { top: 15%; left: 3%; }
+.seat_topRight { top: 15%; right: 3%; }
 .seat_left { top: 38%; left: 0.5%; }
 .seat_right { top: 38%; right: 0.5%; }
 .seat_bottomLeft { top: 56%; left: 2%; }
