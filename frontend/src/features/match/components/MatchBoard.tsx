@@ -22,7 +22,6 @@ import { MatchHud } from './MatchHud';
 import { TableCenter } from './TableCenter';
 import { PlayerHand } from './PlayerHand';
 import { ActionBar } from './ActionBar';
-import { TeamActions } from './TeamActions';
 import { TeamChat } from './TeamChat';
 import { GameOverModal } from './EndModals';
 import styles from '@/pages/MatchPage.module.css';
@@ -115,12 +114,6 @@ export function MatchBoard({
             reveal={reveals}
             onPeekSeat={peek}
             canPeekSeat={canPeekSeat}
-          />
-
-          <TeamActions
-            state={state}
-            humanSeat={humanSeat}
-            onSelectTeammate={(seat) => pushSignal(seat, 'Elegido')}
           />
 
           <PlayerHand
