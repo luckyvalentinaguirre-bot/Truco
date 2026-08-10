@@ -442,44 +442,38 @@
 
 /* =====================================================================
  * MÓVIL — rediseño de la mesa (portrait). Objetivo: nada se pisa.
- * Bandas verticales bien separadas:
- *   0–20%  rivales de arriba (topLeft / top / topRight), separados a lo ancho
- *   ~26%   sus cartas jugadas
- *   ~34%   compañeros/laterales (left/right, bottomLeft/bottomRight) en los
- *          bordes, a media altura
- *   ~48%   MUESTRA en el CENTRO (queda en el medio, despejada)
- *   ~58%   carta jugada por el humano
- *   abajo  la mano propia (la baja PlayerHand)
+ *   - Rivales de enfrente a MEDIA altura (no pegados arriba).
+ *   - CARTAS JUGADAS en un anillo COMPACTO en el CENTRO.
+ *   - MUESTRA pegada al BORDE más cercano al mano (viaja con él).
+ *   - La mano propia va abajo (la baja PlayerHand).
  * ===================================================================== */
 @media (max-width: 720px) {
   .seatInfo { padding: 2px 6px; max-width: 108px; }
   .seatCards :global(*) { --w: 28px !important; }
 
-  /* Fila superior de rivales: bien separada a lo ancho y arriba de todo. */
-  .seat_top { top: 1%; left: 50%; transform: translateX(-50%); }
-  .seat_topLeft { top: 3%; left: 1%; transform: none; }
-  .seat_topRight { top: 3%; right: 1%; transform: none; }
-  /* Laterales/compañeros: pegados a los bordes, a media altura (entre la fila
-     de arriba y la muestra central). Sin solaparse con el centro. */
-  .seat_left { top: 33%; left: 0; }
-  .seat_right { top: 33%; right: 0; }
-  .seat_bottomLeft { top: 40%; left: 0; }
-  .seat_bottomRight { top: 40%; right: 0; }
+  /* Rivales de enfrente (2v2 y 3v3): a media altura de la pantalla. */
+  .seat_top { top: 27%; left: 50%; transform: translateX(-50%); }
+  .seat_topLeft { top: 38%; left: 1%; transform: none; }
+  .seat_topRight { top: 38%; right: 1%; transform: none; }
+  /* Compañeros/laterales cercanos (3v3): más abajo, en los bordes. */
+  .seat_left { top: 44%; left: 0; }
+  .seat_right { top: 44%; right: 0; }
+  .seat_bottomLeft { top: 58%; left: 0; }
+  .seat_bottomRight { top: 58%; right: 0; }
   .seat_left .seatCards,
   .seat_right .seatCards,
   .seat_bottomLeft .seatCards,
   .seat_bottomRight .seatCards { flex-direction: row; }
 
-  /* Cartas jugadas: cada una junto a SU jugador, en un anillo amplio que deja
-     el centro libre para la muestra. */
-  .playedAt_top { left: 50%; top: 23%; }
-  .playedAt_topLeft { left: 26%; top: 24%; }
-  .playedAt_topRight { left: 74%; top: 24%; }
-  .playedAt_left { left: 20%; top: 46%; }
-  .playedAt_right { left: 80%; top: 46%; }
-  .playedAt_bottomLeft { left: 26%; top: 60%; }
-  .playedAt_bottomRight { left: 74%; top: 60%; }
-  .playedAt_bottom { left: 50%; top: 62%; }
+  /* Cartas jugadas: anillo COMPACTO en el centro (la muestra va al borde). */
+  .playedAt_top        { left: 50%; top: 44%; }
+  .playedAt_topLeft    { left: 42%; top: 47%; }
+  .playedAt_topRight   { left: 58%; top: 47%; }
+  .playedAt_left       { left: 40%; top: 51%; }
+  .playedAt_right      { left: 60%; top: 51%; }
+  .playedAt_bottomLeft { left: 42%; top: 55%; }
+  .playedAt_bottomRight{ left: 58%; top: 55%; }
+  .playedAt_bottom     { left: 50%; top: 57%; }
 }
 
 /* ---- Pila mazo + muestra: la MUESTRA va arriba y COMPLETA a la vista
@@ -636,15 +630,15 @@
      por eso cada posición es distinta según dónde esté el mano. En móvil se
      corren hacia adentro (lejos de los bordes) y a una banda despejada para no
      pisar ni los asientos ni el anillo de cartas jugadas. */
-  .deckMulti { transform: scale(0.58); transform-origin: center; }
-  .deckMano_top         { top: 16%; left: 50%; right: auto; bottom: auto; transform: translateX(-50%) scale(0.58); }
-  .deckMano_topLeft     { top: 18%; left: 20%; right: auto; bottom: auto; }
-  .deckMano_topRight    { top: 18%; right: 20%; left: auto; bottom: auto; }
-  .deckMano_left        { top: 38%; left: 16%; right: auto; bottom: auto; }
-  .deckMano_right       { top: 38%; right: 16%; left: auto; bottom: auto; }
-  .deckMano_bottomLeft  { top: 52%; left: 20%; right: auto; bottom: auto; }
-  .deckMano_bottomRight { top: 52%; right: 20%; left: auto; bottom: auto; }
-  .deckMano_bottom      { top: 54%; left: 50%; right: auto; bottom: auto; transform: translateX(-50%) scale(0.58); }
+  .deckMulti { transform: scale(0.55); transform-origin: center; }
+  .deckMano_top         { top: 2%;  left: 50%; right: auto; bottom: auto; transform: translateX(-50%) scale(0.55); }
+  .deckMano_topLeft     { top: 3%;  left: 1%;  right: auto; bottom: auto; }
+  .deckMano_topRight    { top: 3%;  right: 1%; left: auto;  bottom: auto; }
+  .deckMano_left        { top: 26%; left: 0;   right: auto; bottom: auto; }
+  .deckMano_right       { top: 26%; right: 0;  left: auto;  bottom: auto; }
+  .deckMano_bottomLeft  { bottom: 22%; top: auto; left: 1%;  right: auto; }
+  .deckMano_bottomRight { bottom: 22%; top: auto; right: 1%; left: auto; }
+  .deckMano_bottom      { bottom: 22%; top: auto; left: 50%; right: auto; transform: translateX(-50%) scale(0.55); }
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
   .slotTop { top: 26%; }
