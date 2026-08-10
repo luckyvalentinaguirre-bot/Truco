@@ -642,16 +642,19 @@
   /* 2v2: los asientos ocupan top-centro (compañero) y los costados a media
      altura (rivales) y abajo-centro (yo). Por eso el mazo viaja por las CUATRO
      ESQUINAS libres (rota con el mano), sin pisar a nadie. */
-  /* La muestra va AL LADO del mano (el jugador que abre) y viaja con él. Cada
-     posición queda junto a su asiento, corrida a una zona libre para NO pisar
-     ni el asiento, ni sus cartas, ni la carta jugada.
-       top = compañero (arriba)     → justo debajo, corrida a la izquierda
-       left/right = rivales (costados) → hacia adentro, arriba de su carta
-       bottom = yo (abajo)          → abajo a la derecha, al lado de mi mano */
-  .count4 .deckMano_top    { top: 14%; bottom: auto; left: 30%; right: auto; transform: translateX(-50%) scale(0.48); }
-  .count4 .deckMano_left   { top: 32%; bottom: auto; left: 24%; right: auto; transform: scale(0.48); }
-  .count4 .deckMano_right  { top: 32%; bottom: auto; right: 24%; left: auto; transform: scale(0.48); }
-  .count4 .deckMano_bottom { bottom: 26%; top: auto; right: 12%; left: auto; transform: scale(0.48); }
+  /* La muestra va SIEMPRE a la IZQUIERDA del mano (desde la perspectiva del
+     jugador que abre) y viaja con él. Como cada jugador mira al centro, su
+     izquierda cae en una dirección distinta:
+       yo (abajo, miro arriba)        → mi izquierda = abajo-izquierda
+       rival izq (miro a la derecha)  → su izquierda = arriba-izquierda
+       compañero (arriba, miro abajo) → su izquierda = arriba-derecha
+       rival der (miro a la izquierda)→ su izquierda = abajo-derecha
+     Todas caen en las cuatro ESQUINAS, con el MISMO margen (simétricas),
+     tirando hacia la esquina pero sin pegarse al borde. */
+  .count4 .deckMano_bottom { bottom: 16%; top: auto; left: 9%;  right: auto; transform: scale(0.48); }
+  .count4 .deckMano_left   { top: 16%;    bottom: auto; left: 9%;  right: auto; transform: scale(0.48); }
+  .count4 .deckMano_top    { top: 16%;    bottom: auto; right: 9%; left: auto;  transform: scale(0.48); }
+  .count4 .deckMano_right  { bottom: 16%; top: auto; right: 9%; left: auto;  transform: scale(0.48); }
 
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
