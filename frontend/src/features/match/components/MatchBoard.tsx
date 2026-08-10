@@ -8,7 +8,6 @@ import {
   type Seat,
   type TrucoCall,
 } from '@/game';
-import { Icon } from '@/components/ui';
 import {
   humanOptions,
   humanHasFlor,
@@ -24,6 +23,7 @@ import { TableCenter } from './TableCenter';
 import { PlayerHand } from './PlayerHand';
 import { ActionBar } from './ActionBar';
 import { TeamActions } from './TeamActions';
+import { TeamChat } from './TeamChat';
 import { GameOverModal } from './EndModals';
 import styles from '@/pages/MatchPage.module.css';
 
@@ -120,7 +120,6 @@ export function MatchBoard({
           <TeamActions
             state={state}
             humanSeat={humanSeat}
-            onToca={() => pushSignal(humanSeat, '¡Toca!')}
             onSelectTeammate={(seat) => pushSignal(seat, 'Elegido')}
           />
 
@@ -141,9 +140,11 @@ export function MatchBoard({
             onAction={dispatch}
           />
 
-          <button className={styles.chat} disabled aria-label="Chat (próximamente)">
-            <Icon name="chat" size={18} /> Chat
-          </button>
+          <TeamChat
+            state={state}
+            humanSeat={humanSeat}
+            onSend={(text) => pushSignal(humanSeat, text)}
+          />
         </div>
       </div>
 

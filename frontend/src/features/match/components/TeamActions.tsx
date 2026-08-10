@@ -6,34 +6,26 @@
  * 1v1 no se muestra nada. La autoridad es del motor; acá sólo UI.
  * ============================================================= */
 import { useState } from 'react';
-import { canToca, canSelectTeammate, teammatesOf, type MatchState, type Seat } from '@/game';
+import { canSelectTeammate, teammatesOf, type MatchState, type Seat } from '@/game';
 import styles from './TeamActions.module.css';
 
 interface Props {
   state: MatchState;
   humanSeat: Seat;
-  onToca: () => void;
   onSelectTeammate: (seat: Seat) => void;
 }
 
 const nameOf = (seat: Seat) => `Jugador ${seat + 1}`;
 
-export function TeamActions({ state, humanSeat, onToca, onSelectTeammate }: Props) {
+export function TeamActions({ state, humanSeat, onSelectTeammate }: Props) {
   const [picking, setPicking] = useState(false);
-  const showToca = canToca(state, humanSeat);
   const showSelect = canSelectTeammate(state, humanSeat);
   const mates = teammatesOf(state, humanSeat);
 
-  if (!showToca && !showSelect) return null;
+  if (!showSelect) return null;
 
   return (
     <div className={styles.wrap}>
-      {showToca && (
-        <button className={styles.btn} onClick={onToca}>
-          Toca
-        </button>
-      )}
-
       {showSelect && mates.length === 1 && (
         <button
           className={styles.btn}
