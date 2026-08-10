@@ -28,7 +28,8 @@ export type ClientAction =
   | { type: 'FOLD' }
   | { type: 'TOCA' }
   | { type: 'SELECT_TEAMMATE'; seat: Seat }
-  | { type: 'VIEW_TEAMMATE_CARDS'; seat: Seat };
+  | { type: 'VIEW_TEAMMATE_CARDS'; seat: Seat }
+  | { type: 'TEAM_CHAT'; text: string };
 
 /** Mensajes que envía el servidor. El estado siempre va REDACTADO por asiento. */
 export type ServerMessage =
@@ -36,6 +37,7 @@ export type ServerMessage =
   | { type: 'ACTION_REJECTED'; reason: string }
   | { type: 'ERROR'; message: string }
   | { type: 'TEAMMATE_CARDS'; seat: Seat; cards: Card[]; ttlMs: number }
+  | { type: 'TEAM_CHAT'; seat: Seat; text: string }
   | { type: 'JOINED'; matchId: string; seat: Seat; team: TeamId }
   | { type: 'PONG' };
 

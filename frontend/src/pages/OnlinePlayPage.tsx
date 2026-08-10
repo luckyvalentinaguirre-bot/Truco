@@ -96,7 +96,7 @@ export function OnlinePlayPage() {
 
 /** Mesa conectada al servidor por WebSocket. */
 function OnlineBoard() {
-  const { snapshot, netStatus, dispatch } = useOnlineMatch();
+  const { snapshot, netStatus, dispatch, chatBubbles, sendChat } = useOnlineMatch();
 
   if (!snapshot) {
     return <div style={{ padding: 24 }}>Conectando a la partida… ({netStatus})</div>;
@@ -109,11 +109,12 @@ function OnlineBoard() {
       state={snapshot.game}
       humanSeat={humanSeat}
       aiSeat={aiSeat}
-      bubbles={[]}
+      bubbles={chatBubbles}
       reveal={[]}
       dispatch={dispatch}
       onRestart={() => window.location.assign('/online')}
       netStatus={netStatus}
+      onChat={sendChat}
     />
   );
 }

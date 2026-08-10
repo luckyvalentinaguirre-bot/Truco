@@ -164,6 +164,12 @@ export class MatchRuntime {
     return b ? b.seat : null;
   }
 
+  /** Equipo del usuario (o null si no está en la partida). Para el chat de equipo. */
+  teamOfUser(userId: string): TeamId | null {
+    const b = this.seats.find((s) => s.userId === userId);
+    return b ? b.team : null;
+  }
+
   hasUser(userId: string): boolean {
     return this.seats.some((s) => s.userId === userId);
   }

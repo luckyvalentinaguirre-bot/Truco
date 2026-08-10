@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { cardId, type Action, type MatchState, type Seat, type TeamId } from '@/game';
 import { wsUrl } from '@/api/match';
 import type { ConnState } from './components/ConnectionIndicator';
+import type { ActiveBubble } from './useLocalMatch';
 
 /** Acción que entiende el servidor (protocolo WS). */
 type ClientAction =
@@ -56,13 +57,20 @@ export interface OnlineMatch {
   snapshot: Snapshot | null;
   netStatus: ConnState;
   dispatch: (action: Action) => void;
+  /** Burbujas del chat de equipo recibidas de un compañero (efímeras). */
+  chatBubbles: ActiveBubble[];
+  /** Envía un mensaje del chat de equipo (sólo lo reciben los compañeros). */
+  sendChat: (text: string) => void;
 }
 
 const RECONNECT_MS = 1500;
+const CHAT_BUBBLE_MS = 2600;
+let chatSeq = 0;
 
 export function useOnlineMatch(): OnlineMatch {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [netStatus, setNetStatus] = useState<ConnState>('connecting');
+  const [chatBubbles, setChatBubbles] = useState<ActiveBubble[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
   const closedByUs = useRef(false);
 
@@ -80,6 +88,20 @@ export function useOnlineMatch(): OnlineMatch {
         try {
           const msg = JSON.parse(String(ev.data));
           if (msg.type === 'SNAPSHOT') setSnapshot(msg.snapshot as Snapshot);
+          else if (msg.type === 'TEAM_CHAT') {
+            const id = ++chatSeq;
+            const bubble: ActiveBubble = {
+              id,
+              seat: msg.seat as Seat,
+              text: String(msg.text),
+              born: Date.now(),
+            };
+            setChatBubbles((cur) => [...cur, bubble]);
+            setTimeout(
+              () => setChatBubbles((cur) => cur.filter((b) => b.id !== id)),
+              CHAT_BUBBLE_MS,
+            );
+          }
         } catch {
           /* ignora mensajes no-JSON */
         }
@@ -108,5 +130,13 @@ export function useOnlineMatch(): OnlineMatch {
     }
   }, []);
 
-  return { snapshot, netStatus, dispatch };
+  const sendChat = useCallback((text: string) => {
+    const clean = text.trim().slice(0, 200);
+    const ws = wsRef.current;
+    if (clean && ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'TEAM_CHAT', text: clean }));
+    }
+  }, []);
+
+  return { snapshot, netStatus, dispatch, chatBubbles, sendChat };
 }

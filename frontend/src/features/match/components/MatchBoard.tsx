@@ -39,6 +39,8 @@ interface MatchBoardProps {
   onRestart: () => void;
   /** Estado de conexión (sólo online/LAN). */
   netStatus?: import('./ConnectionIndicator').ConnState;
+  /** Envía un mensaje del chat de equipo por red (sólo online). */
+  onChat?: (text: string) => void;
 }
 
 /**
@@ -54,6 +56,7 @@ export function MatchBoard({
   dispatch,
   onRestart,
   netStatus,
+  onChat,
 }: MatchBoardProps) {
   const [selected, setSelected] = useState<number | null>(null);
 
@@ -136,7 +139,10 @@ export function MatchBoard({
           <TeamChat
             state={state}
             humanSeat={humanSeat}
-            onSend={(text) => pushSignal(humanSeat, text)}
+            onSend={(text) => {
+              pushSignal(humanSeat, text); // eco local (mi propia burbuja)
+              onChat?.(text); // por red: sólo lo reciben mis compañeros
+            }}
           />
         </div>
       </div>

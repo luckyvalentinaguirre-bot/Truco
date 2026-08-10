@@ -135,6 +135,22 @@ function handleMessage(ws: WsClient, action: ClientAction, clients: Set<WsClient
     return;
   }
 
+  // Chat de equipo: privado del equipo del emisor (los rivales NUNCA lo reciben).
+  if (action.type === 'TEAM_CHAT') {
+    const seat = rt.seatOfUser(ws.userId);
+    const team = rt.teamOfUser(ws.userId);
+    if (seat === null || team === null) return;
+    const text = String(action.text ?? '').trim().slice(0, 200);
+    if (!text) return;
+    for (const c of clients) {
+      if (c.matchId !== rt.matchId || !c.userId) continue;
+      if (c === ws) continue; // el emisor ya lo muestra localmente
+      if (rt.teamOfUser(c.userId) !== team) continue; // sólo compañeros
+      send(c, { type: 'TEAM_CHAT', seat, text });
+    }
+    return;
+  }
+
   // Peek de cartas de compañero: respuesta privada, con TTL (el cliente oculta a los 5s).
   if (action.type === 'VIEW_TEAMMATE_CARDS') {
     const cards = rt.teammatePeek(ws.userId, action.seat);
