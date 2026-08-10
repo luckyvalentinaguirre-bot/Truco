@@ -449,7 +449,7 @@
  * ===================================================================== */
 @media (max-width: 720px) {
   .seatInfo { padding: 2px 6px; max-width: 108px; }
-  .seatCards :global(*) { --w: 28px !important; }
+  .seatCards :global(*) { --w: 35px !important; }
 
   /* 3v3: rivales de enfrente a media altura. */
   .seat_top { top: 27%; left: 50%; transform: translateX(-50%); }
@@ -651,10 +651,10 @@
        rival der (miro a la izquierda)→ su izquierda = abajo-derecha
      Todas caen en las cuatro ESQUINAS, con el MISMO margen (simétricas),
      tirando hacia la esquina pero sin pegarse al borde. */
-  .count4 .deckMano_bottom { bottom: 16%; top: auto; left: 9%;  right: auto; transform: scale(0.48); }
-  .count4 .deckMano_left   { top: 16%;    bottom: auto; left: 9%;  right: auto; transform: scale(0.48); }
-  .count4 .deckMano_top    { top: 16%;    bottom: auto; right: 9%; left: auto;  transform: scale(0.48); }
-  .count4 .deckMano_right  { bottom: 16%; top: auto; right: 9%; left: auto;  transform: scale(0.48); }
+  .count4 .deckMano_bottom { bottom: 11%; top: auto; left: 4%;  right: auto; transform: scale(0.58); }
+  .count4 .deckMano_left   { top: 11%;    bottom: auto; left: 4%;  right: auto; transform: scale(0.58); }
+  .count4 .deckMano_top    { top: 11%;    bottom: auto; right: 4%; left: auto;  transform: scale(0.58); }
+  .count4 .deckMano_right  { bottom: 11%; top: auto; right: 4%; left: auto;  transform: scale(0.58); }
 
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
