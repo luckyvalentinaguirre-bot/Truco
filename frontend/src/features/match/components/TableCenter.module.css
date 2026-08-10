@@ -621,6 +621,9 @@
   /* Mantiene las posiciones (%) calibradas; sólo ajusta el origen del escalado. */
   .deckRightBottom { transform-origin: right bottom; }
   .deckLeftTop { transform-origin: left top; }
+  /* Mazo + muestra de 2v2/3v3: más chico en el celu para que no se pise ni se
+     corte, y anclado desde su lado para no desbordar. */
+  .deckMulti { transform: scale(0.68); transform-origin: top center; }
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
   .slotTop { top: 26%; }

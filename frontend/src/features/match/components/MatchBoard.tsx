@@ -21,7 +21,7 @@ import {
 } from '@/features/match/matchView';
 import type { ActiveBubble, RevealHand } from '@/features/match/useLocalMatch';
 import { useTeammatePeek } from '@/features/match/useTeammatePeek';
-import { TopBar } from './TopBar';
+import { MatchHud } from './MatchHud';
 import { TableCenter } from './TableCenter';
 import { PlayerHand } from './PlayerHand';
 import { ActionBar } from './ActionBar';
@@ -114,12 +114,12 @@ export function MatchBoard({
 
   return (
     <div className={styles.screen}>
-      <TopBar state={state} humanSeat={humanSeat} netStatus={netStatus} />
-
       <div
         className={styles.feltFrame}
         style={{ backgroundImage: `url("${getMesaAsset(mesaTheme)}")` }}
       >
+        {/* HUD mínimo superpuesto (menú + tantos): la mesa ocupa todo el alto. */}
+        <MatchHud state={state} humanSeat={humanSeat} netStatus={netStatus} />
         <div className={styles.felt}>
           <TableCenter
             state={state}

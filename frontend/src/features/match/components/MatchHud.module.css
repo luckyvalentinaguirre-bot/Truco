@@ -1,0 +1,69 @@
+/* HUD superpuesto sobre la mesa (esquinas). No ocupa alto del layout. */
+.menuWrap {
+  position: absolute;
+  top: calc(var(--safe-top) + 8px);
+  left: 10px;
+  z-index: var(--z-sticky);
+}
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--c-border-strong);
+  background: rgba(12, 9, 6, 0.6);
+  color: var(--c-text-hi);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.backdrop { position: fixed; inset: 0; z-index: var(--z-drawer); }
+.dropdown {
+  position: absolute;
+  top: 46px;
+  left: 0;
+  z-index: var(--z-overlay);
+  min-width: 168px;
+  background: var(--c-bg-700);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-lg);
+  padding: 6px;
+  display: grid;
+  gap: 2px;
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--c-text);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+}
+.item:hover { background: var(--c-surface); }
+
+.score {
+  position: absolute;
+  top: calc(var(--safe-top) + 8px);
+  right: 10px;
+  z-index: var(--z-sticky);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--c-border-strong);
+  background: rgba(12, 9, 6, 0.6);
+  backdrop-filter: blur(6px);
+  font-variant-numeric: tabular-nums;
+}
+.us { color: var(--c-gold-soft); font-weight: 800; font-size: 18px; }
+.them { color: var(--c-text-hi); font-weight: 800; font-size: 18px; }
+.sep { color: var(--c-text-dim); }
+.target { color: var(--c-text-mut); font-size: 12px; }
