@@ -623,7 +623,19 @@
   .deckLeftTop { transform-origin: left top; }
   /* Mazo + muestra de 2v2/3v3: más chico en el celu para que no se pise ni se
      corte, y anclado desde su lado para no desbordar. */
-  .deckMulti { transform: scale(0.68); transform-origin: top center; }
+  .deckMulti { transform: scale(0.6); transform-origin: top center; }
+  /* En celular los asientos se compactan arriba (0–30%) y la mano/acciones van
+     abajo. El mazo se ancla al borde lateral del MANO en la franja media libre
+     (~40–46%), así no pisa ni las cartas de arriba ni la mano propia. Se
+     resetean las propiedades verticales/horizontales opuestas de escritorio. */
+  .deckMano_bottom      { top: 44%; bottom: auto; right: 2%; left: auto; }
+  .deckMano_bottomRight { top: 44%; bottom: auto; right: 2%; left: auto; }
+  .deckMano_right       { top: 40%; bottom: auto; right: 2%; left: auto; }
+  .deckMano_topRight    { top: 36%; bottom: auto; right: 2%; left: auto; }
+  .deckMano_top         { top: 36%; bottom: auto; left: 2%; right: auto; transform: none; }
+  .deckMano_topLeft     { top: 36%; bottom: auto; left: 2%; right: auto; }
+  .deckMano_left        { top: 40%; bottom: auto; left: 2%; right: auto; }
+  .deckMano_bottomLeft  { top: 44%; bottom: auto; left: 2%; right: auto; }
   /* En móvil (paño más alto) se ubican en la franja libre, despejadas de la
      mano del rival (arriba) y de las cartas propias (abajo). */
   .slotTop { top: 26%; }

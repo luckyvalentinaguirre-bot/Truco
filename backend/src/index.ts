@@ -37,6 +37,13 @@ async function bootstrap(): Promise<void> {
     } catch (e) {
       console.error('[backend] ⚠️ no se pudo asegurar temporada:', e instanceof Error ? e.name : e);
     }
+    // Bootstrap del primer administrador (por ADMIN_BOOTSTRAP_EMAIL, si existe).
+    try {
+      const { bootstrapAdminFromEnv } = await import('./services/admin.service.js');
+      await bootstrapAdminFromEnv();
+    } catch (e) {
+      console.error('[backend] ⚠️ bootstrap admin falló:', e instanceof Error ? e.name : e);
+    }
   } catch (err) {
     console.error(
       '[backend] ⚠️ base de datos no accesible por ahora:',

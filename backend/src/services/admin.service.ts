@@ -17,6 +17,7 @@ import {
   findAdminSession,
   deleteAdminSession,
   getRole,
+  promoteToAdminByEmail,
 } from '../repositories/admin.repository.js';
 
 export const MAX_ADMIN_ATTEMPTS = 3; // el 4º intento fallido bloquea
@@ -88,4 +89,18 @@ export async function adminLogout(token: string | undefined): Promise<void> {
 /** ¿El usuario tiene rol admin? (server-side). */
 export async function isAdminRole(userId: string): Promise<boolean> {
   return (await getRole(userId)) === 'admin';
+}
+
+/**
+ * Bootstrap del primer administrador desde el entorno: si ADMIN_BOOTSTRAP_EMAIL
+ * está definido, promueve esa cuenta a admin al arrancar (idempotente). Permite
+ * crear el primer admin sin tocar la base a mano. NUNCA hay credenciales en el
+ * código; sólo se lee el email de una variable de entorno.
+ */
+export async function bootstrapAdminFromEnv(): Promise<void> {
+  const email = process.env.ADMIN_BOOTSTRAP_EMAIL?.trim();
+  if (!email) return;
+  const found = await promoteToAdminByEmail(email);
+  if (found) console.log(`[admin] cuenta promovida/confirmada como admin: ${email}`);
+  else console.warn(`[admin] ADMIN_BOOTSTRAP_EMAIL no coincide con ninguna cuenta (aún): ${email}`);
 }

@@ -109,6 +109,25 @@ export async function setRole(userId: string, role: 'user' | 'admin'): Promise<v
   await query(`UPDATE users SET role = $2, updated_at = now() WHERE id = $1`, [userId, role]);
 }
 
+/**
+ * Promueve a admin por email (bootstrap del primer administrador). Idempotente:
+ * si ya es admin no hace nada. Devuelve true si el usuario existe (y quedó admin).
+ */
+export async function promoteToAdminByEmail(email: string): Promise<boolean> {
+  const res = await query<{ id: string }>(
+    `UPDATE users SET role = 'admin', updated_at = now()
+       WHERE lower(email) = lower($1) AND role <> 'admin'
+     RETURNING id`,
+    [email],
+  );
+  if (res.rowCount && res.rowCount > 0) return true;
+  // Ya era admin o no existe: distinguimos con un SELECT.
+  const chk = await query<{ id: string }>(`SELECT id FROM users WHERE lower(email) = lower($1)`, [
+    email,
+  ]);
+  return (chk.rowCount ?? 0) > 0;
+}
+
 export async function banUser(
   userId: string,
   opts: { reason: string; until: Date | null; byAdminId: string },

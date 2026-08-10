@@ -20,6 +20,7 @@ Backend del panel `/admin`. Autorización **siempre server-side**: sesión váli
 ## Variables de entorno (sólo nombres — nunca en Git)
 ```
 ADMIN_PASSWORD_HASH   # hash scrypt de la contraseña admin (ver "generar" abajo)
+ADMIN_BOOTSTRAP_EMAIL # email de la cuenta a promover a admin al arrancar (1er admin)
 ADMIN_ALERT_EMAIL     # destino de las alertas (default luckyvalentinaguirre@gmail.com)
 EMAIL_PROVIDER        # p. ej. "resend"
 EMAIL_API_KEY         # clave del proveedor de email (secreto)
@@ -38,9 +39,16 @@ npx tsx -e "import('./src/services/password.js').then(m=>m.hashPassword('TU_CLAV
 Copiá el resultado a `ADMIN_PASSWORD_HASH` en el entorno (no en el repo).
 
 ### Hacer admin a un usuario
+Opción A (recomendada, primer admin) — definí `ADMIN_BOOTSTRAP_EMAIL` en el
+entorno con el email de tu cuenta y reiniciá el backend: al arrancar promueve
+esa cuenta a admin (idempotente; la cuenta debe existir ya, registrate primero).
+
+Opción B (manual, por SQL):
 ```sql
 UPDATE users SET role = 'admin' WHERE email = 'tu-email@dominio';
 ```
+Recordá que además del rol admin, para entrar al panel necesitás la 2ª
+credencial (`ADMIN_PASSWORD_HASH` configurada + ingresar esa contraseña).
 
 ## Endpoints (todos server-side, auditados)
 | Método | Ruta | Descripción |
