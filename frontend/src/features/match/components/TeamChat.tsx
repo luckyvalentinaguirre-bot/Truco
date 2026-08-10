@@ -19,7 +19,18 @@ interface Props {
 }
 
 /** Frases rápidas típicas de coordinación en el truco. */
-const QUICK = ['¡Tengo!', 'No tengo', 'Andá', 'Quiero', 'No quiero', 'Cuidado', '¡Buena!'];
+const QUICK = [
+  '¡Toca!',
+  'Vení',
+  'Voy',
+  '¡Tengo!',
+  'No tengo',
+  'Andá',
+  'Quiero',
+  'No quiero',
+  'Cuidado',
+  '¡Buena!',
+];
 
 interface ChatLine {
   id: number;
