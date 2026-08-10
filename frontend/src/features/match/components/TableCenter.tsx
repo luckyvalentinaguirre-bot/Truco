@@ -299,7 +299,12 @@ function TableMulti({
   return (
     <>
       {/* Asientos de rivales/compañeros alrededor del óvalo */}
-      <div className={styles.seatsLayer}>
+      <div
+        className={[
+          styles.seatsLayer,
+          state.players.length === 4 ? styles.count4 : styles.count6,
+        ].join(' ')}
+      >
         {views
           .filter((v) => !v.isHuman)
           .map((v) => {

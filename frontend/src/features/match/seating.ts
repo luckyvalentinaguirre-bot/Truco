@@ -24,9 +24,10 @@ export type Spot =
 /** Lugares de los rivales/compañeros según total de jugadores (excluye al humano). */
 const SPOTS_BY_COUNT: Record<number, Spot[]> = {
   2: ['top'], // 1v1: rival enfrente
-  // 2v2: en DIAGONAL arriba (como el 3v3): rival arriba-der, compañero arriba,
-  // rival arriba-izq. Así las 3 manos se ven igual que en 3v3.
-  4: ['topRight', 'top', 'topLeft'],
+  // 2v2: compañero ENFRENTE (otra punta) y los dos rivales a los COSTADOS
+  // (a media altura). offset 1 = rival → derecha; offset 2 = compañero → arriba;
+  // offset 3 = rival → izquierda.
+  4: ['right', 'top', 'left'],
   6: ['bottomRight', 'topRight', 'top', 'topLeft', 'bottomLeft'], // 3v3 alternado
 };
 
