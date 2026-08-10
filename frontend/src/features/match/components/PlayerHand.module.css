@@ -2,6 +2,11 @@
   display: flex;
   justify-content: center;
 }
+
+/* Celular: baja la mano propia hacia el borde inferior (más cerca del pulgar). */
+@media (max-width: 720px) {
+  .wrap { margin-top: auto; }
+}
 /* Mano en abanico: las cartas se superponen y se inclinan como sostenidas
    en la mano (referencia del usuario). El solapado se logra con margen
    negativo; la inclinación/altura, con el transform de reposo por posición. */

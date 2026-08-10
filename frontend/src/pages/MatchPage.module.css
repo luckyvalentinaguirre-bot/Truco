@@ -103,7 +103,8 @@
     display: none;
   }
   .felt {
-    padding: var(--sp-2);
+    /* Menos aire abajo: la mano propia baja hacia el borde inferior. */
+    padding: var(--sp-2) var(--sp-2) 0;
     gap: var(--sp-1);
   }
 }
@@ -149,5 +150,5 @@
 /* Celulares/pantallas muy bajas: recortar el inset vertical del paño para
    ganar alto y que el panel de acciones no se corte abajo. */
 @media (max-height: 660px) {
-  .felt { padding: 4px clamp(10px, 5%, 60px); gap: 1px; }
+  .felt { padding: 4px clamp(10px, 5%, 60px) 0; gap: 1px; }
 }
